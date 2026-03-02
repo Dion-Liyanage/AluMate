@@ -1,65 +1,188 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, Calendar, Bell, TrendingUp, Network, Shield } from "lucide-react";
 
 export default function Home() {
+  const features = [
+    {
+      icon: Users,
+      title: "Alumni Network",
+      description: "Connect with fellow alumni and expand your professional network",
+    },
+    {
+      icon: Calendar,
+      title: "Events & Reunions",
+      description: "Stay updated with upcoming events, reunions, and workshops",
+    },
+    {
+      icon: Bell,
+      title: "Real-time Updates",
+      description: "Get instant notifications about important announcements",
+    },
+    {
+      icon: TrendingUp,
+      title: "Career Growth",
+      description: "Access job opportunities and mentorship programs",
+    },
+    {
+      icon: Network,
+      title: "Community Engagement",
+      description: "Participate in discussions and share your experiences",
+    },
+    {
+      icon: Shield,
+      title: "Secure Platform",
+      description: "Your data is protected with enterprise-grade security",
+    },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
+      {/* Grid overlay for industrial effect */}
+      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+      
+      <div className="relative">
+        {/* Navigation */}
+        <nav className="border-b border-zinc-800/50 bg-black/20 backdrop-blur-xl">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
+                <span className="text-xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">AluMate</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Link href="/login">
+                  <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800/50">Login</Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-600 hover:to-zinc-700 text-white border border-zinc-600 shadow-[0_0_20px_rgba(161,161,170,0.2)]">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero Section */}
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
+              Connect, Engage, and Grow
+              <br />
+              <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+                with Your Alumni Community
+              </span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
+              AluMate is your comprehensive platform for staying connected with your university alumni network.
+              Join events, share experiences, and build lasting professional relationships.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-4">
+              <Link href="/register">
+                <Button size="lg" className="text-base bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500 shadow-[0_0_30px_rgba(161,161,170,0.3)]">
+                  Join Now
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button size="lg" variant="outline" className="text-base border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 hover:text-white">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Features Section */}
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent sm:text-4xl">
+              Everything You Need to Stay Connected
+            </h2>
+            <p className="mt-4 text-lg text-zinc-400">
+              Powerful features designed to strengthen your alumni community
+            </p>
+          </motion.div>
+
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-700 hover:shadow-[0_0_30px_rgba(161,161,170,0.15)]">
+                  <CardContent className="p-6">
+                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                      <feature.icon className="h-6 w-6 text-zinc-400" />
+                    </div>
+                    <h3 className="mb-2 text-xl font-semibold text-zinc-200">
+                      {feature.title}
+                    </h3>
+                    <p className="text-zinc-400">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Card className="bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-zinc-700 shadow-[0_0_50px_rgba(161,161,170,0.2)]">
+              <CardContent className="p-12 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-300 bg-clip-text text-transparent sm:text-4xl relative z-10">
+                  Ready to Reconnect?
+                </h2>
+                <p className="mt-4 text-lg text-zinc-300 relative z-10">
+                  Join thousands of alumni already connected on AluMate
+                </p>
+                <div className="mt-8 relative z-10">
+                  <Link href="/register">
+                    <Button size="lg" className="text-base bg-gradient-to-r from-zinc-200 to-zinc-300 hover:from-zinc-100 hover:to-zinc-200 text-black font-semibold shadow-[0_0_30px_rgba(228,228,231,0.3)]">
+                      Create Your Account
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t border-zinc-800/50 bg-black/20 backdrop-blur-xl">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="text-center text-sm text-zinc-500">
+              <p>&copy; 2026 AluMate. All rights reserved.</p>
+              <p className="mt-2">Alumni Management & Engagement Platform</p>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
