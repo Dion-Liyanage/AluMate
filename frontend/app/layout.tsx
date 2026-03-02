@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AluMate - Alumni Management & Engagement Platform",
-  description: "Connect, engage, and grow with your university alumni community",
+  title: "AluMate - Aluminium Fabrication & Service Management System",
+  description: "Streamline your aluminium fabrication orders, quotations, inventory, and service management",
 };
 
 export default function RootLayout({

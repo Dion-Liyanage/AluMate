@@ -2,21 +2,23 @@
 
 ## 1. Project Overview
 
-**Project Name:** AluMate - Alumni Management & Engagement Platform
+**Project Name:** AluMate - Web based Aluminium Fabrication and Service Management System
 
-**Description:** A web-based Alumni Management and Engagement Platform designed to strengthen the relationship between universities and their alumni. The system provides a centralized digital platform where alumni can register, maintain profiles, participate in events, communicate with peers, and contribute to the university community, while administrators can efficiently manage alumni data, events, and communications.
+**Description:** A web-based Aluminium Fabrication and Service Management System designed to streamline the operations of aluminium fabrication businesses. The system provides a centralized digital platform where customers can request quotes, place orders, and track fabrication progress, while administrators can efficiently manage orders, services, inventory, workforce, and customer communications.
 
-**Objective:** Replace fragmented, manual, or outdated alumni management methods with a modern, scalable, and secure web application.
+**Objective:** Replace fragmented, manual, or paper-based aluminium fabrication management methods with a modern, scalable, and secure web application.
 
 ---
 
 ## 2. Problem Statement
 
-Many universities struggle to:
-- Maintain updated alumni records
-- Engage alumni consistently after graduation
-- Manage alumni events and communications efficiently
-- Leverage alumni expertise, networking, and contributions
+Many aluminium fabrication businesses struggle to:
+
+- Track and manage fabrication orders efficiently
+- Maintain accurate inventory of raw materials and finished products
+- Communicate order progress and updates to customers
+- Schedule and manage service/maintenance requests
+- Generate accurate quotations and invoices
 
 Existing systems are often manual, poorly integrated, or lack modern features such as real-time updates, role-based access, and scalable architectures.
 
@@ -24,11 +26,11 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 
 ## 3. Project Objectives
 
-1. Provide a centralized alumni database
-2. Enable alumni to manage their own profiles
-3. Support event creation, registration, and participation
-4. Improve communication between alumni and the university
-5. Provide administrators with tools for efficient alumni management
+1. Provide a centralized order and service management system
+2. Enable customers to request quotes, place orders, and track progress
+3. Support fabrication job scheduling and workflow management
+4. Improve communication between the business and its customers
+5. Provide administrators with tools for efficient business operations
 6. Ensure data security and role-based access control
 7. Design a scalable and maintainable system using modern technologies
 
@@ -36,24 +38,31 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 
 ## 4. Core Features & Functionalities
 
-### 4.1 Alumni (User) Functionalities
-- User registration and authentication
-- Alumni profile creation and management
-- Viewing and updating personal and professional information
-- Browsing and registering for alumni events
-- Receiving announcements and notifications
-- Interacting with other alumni (future scope)
+### 4.1 Customer Functionalities
+
+- Customer registration and authentication
+- Request quotations for fabrication work
+- Place and manage fabrication orders
+- Track order/fabrication progress in real-time
+- View service history and past orders
+- Receive notifications and updates on order status
+- Submit service/maintenance requests
 - Secure login and logout
 
 ### 4.2 Administrator Functionalities
+
 - Admin authentication and authorization
-- Alumni account management (view, update, deactivate)
-- Event creation, update, and deletion
-- Publishing announcements and notifications
-- Viewing alumni statistics and engagement data
+- Order management (view, update, assign, complete)
+- Quotation creation and management
+- Service request handling
+- Customer account management (view, update, deactivate)
+- Inventory tracking (raw materials, finished products)
+- Workforce and job scheduling
+- Viewing business analytics and reports
 - Role-based access control (RBAC)
 
 ### 4.3 System-Level Functionalities
+
 - Secure data storage and retrieval
 - API-based communication between frontend and backend
 - Environment-based configuration management
@@ -67,6 +76,7 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 **Architecture Type:** Monolithic Architecture (Initial Development)
 
 **Characteristics:**
+
 - Single repository containing frontend and backend
 - Clear separation of concerns between UI, business logic, and data access
 - Modular internal structure to allow future scalability
@@ -77,6 +87,7 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 ## 6. Technology Stack
 
 ### Frontend
+
 - **Framework:** Next.js (App Router)
 - **UI Library:** React 19
 - **Language:** TypeScript
@@ -87,6 +98,7 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 - **Code Quality:** ESLint
 
 ### Backend (Planned)
+
 - **Runtime:** Node.js
 - **Framework:** NestJS
 - **API Type:** RESTful APIs
@@ -95,10 +107,12 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 - **Configuration:** Environment Variables (.env)
 
 ### Database
+
 - **Type:** NoSQL (Cloud-based)
 - **Platform:** MongoDB Atlas
 
 ### Development Tools
+
 - **Version Control:** Git & GitHub
 - **IDE:** Visual Studio Code
 - **Package Manager:** npm
@@ -112,9 +126,10 @@ Existing systems are often manual, poorly integrated, or lack modern features su
   /frontend
     /app                    # Next.js App Router
       /(auth)              # Authentication pages
-      /dashboard           # Alumni dashboard
+      /dashboard           # Customer dashboard
       /admin               # Admin dashboard
-      /events              # Event pages
+      /orders              # Order management pages
+      /services            # Service request pages
       /profile             # Profile pages
     /components            # React components
       /ui                  # Shared UI components
@@ -137,12 +152,16 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 ### Database: MongoDB Atlas
 
 **Collections:**
-- Alumni user profiles
+
+- Customer profiles
 - Authentication credentials (securely stored)
-- Event details and registrations
+- Fabrication orders and job details
+- Quotations and invoices
+- Service/maintenance requests
+- Inventory (raw materials and finished products)
 - Administrative data
 - System metadata
-- Announcements and notifications
+- Notifications
 
 ---
 
@@ -161,6 +180,7 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 ## 10. Development Phases
 
 ### Phase 1: Foundation (Current)
+
 - ✅ Frontend structure setup
 - ✅ Next.js project initialization
 - ✅ Component library integration (shadcn/ui)
@@ -169,20 +189,24 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 - ⏳ JWT authentication implementation
 
 ### Phase 2: Core Features
-- User registration and login
-- Alumni profile management
+
+- Customer registration and login
+- Order placement and management
+- Quotation request and generation
 - Admin dashboard basics
-- Event management system
 - Basic notifications
 
 ### Phase 3: Enhancement
+
+- Service/maintenance request management
+- Inventory tracking system
 - Advanced search and filtering
-- Event registration system
-- Announcement system
+- Job scheduling and assignment
 - Analytics dashboard
-- Real-time notifications (WebSocket)
+- Real-time order status updates (WebSocket)
 
 ### Phase 4: Polish & Deployment
+
 - Security hardening
 - Performance optimization
 - Testing (unit, integration, e2e)
@@ -204,86 +228,88 @@ Existing systems are often manual, poorly integrated, or lack modern features su
 
 ## 12. Future Enhancements
 
-- Alumni messaging system
-- Job posting and referrals
-- Donation and fundraising modules
-- Advanced analytics dashboard
+- Invoice and payment integration
+- Material cost calculator
+- Delivery tracking and logistics
+- Customer feedback and rating system
 - Mobile application integration
 - Microservices migration (if required)
-- Social networking features
-- Alumni directory with advanced search
-- Photo galleries and event highlights
-- Newsletter system
-- Integration with university systems
+- Supplier management module
+- Automated quotation engine
+- Photo/document upload for custom fabrication designs
+- Report generation and export (PDF/Excel)
+- Integration with accounting software
 
 ---
 
 ## 13. Success Metrics
 
-- Number of registered alumni
-- User engagement rate (logins, event registrations)
-- Event participation statistics
-- Admin efficiency improvements
+- Number of registered customers
+- Order processing efficiency
+- Average quotation-to-order conversion rate
+- Customer satisfaction scores
 - System uptime and performance
-- User satisfaction scores
-- Reduced manual administrative overhead
+- Reduction in manual administrative overhead
+- Inventory accuracy rate
 
 ---
 
 ## 14. Constraints & Assumptions
 
 ### Constraints
+
 - Development timeline aligned with academic schedule
 - Budget limitations for cloud services
 - Team size and resource availability
 
 ### Assumptions
-- Alumni have internet access
+
+- Customers have internet access
 - Users have basic technical literacy
-- University will provide initial alumni data
+- Business will provide initial product/service data
 - MongoDB Atlas free tier sufficient for initial deployment
 
 ---
 
 ## 15. Risk Management
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Data security breach | High | Implement JWT, RBAC, encryption |
-| Database scalability issues | Medium | Use MongoDB Atlas auto-scaling |
-| Backend delays | Medium | Frontend-first development approach |
-| Third-party service outages | Low | Choose reliable cloud providers |
-| User adoption challenges | Medium | Intuitive UI/UX, onboarding tutorials |
+| Risk                        | Impact | Mitigation                            |
+| --------------------------- | ------ | ------------------------------------- |
+| Data security breach        | High   | Implement JWT, RBAC, encryption       |
+| Database scalability issues | Medium | Use MongoDB Atlas auto-scaling        |
+| Backend delays              | Medium | Frontend-first development approach   |
+| Third-party service outages | Low    | Choose reliable cloud providers       |
+| User adoption challenges    | Medium | Intuitive UI/UX, onboarding tutorials |
 
 ---
 
 ## 16. Project Timeline (Estimated)
 
 - **Month 1-2:** Setup, architecture, authentication
-- **Month 3-4:** Core features (profiles, events, admin panel)
-- **Month 5:** Enhancements (notifications, analytics)
+- **Month 3-4:** Core features (orders, quotations, admin panel)
+- **Month 5:** Enhancements (inventory, services, analytics)
 - **Month 6:** Testing, optimization, deployment
 
 ---
 
 ## 17. Stakeholders
 
-- **Primary Users:** University alumni
-- **Secondary Users:** University administrators
-- **Project Owner:** University administration
+- **Primary Users:** Customers of the aluminium fabrication business
+- **Secondary Users:** Business administrators and staff
+- **Project Owner:** Aluminium fabrication business management
 - **Development Team:** Student developers
-- **End Beneficiaries:** University community
+- **End Beneficiaries:** Aluminium fabrication business and its customers
 
 ---
 
 ## 18. Conclusion
 
-AluMate is a comprehensive, modern alumni management system designed to bridge the gap between universities and their alumni communities. By using industry-standard technologies (Next.js, NestJS, MongoDB), a clean architectural approach, and scalable design principles, the project aims to deliver a professional-grade solution suitable for both academic evaluation and real-world application.
+AluMate is a comprehensive, modern aluminium fabrication and service management system designed to streamline operations for aluminium fabrication businesses. By using industry-standard technologies (Next.js, NestJS, MongoDB), a clean architectural approach, and scalable design principles, the project aims to deliver a professional-grade solution suitable for both academic evaluation and real-world application.
 
-The system will transform how universities maintain relationships with their alumni, fostering a vibrant, engaged community that benefits both parties through efficient communication, event management, and networking opportunities.
+The system will transform how aluminium fabrication businesses manage their orders, services, inventory, and customer relationships, fostering efficient operations and improved customer satisfaction.
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** January 13, 2026  
+**Document Version:** 1.1  
+**Last Updated:** March 2, 2026  
 **Status:** In Development
