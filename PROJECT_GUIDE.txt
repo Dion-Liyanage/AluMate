@@ -1,0 +1,1494 @@
+================================================================================
+  ALUMATE - COMPLETE PROJECT DEVELOPMENT GUIDE
+  Web-based Aluminium Fabrication and Service Management System
+================================================================================
+
+  This file contains EVERYTHING needed to understand and develop the AluMate
+  project from its current state to completion. Any AI agent or developer
+  reading this file should be able to continue development without any
+  additional context or guidance.
+
+================================================================================
+  TABLE OF CONTENTS
+================================================================================
+
+  1.  PROJECT IDENTITY
+  2.  PROBLEM STATEMENT
+  3.  PROJECT OBJECTIVES
+  4.  SYSTEM USERS & ROLES
+  5.  TECHNOLOGY STACK
+  6.  REPOSITORY STRUCTURE
+  7.  CURRENT IMPLEMENTATION STATUS
+  8.  WHAT EXISTS (Completed)
+  9.  WHAT NEEDS TO BE BUILT (Remaining Work)
+  10. DATABASE SCHEMA (MongoDB Collections)
+  11. API ENDPOINTS (Backend REST API Design)
+  12. FRONTEND PAGES & ROUTES
+  13. COMPONENT SPECIFICATIONS
+  14. AUTHENTICATION & AUTHORIZATION
+  15. REAL-TIME FEATURES
+  16. UI/UX DESIGN GUIDELINES
+  17. BACKEND SETUP INSTRUCTIONS
+  18. FRONTEND DEVELOPMENT INSTRUCTIONS
+  19. ENVIRONMENT VARIABLES
+  20. DEVELOPMENT PHASES & PRIORITIES
+  21. BUSINESS LOGIC & WORKFLOWS
+  22. SECURITY REQUIREMENTS
+  23. TESTING STRATEGY
+  24. DEPLOYMENT STRATEGY
+  25. IMPORTANT RULES & CONVENTIONS
+
+================================================================================
+  1. PROJECT IDENTITY
+================================================================================
+
+  Project Name:    AluMate
+  Full Title:      AluMate - Web based Aluminium Fabrication and Service
+                   Management System
+  Project Type:    Final Year Project (Academic + Real-world application)
+  Student ID:      10953557
+  Domain:          Aluminium Fabrication Business Management
+  Status:          In Development (Phase 1 - Foundation)
+
+  CRITICAL NOTE:
+  This is NOT an alumni management system. The name "AluMate" comes from
+  "Alu" (Aluminium) + "Mate" (companion/helper). Every feature, page, text,
+  component, and data model must relate to ALUMINIUM FABRICATION business
+  operations — orders, quotations, inventory, services, customers.
+
+================================================================================
+  2. PROBLEM STATEMENT
+================================================================================
+
+  Many aluminium fabrication businesses struggle with:
+
+  - Tracking and managing fabrication orders efficiently
+  - Maintaining accurate inventory of raw materials and finished products
+  - Communicating order progress and updates to customers
+  - Scheduling and managing service/maintenance requests
+  - Generating accurate quotations and invoices
+
+  Current processes are manual, paper-based, fragmented, or use disconnected
+  tools. AluMate replaces all of this with a single modern web platform.
+
+================================================================================
+  3. PROJECT OBJECTIVES
+================================================================================
+
+  1. Provide a centralized order and service management system
+  2. Enable customers to request quotes, place orders, and track progress
+  3. Support fabrication job scheduling and workflow management
+  4. Improve communication between the business and its customers
+  5. Provide administrators with tools for efficient business operations
+  6. Ensure data security and role-based access control
+  7. Design a scalable and maintainable system using modern technologies
+
+================================================================================
+  4. SYSTEM USERS & ROLES
+================================================================================
+
+  ROLE: customer
+  ---------------
+  - Can register and login
+  - Can request quotations for aluminium fabrication work
+  - Can place and manage fabrication orders
+  - Can track order/fabrication progress in real-time
+  - Can view service history and past orders
+  - Can receive notifications and updates on order status
+  - Can submit service/maintenance requests (repair, maintenance, installation)
+  - Has a profile page with personal details
+
+  ROLE: admin
+  ---------------
+  - Can login (admin accounts are pre-created or seeded)
+  - Can manage ALL orders (view, update status, assign, complete)
+  - Can create and manage quotations
+  - Can handle service requests
+  - Can manage customer accounts (view, update, deactivate)
+  - Can track inventory (raw materials and finished products)
+  - Can manage workforce and job scheduling
+  - Can view business analytics and reports
+  - Has full role-based access control
+
+  There are ONLY two roles: "customer" and "admin". No other roles exist.
+
+================================================================================
+  5. TECHNOLOGY STACK
+================================================================================
+
+  FRONTEND (Already initialized):
+  --------------------------------
+  Framework:       Next.js 16.1.1 (App Router)
+  UI Library:      React 19.2.3
+  Language:        TypeScript 5
+  Styling:         Tailwind CSS 4
+  UI Components:   shadcn/ui (Radix UI primitives)
+  Animations:      Framer Motion 12
+  Icons:           Lucide React
+  Real-time:       Socket.io Client 4.8
+  Code Quality:    ESLint 9
+
+  BACKEND (Not yet created):
+  --------------------------------
+  Runtime:         Node.js
+  Framework:       NestJS (latest)
+  Language:        TypeScript
+  API Type:        RESTful APIs
+  Authentication:  JWT (JSON Web Tokens)
+  Authorization:   Role-Based Access Control (RBAC) using Guards
+  Password Hash:   bcrypt
+  Validation:      class-validator + class-transformer
+  Configuration:   @nestjs/config with .env files
+  Real-time:       Socket.io (via @nestjs/websockets)
+
+  DATABASE:
+  --------------------------------
+  Type:            MongoDB (NoSQL)
+  Platform:        MongoDB Atlas (cloud)
+  ODM:             Mongoose (via @nestjs/mongoose)
+
+  DEVELOPMENT TOOLS:
+  --------------------------------
+  Version Control: Git & GitHub
+  IDE:             Visual Studio Code
+  Package Manager: npm
+  OS:              Linux (development environment)
+
+================================================================================
+  6. REPOSITORY STRUCTURE
+================================================================================
+
+  /AluMate                              # Root directory
+  ├── PROJECT_SCOPE.md                  # Project scope document
+  ├── PROJECT_GUIDE.txt                 # THIS FILE - complete dev guide
+  ├── README.md                         # Project readme
+  │
+  ├── /frontend                         # Next.js frontend application
+  │   ├── package.json                  # Frontend dependencies
+  │   ├── next.config.ts                # Next.js configuration
+  │   ├── tsconfig.json                 # TypeScript configuration
+  │   ├── tailwind.config.ts            # Tailwind (if custom config needed)
+  │   ├── postcss.config.mjs            # PostCSS configuration
+  │   ├── eslint.config.mjs             # ESLint configuration
+  │   ├── components.json               # shadcn/ui configuration
+  │   │
+  │   ├── /app                          # Next.js App Router pages
+  │   │   ├── layout.tsx                # Root layout
+  │   │   ├── page.tsx                  # Landing page (/)
+  │   │   ├── globals.css               # Global styles
+  │   │   │
+  │   │   ├── /(auth)                   # Auth route group
+  │   │   │   ├── /login/page.tsx       # Login page
+  │   │   │   ├── /register/page.tsx    # Registration page
+  │   │   │   └── /forgot-password/     # Password reset (to be created)
+  │   │   │
+  │   │   ├── /dashboard/page.tsx       # Customer dashboard
+  │   │   ├── /admin/page.tsx           # Admin dashboard
+  │   │   ├── /profile/page.tsx         # User profile
+  │   │   │
+  │   │   ├── /orders/                  # TO CREATE: Order pages
+  │   │   ├── /quotations/              # TO CREATE: Quotation pages
+  │   │   └── /services/                # TO CREATE: Service request pages
+  │   │
+  │   ├── /components
+  │   │   ├── /ui                       # shadcn/ui components (button, card, etc.)
+  │   │   ├── /forms                    # Form components (empty, to be built)
+  │   │   ├── /layout                   # Layout components (empty, to be built)
+  │   │   ├── /customer                 # Customer-facing components
+  │   │   │   ├── DashboardOverview.tsx  # (stub)
+  │   │   │   ├── OrderCard.tsx          # (minimal)
+  │   │   │   ├── ProfileCard.tsx        # (minimal)
+  │   │   │   └── NotificationList.tsx   # (stub)
+  │   │   └── /admin                    # Admin-facing components
+  │   │       ├── AdminDashboard.tsx      # (stub)
+  │   │       ├── OrderManagement.tsx     # (stub)
+  │   │       ├── CustomerManagement.tsx  # (stub)
+  │   │       ├── AnalyticsCard.tsx       # (minimal)
+  │   │       └── AnnouncementForm.tsx    # (stub)
+  │   │
+  │   ├── /types/index.ts              # TypeScript interfaces
+  │   ├── /constants/index.ts          # App constants and routes
+  │   ├── /hooks/useAuth.ts            # Auth hook (placeholder)
+  │   ├── /lib
+  │   │   ├── api.ts                   # API client (placeholder)
+  │   │   └── utils.ts                 # Utility functions (cn helper)
+  │   └── /public                      # Static assets
+  │
+  └── /backend                          # NestJS backend (NOT CREATED YET)
+      └── README.md                     # Placeholder
+
+================================================================================
+  7. CURRENT IMPLEMENTATION STATUS
+================================================================================
+
+  COMPLETED:
+  - [x] Project repository structure
+  - [x] Next.js 16 frontend initialized with App Router
+  - [x] Tailwind CSS 4 configured
+  - [x] shadcn/ui integrated (button, card components)
+  - [x] Framer Motion installed
+  - [x] Socket.io client installed
+  - [x] Landing page fully built (dark zinc theme, animations, features grid)
+  - [x] TypeScript types defined (User, Order, Quotation, ServiceRequest, etc.)
+  - [x] Constants defined (roles, routes, order statuses)
+  - [x] Basic page stubs created (login, register, dashboard, admin, profile)
+  - [x] Component stubs created (admin + customer directories)
+  - [x] Domain aligned to aluminium fabrication (no alumni content)
+
+  NOT YET STARTED:
+  - [ ] NestJS backend initialization
+  - [ ] MongoDB Atlas connection
+  - [ ] Mongoose schemas
+  - [ ] JWT authentication (backend)
+  - [ ] Auth pages UI (login form, register form)
+  - [ ] useAuth hook implementation
+  - [ ] API client methods
+  - [ ] Customer dashboard UI
+  - [ ] Admin dashboard UI
+  - [ ] Order management pages
+  - [ ] Quotation management pages
+  - [ ] Service request pages
+  - [ ] Inventory management
+  - [ ] Profile page UI
+  - [ ] Notification system
+  - [ ] Real-time updates (WebSocket)
+  - [ ] Layout components (sidebar, navbar, etc.)
+  - [ ] Form components
+  - [ ] Protected routes / route guards
+  - [ ] Testing
+  - [ ] Deployment
+
+================================================================================
+  8. WHAT EXISTS (Completed) - Detailed
+================================================================================
+
+  LANDING PAGE (/frontend/app/page.tsx):
+  - Dark zinc-themed design with gradient backgrounds
+  - Navigation bar with AluMate logo, Login and Get Started buttons
+  - Hero section: "Streamline Your Aluminium Fabrication Business"
+  - 6 feature cards: Order Management, Quotation Requests, Real-time Updates,
+    Business Analytics, Service Requests, Secure Platform
+  - CTA section: "Ready to Get Started?"
+  - Footer: "Aluminium Fabrication & Service Management System"
+  - Uses Framer Motion for scroll animations
+  - Fully responsive design
+  - Icons from Lucide React
+
+  TYPESCRIPT TYPES (/frontend/types/index.ts):
+  - User: id, email, firstName, lastName, phone?, address?, role, timestamps
+  - Order: id, customerId, title, description, status, quotationId?, amount
+  - Quotation: id, customerId, orderId?, items[], totalAmount, status, validUntil
+  - QuotationItem: description, material, dimensions?, quantity, prices
+  - ServiceRequest: id, customerId, type, description, status, scheduledDate?
+  - InventoryItem: id, name, category, quantity, unit, reorderLevel
+  - Notification: id, userId, title, message, type, isRead
+
+  CONSTANTS (/frontend/constants/index.ts):
+  - APP_NAME: 'AluMate'
+  - ROLES: { CUSTOMER, ADMIN }
+  - ORDER_STATUSES: { PENDING, QUOTED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED }
+  - ROUTES: All customer, admin, and shared routes defined
+
+  UI COMPONENTS (shadcn/ui):
+  - button.tsx: Full button component with variants
+  - card.tsx: Card, CardHeader, CardContent, CardFooter, etc.
+
+  API CLIENT (/frontend/lib/api.ts):
+  - Base URL configured: http://localhost:3001/api/v1
+  - Empty api object (methods to be implemented)
+
+  AUTH HOOK (/frontend/hooks/useAuth.ts):
+  - Returns { user: null, isLoading: false, isAuthenticated: false }
+  - Placeholder — needs full implementation
+
+================================================================================
+  9. WHAT NEEDS TO BE BUILT (Remaining Work)
+================================================================================
+
+  PRIORITY 1 — BACKEND FOUNDATION:
+  =================================
+
+  1. Initialize NestJS project in /backend directory
+     - npm i -g @nestjs/cli
+     - nest new backend (or manual setup)
+     - Install: @nestjs/mongoose, mongoose, @nestjs/jwt, @nestjs/passport,
+       passport, passport-jwt, passport-local, bcrypt, class-validator,
+       class-transformer, @nestjs/config, @nestjs/websockets,
+       @nestjs/platform-socket.io
+     - Configure CORS to allow frontend (localhost:3000)
+     - Backend runs on port 3001
+
+  2. Set up MongoDB Atlas connection
+     - Create cluster on MongoDB Atlas
+     - Create database: alumate_db
+     - Configure connection string in .env
+     - Set up MongooseModule in app.module.ts
+
+  3. Create Mongoose Schemas (see Section 10 for details):
+     - User schema
+     - Order schema
+     - Quotation schema
+     - ServiceRequest schema
+     - InventoryItem schema
+     - Notification schema
+
+  4. Implement Authentication Module:
+     - POST /api/v1/auth/register — customer registration
+     - POST /api/v1/auth/login — login (returns JWT)
+     - GET /api/v1/auth/me — get current user from token
+     - POST /api/v1/auth/forgot-password — (optional)
+     - JWT strategy with passport
+     - Password hashing with bcrypt (salt rounds: 10)
+     - JWT stored in HTTP-only cookie OR Authorization header
+     - Role-based guards: @Roles('admin'), @Roles('customer')
+
+  PRIORITY 2 — FRONTEND AUTH:
+  ============================
+
+  5. Build Login page UI (/frontend/app/(auth)/login/page.tsx):
+     - Email and password fields
+     - "Remember me" checkbox
+     - "Forgot password?" link
+     - "Don't have an account? Register" link
+     - Form validation
+     - API call to POST /api/v1/auth/login
+     - Redirect to /dashboard (customer) or /admin (admin) based on role
+     - Use the dark zinc theme matching the landing page
+
+  6. Build Register page UI (/frontend/app/(auth)/register/page.tsx):
+     - firstName, lastName, email, phone, password, confirmPassword fields
+     - Form validation
+     - API call to POST /api/v1/auth/register
+     - Redirect to login after success
+     - Dark zinc theme
+
+  7. Implement useAuth hook fully:
+     - Store user in state/context
+     - Login function (API call + store token)
+     - Register function
+     - Logout function (clear token)
+     - isAuthenticated check
+     - isLoading state
+     - Auto-check token on app load (GET /api/v1/auth/me)
+
+  8. Implement API client (/frontend/lib/api.ts):
+     - Axios or fetch wrapper
+     - Attach JWT token to all requests
+     - Base URL from env
+     - Methods: auth.login(), auth.register(), auth.me(), auth.logout()
+     - Methods: orders.getAll(), orders.getById(), orders.create(), etc.
+     - Methods: quotations.*, services.*, inventory.*, notifications.*
+     - Error handling with standardized error responses
+
+  9. Create AuthProvider context:
+     - Wrap the app in an AuthProvider
+     - Provide user, login, logout, register to all components
+     - Protect routes: redirect to /login if not authenticated
+
+  PRIORITY 3 — LAYOUT & NAVIGATION:
+  ===================================
+
+  10. Create shared layout components:
+      - Sidebar component (for dashboard/admin pages):
+        * Customer sidebar: Dashboard, My Orders, Quotations, Services, Profile
+        * Admin sidebar: Dashboard, Orders, Customers, Inventory, Services,
+          Analytics, Announcements, Settings
+      - TopNav/Header component:
+        * AluMate logo/brand
+        * User avatar + name
+        * Notification bell with count
+        * Logout button
+      - DashboardLayout wrapper that includes Sidebar + TopNav
+      - Mobile responsive: sidebar becomes hamburger menu on small screens
+
+  11. Create route group layouts:
+      - /app/(auth)/layout.tsx — centered card layout for auth pages
+      - /app/(dashboard)/layout.tsx — sidebar + topnav for customer pages
+      - /app/(admin)/layout.tsx — sidebar + topnav for admin pages
+      OR restructure routes to use layout groups properly
+
+  PRIORITY 4 — CUSTOMER FEATURES:
+  =================================
+
+  12. Customer Dashboard (/dashboard):
+      - Welcome message with user's name
+      - Summary cards: Total Orders, Pending Orders, Active Quotations,
+        Service Requests
+      - Recent orders list (last 5)
+      - Recent notifications
+      - Quick action buttons: New Order, Request Quotation, Service Request
+
+  13. Orders Module:
+      - /orders — list all customer's orders with filtering/sorting
+      - /orders/new — create new fabrication order form
+        * Title, description, material type, dimensions, quantity, notes
+        * File upload for design/reference images (optional future feature)
+      - /orders/[id] — order detail page with:
+        * Full order details
+        * Status timeline (pending → quoted → confirmed → in-progress → completed)
+        * Linked quotation (if any)
+        * Communication/notes section
+
+  14. Quotations Module:
+      - /quotations — list all customer's quotations
+      - /quotations/request — request a new quotation form
+        * Describe the fabrication work needed
+        * Material preferences, dimensions, quantity
+      - /quotations/[id] — quotation detail page
+        * Line items with materials, dimensions, quantities, prices
+        * Total amount
+        * Accept/Reject buttons
+        * Valid until date
+
+  15. Services Module:
+      - /services — list all service requests
+      - /services/new — create new service request
+        * Type: maintenance | repair | installation
+        * Description, preferred date, urgency
+      - /services/[id] — service request detail page
+
+  PRIORITY 5 — ADMIN FEATURES:
+  ==============================
+
+  16. Admin Dashboard (/admin):
+      - Analytics overview cards: Total Orders, Revenue, Active Customers,
+        Pending Quotations, Low Stock Items, Service Requests
+      - Charts/graphs: Orders over time, Revenue trends
+      - Recent activity feed
+      - Quick actions
+
+  17. Admin Order Management (/admin/orders):
+      - Table of ALL orders from all customers
+      - Filters: status, date range, customer
+      - Click to view/edit order
+      - Update order status
+      - Assign orders to workers/jobs
+      - Add notes/updates (visible to customer)
+
+  18. Admin Customer Management (/admin/customers):
+      - Table of all registered customers
+      - Search by name, email
+      - View customer details and their order history
+      - Activate/deactivate customer accounts
+
+  19. Admin Inventory Management (/admin/inventory):
+      - Table of all inventory items
+      - Categories: raw materials and finished products
+      - Add/edit/delete inventory items
+      - Track quantities and reorder levels
+      - Low stock alerts (quantity <= reorderLevel)
+      - Record stock in/out transactions
+
+  20. Admin Quotation Management (/admin/quotations):
+      - View quotation requests from customers
+      - Create/edit quotations with line items
+      - Send quotation to customer
+      - Track quotation status
+
+  21. Admin Service Management (/admin/services):
+      - View all service requests
+      - Assign and schedule service requests
+      - Update service status
+
+  22. Admin Announcements:
+      - Create announcements (sent as notifications to all/specific customers)
+      - View past announcements
+
+  PRIORITY 6 — SHARED FEATURES:
+  ===============================
+
+  23. Profile Page (/profile):
+      - Display user profile information
+      - Edit profile (firstName, lastName, phone, address)
+      - Change password
+      - Account settings
+
+  24. Notification System:
+      - Notification bell in header with unread count
+      - Notification dropdown/page showing all notifications
+      - Mark as read
+      - Types: order updates, quotation updates, service updates, system
+      - Real-time push via Socket.io
+
+  25. Real-time Updates:
+      - Socket.io connection on login
+      - Listen for: order status changes, new notifications, new quotations
+      - Admin receives: new orders, new service requests
+      - Customer receives: order updates, quotation sent, service scheduled
+
+  PRIORITY 7 — POLISH:
+  =====================
+
+  26. Error pages (404, 500)
+  27. Loading states and skeletons
+  28. Toast notifications for user actions
+  29. Responsive design verification
+  30. Form validation messages
+  31. Empty states for lists
+  32. Search and filtering across all list pages
+
+================================================================================
+  10. DATABASE SCHEMA (MongoDB Collections)
+================================================================================
+
+  COLLECTION: users
+  ------------------
+  {
+    _id:          ObjectId (auto),
+    email:        String (unique, required, lowercase, trimmed),
+    password:     String (required, hashed with bcrypt),
+    firstName:    String (required, trimmed),
+    lastName:     String (required, trimmed),
+    phone:        String (optional),
+    address:      String (optional),
+    role:         String (enum: ['customer', 'admin'], default: 'customer'),
+    isActive:     Boolean (default: true),
+    createdAt:    Date (auto),
+    updatedAt:    Date (auto)
+  }
+  Indexes: { email: 1 } (unique)
+
+  COLLECTION: orders
+  ------------------
+  {
+    _id:          ObjectId (auto),
+    customerId:   ObjectId (ref: users, required),
+    title:        String (required),
+    description:  String (required),
+    materialType: String (optional, e.g. "6063 Aluminium", "7075 Aluminium"),
+    dimensions:   String (optional, e.g. "2400mm x 1200mm x 3mm"),
+    quantity:     Number (optional),
+    status:       String (enum: ['pending','quoted','confirmed','in-progress',
+                  'completed','cancelled'], default: 'pending'),
+    quotationId:  ObjectId (ref: quotations, optional),
+    assignedTo:   String (optional, worker/team name),
+    totalAmount:  Number (optional),
+    notes:        [{ message: String, createdBy: String, createdAt: Date }],
+    createdAt:    Date (auto),
+    updatedAt:    Date (auto)
+  }
+  Indexes: { customerId: 1 }, { status: 1 }
+
+  COLLECTION: quotations
+  ----------------------
+  {
+    _id:          ObjectId (auto),
+    customerId:   ObjectId (ref: users, required),
+    orderId:      ObjectId (ref: orders, optional),
+    items:        [{
+                    description: String,
+                    material:    String,
+                    dimensions:  String,
+                    quantity:    Number,
+                    unitPrice:   Number,
+                    totalPrice:  Number
+                  }],
+    totalAmount:  Number (required),
+    status:       String (enum: ['draft','sent','accepted','rejected'],
+                  default: 'draft'),
+    validUntil:   Date (required),
+    notes:        String (optional),
+    createdAt:    Date (auto),
+    updatedAt:    Date (auto)
+  }
+  Indexes: { customerId: 1 }, { orderId: 1 }
+
+  COLLECTION: service_requests
+  ----------------------------
+  {
+    _id:          ObjectId (auto),
+    customerId:   ObjectId (ref: users, required),
+    type:         String (enum: ['maintenance','repair','installation'], required),
+    description:  String (required),
+    status:       String (enum: ['pending','scheduled','in-progress','completed'],
+                  default: 'pending'),
+    scheduledDate: Date (optional),
+    completedDate: Date (optional),
+    assignedTo:   String (optional),
+    notes:        String (optional),
+    createdAt:    Date (auto),
+    updatedAt:    Date (auto)
+  }
+  Indexes: { customerId: 1 }, { status: 1 }
+
+  COLLECTION: inventory
+  ---------------------
+  {
+    _id:          ObjectId (auto),
+    name:         String (required),
+    description:  String (optional),
+    category:     String (enum: ['raw-material','finished-product'], required),
+    quantity:     Number (required, default: 0),
+    unit:         String (required, e.g. 'kg', 'sheets', 'meters', 'pieces'),
+    unitPrice:    Number (optional),
+    reorderLevel: Number (required, default: 0),
+    supplier:     String (optional),
+    location:     String (optional, e.g. 'Warehouse A'),
+    createdAt:    Date (auto),
+    updatedAt:    Date (auto)
+  }
+  Indexes: { category: 1 }, { name: 1 }
+
+  COLLECTION: notifications
+  -------------------------
+  {
+    _id:          ObjectId (auto),
+    userId:       ObjectId (ref: users, required),
+    title:        String (required),
+    message:      String (required),
+    type:         String (enum: ['order','quotation','service','system'],
+                  required),
+    isRead:       Boolean (default: false),
+    linkTo:       String (optional, e.g. '/orders/abc123' for navigation),
+    createdAt:    Date (auto)
+  }
+  Indexes: { userId: 1, isRead: 1 }, { createdAt: -1 }
+
+================================================================================
+  11. API ENDPOINTS (Backend REST API Design)
+================================================================================
+
+  Base URL: http://localhost:3001/api/v1
+  All responses follow: { success: boolean, data?: any, message?: string }
+
+  AUTHENTICATION:
+  ---------------
+  POST   /auth/register          — Register new customer
+         Body: { firstName, lastName, email, phone?, password }
+         Returns: { success, message }
+
+  POST   /auth/login             — Login
+         Body: { email, password }
+         Returns: { success, data: { token, user } }
+
+  GET    /auth/me                — Get current user (requires JWT)
+         Returns: { success, data: { user } }
+
+  POST   /auth/logout            — Logout (clear cookie if using cookies)
+
+  ORDERS (Customer):
+  ------------------
+  GET    /orders                 — Get customer's orders (auth: customer)
+         Query: ?status=pending&page=1&limit=10
+  POST   /orders                 — Create new order (auth: customer)
+  GET    /orders/:id             — Get order by ID (auth: customer, own only)
+  PATCH  /orders/:id/cancel      — Cancel own order (auth: customer)
+
+  ORDERS (Admin):
+  ---------------
+  GET    /admin/orders           — Get all orders (auth: admin)
+         Query: ?status=&customerId=&page=1&limit=10&sort=-createdAt
+  GET    /admin/orders/:id       — Get any order (auth: admin)
+  PATCH  /admin/orders/:id       — Update order (status, notes, assignedTo)
+  DELETE /admin/orders/:id       — Delete order (auth: admin)
+
+  QUOTATIONS (Customer):
+  ----------------------
+  GET    /quotations             — Get customer's quotations (auth: customer)
+  POST   /quotations/request     — Request a quotation (auth: customer)
+  GET    /quotations/:id         — Get quotation by ID (auth: customer)
+  PATCH  /quotations/:id/accept  — Accept quotation (auth: customer)
+  PATCH  /quotations/:id/reject  — Reject quotation (auth: customer)
+
+  QUOTATIONS (Admin):
+  -------------------
+  GET    /admin/quotations       — Get all quotations (auth: admin)
+  POST   /admin/quotations       — Create quotation for customer (auth: admin)
+  PATCH  /admin/quotations/:id   — Update quotation (auth: admin)
+  DELETE /admin/quotations/:id   — Delete quotation (auth: admin)
+
+  SERVICE REQUESTS (Customer):
+  ----------------------------
+  GET    /services               — Get customer's service requests
+  POST   /services               — Create service request
+  GET    /services/:id           — Get service request by ID
+
+  SERVICE REQUESTS (Admin):
+  -------------------------
+  GET    /admin/services         — Get all service requests
+  PATCH  /admin/services/:id     — Update service request (status, schedule)
+  DELETE /admin/services/:id     — Delete service request
+
+  INVENTORY (Admin only):
+  -----------------------
+  GET    /admin/inventory        — Get all inventory items
+         Query: ?category=raw-material&search=aluminium&lowStock=true
+  POST   /admin/inventory        — Add inventory item
+  PATCH  /admin/inventory/:id    — Update inventory item
+  DELETE /admin/inventory/:id    — Delete inventory item
+
+  CUSTOMERS (Admin only):
+  -----------------------
+  GET    /admin/customers        — Get all customers
+         Query: ?search=&isActive=true&page=1&limit=10
+  GET    /admin/customers/:id    — Get customer details + order history
+  PATCH  /admin/customers/:id    — Update customer (deactivate, update info)
+
+  NOTIFICATIONS:
+  --------------
+  GET    /notifications          — Get user's notifications
+         Query: ?isRead=false&page=1&limit=20
+  PATCH  /notifications/:id/read — Mark notification as read
+  PATCH  /notifications/read-all — Mark all as read
+  GET    /notifications/unread-count — Get unread count
+
+  ANALYTICS (Admin only):
+  -----------------------
+  GET    /admin/analytics/overview  — Dashboard stats (total orders, revenue, etc.)
+  GET    /admin/analytics/orders    — Orders over time data
+  GET    /admin/analytics/revenue   — Revenue trends data
+
+  PROFILE:
+  --------
+  GET    /profile                — Get own profile
+  PATCH  /profile                — Update own profile
+  PATCH  /profile/password       — Change password
+
+================================================================================
+  12. FRONTEND PAGES & ROUTES
+================================================================================
+
+  PUBLIC ROUTES (no auth required):
+  ---------------------------------
+  /                        — Landing page (DONE)
+  /login                   — Login page
+  /register                — Registration page
+  /forgot-password         — Forgot password page
+
+  CUSTOMER ROUTES (auth: customer):
+  ---------------------------------
+  /dashboard               — Customer dashboard
+  /orders                  — My orders list
+  /orders/new              — Place new order
+  /orders/[id]             — Order detail
+  /quotations              — My quotations list
+  /quotations/request      — Request quotation
+  /quotations/[id]         — Quotation detail
+  /services                — My service requests
+  /services/new            — New service request
+  /services/[id]           — Service request detail
+  /profile                 — My profile
+
+  ADMIN ROUTES (auth: admin):
+  ---------------------------
+  /admin                   — Admin dashboard
+  /admin/orders            — All orders management
+  /admin/orders/[id]       — Order detail/edit
+  /admin/customers         — Customer management
+  /admin/customers/[id]    — Customer detail
+  /admin/inventory         — Inventory management
+  /admin/quotations        — Quotation management
+  /admin/quotations/new    — Create quotation
+  /admin/quotations/[id]   — Quotation detail/edit
+  /admin/services          — Service requests management
+  /admin/analytics         — Business analytics
+  /admin/announcements     — Announcements management
+
+  ROUTE PROTECTION:
+  -----------------
+  - Unauthenticated users trying to access /dashboard or /admin get
+    redirected to /login
+  - Customers trying to access /admin/* get redirected to /dashboard
+  - Admins trying to access /dashboard can optionally be redirected to /admin
+  - After login, redirect based on role:
+    * customer → /dashboard
+    * admin → /admin
+
+================================================================================
+  13. COMPONENT SPECIFICATIONS
+================================================================================
+
+  LAYOUT COMPONENTS (to create in /components/layout/):
+  =====================================================
+
+  Sidebar.tsx:
+  - Collapsible sidebar navigation
+  - Different menu items based on user role
+  - Active route highlighting
+  - AluMate logo/brand at top
+  - Customer items: Dashboard, Orders, Quotations, Services, Profile
+  - Admin items: Dashboard, Orders, Customers, Inventory, Quotations,
+    Services, Analytics, Announcements
+  - Mobile: slide-out hamburger menu
+
+  TopNav.tsx:
+  - Horizontal header bar
+  - Hamburger menu toggle (mobile)
+  - Page title/breadcrumb
+  - Notification bell with badge count
+  - User avatar dropdown (Profile, Settings, Logout)
+
+  DashboardLayout.tsx:
+  - Wraps Sidebar + TopNav + main content area
+  - Responsive: sidebar hidden on mobile, shown on desktop
+  - Pass user role to determine sidebar items
+
+  AuthLayout.tsx:
+  - Centered layout for login/register pages
+  - AluMate branding
+  - Card wrapper for form
+
+  FORM COMPONENTS (to create in /components/forms/):
+  ==================================================
+
+  LoginForm.tsx:
+  - Email input, password input, remember me checkbox
+  - Submit button with loading state
+  - Validation: required fields, email format
+  - Error message display
+
+  RegisterForm.tsx:
+  - firstName, lastName, email, phone, password, confirmPassword
+  - Submit button with loading state
+  - Validation: required, email, password match, min length
+  - Error message display
+
+  OrderForm.tsx:
+  - Title, description (textarea), material type (select), dimensions,
+    quantity, additional notes
+  - Submit button
+  - Validation
+
+  QuotationRequestForm.tsx:
+  - Description of work needed, material preferences, dimensions, quantity
+  - Submit button
+
+  ServiceRequestForm.tsx:
+  - Service type (select: maintenance/repair/installation)
+  - Description, preferred date (date picker), urgency
+  - Submit button
+
+  ProfileEditForm.tsx:
+  - firstName, lastName, phone, address
+  - Save button
+
+  ChangePasswordForm.tsx:
+  - Current password, new password, confirm new password
+  - Submit button
+
+  ADMIN FORM COMPONENTS:
+  ======================
+
+  QuotationForm.tsx (admin creates quotation):
+  - Select customer
+  - Dynamic line items: description, material, dimensions, qty, unit price
+  - Auto-calculate total
+  - Valid until date
+  - Notes
+
+  InventoryForm.tsx:
+  - Name, description, category (select), quantity, unit, unitPrice,
+    reorderLevel, supplier, location
+  - Submit button
+
+  AnnouncementForm.tsx:
+  - Title, message, target audience (all/specific)
+  - Submit button
+
+  SHARED UI COMPONENTS (add via shadcn/ui as needed):
+  ====================================================
+
+  Already installed: Button, Card
+  Need to add: Input, Label, Select, Textarea, Dialog, Table, Badge,
+  Avatar, DropdownMenu, Sheet (mobile sidebar), Tabs, Form, Toast/Sonner,
+  Separator, Skeleton, Tooltip, Calendar/DatePicker, Pagination
+
+  Install via: npx shadcn@latest add <component-name>
+  (Run from /frontend directory)
+
+  CUSTOMER COMPONENTS (in /components/customer/):
+  ================================================
+
+  DashboardOverview.tsx:
+  - Summary stat cards (orders count, pending, active quotations, services)
+  - Recent orders preview
+  - Notifications preview
+  - Quick action buttons
+
+  OrderCard.tsx:
+  - Display order summary: title, status badge, date, amount
+  - Click navigates to order detail
+
+  OrderDetail.tsx:
+  - Full order information display
+  - Status timeline/progress bar
+  - Linked quotation section
+  - Notes/updates history
+
+  QuotationCard.tsx:
+  - Display quotation summary with status badge
+  - Total amount, valid until date
+
+  ServiceRequestCard.tsx:
+  - Display service request summary
+  - Type badge, status, scheduled date
+
+  ProfileCard.tsx:
+  - Display user profile info
+  - Edit button
+
+  NotificationList.tsx:
+  - List of notifications
+  - Unread indicator
+  - Click to navigate to related item
+  - Mark as read
+
+  ADMIN COMPONENTS (in /components/admin/):
+  ==========================================
+
+  AdminDashboard.tsx:
+  - Analytics overview cards
+  - Charts (use a chart library like recharts or chart.js)
+  - Recent activity feed
+
+  OrderManagement.tsx:
+  - Data table of all orders
+  - Filters and search
+  - Status update actions
+  - Bulk actions
+
+  CustomerManagement.tsx:
+  - Data table of all customers
+  - Search, filter by active/inactive
+  - View details, deactivate actions
+
+  InventoryManagement.tsx:
+  - Data table of inventory items
+  - Category filter
+  - Low stock warning indicators
+  - Add/edit actions
+
+  AnalyticsCard.tsx:
+  - Reusable card showing a metric title, value, trend
+
+  AnnouncementForm.tsx:
+  - Form to create and send announcements
+
+================================================================================
+  14. AUTHENTICATION & AUTHORIZATION
+================================================================================
+
+  FLOW:
+  -----
+  1. User enters email + password on login page
+  2. Frontend sends POST /api/v1/auth/login
+  3. Backend validates credentials, returns JWT token + user object
+  4. Frontend stores token (localStorage or HTTP-only cookie)
+  5. Frontend stores user in AuthContext
+  6. All subsequent API calls include token in Authorization header:
+     Authorization: Bearer <token>
+  7. Backend verifies token on every protected route
+  8. Backend checks role for admin-only routes
+
+  JWT PAYLOAD:
+  ------------
+  {
+    sub: userId (string),
+    email: email (string),
+    role: 'customer' | 'admin',
+    iat: issued at timestamp,
+    exp: expiration timestamp (e.g. 7 days)
+  }
+
+  NESTJS IMPLEMENTATION:
+  ----------------------
+  - AuthModule with AuthService, AuthController
+  - JwtStrategy (passport-jwt) for token validation
+  - LocalStrategy (passport-local) for login validation
+  - JwtAuthGuard — apply to all protected routes
+  - RolesGuard — check user role against @Roles() decorator
+  - Example:
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @Get('admin/orders')
+    getAllOrders() { ... }
+
+  FRONTEND IMPLEMENTATION:
+  ------------------------
+  - AuthContext (React Context) providing:
+    * user: User | null
+    * token: string | null
+    * isAuthenticated: boolean
+    * isLoading: boolean
+    * login(email, password): Promise
+    * register(data): Promise
+    * logout(): void
+  - AuthProvider wrapping the app in layout.tsx
+  - useAuth() hook to access context
+  - ProtectedRoute component or middleware to check auth
+  - Route-level protection using Next.js middleware (middleware.ts):
+    * Check for token cookie/header
+    * Redirect unauthenticated users to /login
+    * Redirect unauthorized roles
+
+================================================================================
+  15. REAL-TIME FEATURES
+================================================================================
+
+  SOCKET.IO IMPLEMENTATION:
+  -------------------------
+
+  Backend (NestJS):
+  - @nestjs/websockets + @nestjs/platform-socket.io
+  - NotificationGateway handles WebSocket connections
+  - Authenticate socket connections using JWT
+  - Events emitted:
+    * 'order:statusChanged' — when admin updates order status
+    * 'quotation:sent' — when admin sends quotation to customer
+    * 'notification:new' — generic new notification
+    * 'service:updated' — service request status change
+
+  Frontend:
+  - socket.io-client already installed
+  - Create useSocket() hook:
+    * Connect on login, disconnect on logout
+    * Authenticate with JWT token
+    * Listen for events and update local state
+    * Trigger toast notifications for real-time events
+  - Integrate with notification count in TopNav
+
+================================================================================
+  16. UI/UX DESIGN GUIDELINES
+================================================================================
+
+  THEME:
+  ------
+  - Dark theme with zinc color palette (matching the existing landing page)
+  - Background: zinc-950/zinc-900 gradients
+  - Cards: zinc-900/zinc-950 with zinc-800 borders
+  - Text: white (primary), zinc-300 (secondary), zinc-400 (muted)
+  - Accents: zinc-300/zinc-400 gradients for highlights
+  - Subtle glow effects: shadow-[0_0_20px_rgba(161,161,170,0.2)]
+
+  DESIGN PRINCIPLES:
+  ------------------
+  - Clean, professional, industrial aesthetic (fitting for fabrication business)
+  - Consistent spacing and typography using Tailwind
+  - Responsive: mobile-first design, works on all screen sizes
+  - Accessible: proper labels, focus states, aria attributes
+  - Loading states: skeleton loaders for data-dependent content
+  - Empty states: meaningful messages when lists are empty
+  - Error states: clear error messages, retry actions
+  - Framer Motion for page transitions and micro-animations
+
+  STATUS BADGES:
+  --------------
+  Order statuses should have distinct colors:
+  - pending:     yellow/amber badge
+  - quoted:      blue badge
+  - confirmed:   indigo badge
+  - in-progress: orange badge
+  - completed:   green badge
+  - cancelled:   red badge
+
+  FONTS:
+  ------
+  - Geist Sans (primary) — already configured in layout.tsx
+  - Geist Mono (code/numbers) — already configured in layout.tsx
+
+================================================================================
+  17. BACKEND SETUP INSTRUCTIONS
+================================================================================
+
+  STEP-BY-STEP:
+
+  1. Navigate to /AluMate/backend
+
+  2. Initialize NestJS project:
+     npx @nestjs/cli new . --package-manager npm --skip-git
+
+  3. Install dependencies:
+     npm install @nestjs/mongoose mongoose
+     npm install @nestjs/jwt @nestjs/passport passport passport-jwt passport-local
+     npm install bcrypt class-validator class-transformer
+     npm install @nestjs/config
+     npm install @nestjs/websockets @nestjs/platform-socket.io
+     npm install -D @types/passport-jwt @types/passport-local @types/bcrypt
+
+  4. Create .env file in /backend:
+     MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/alumate_db
+     JWT_SECRET=your-super-secret-key-change-this
+     JWT_EXPIRATION=7d
+     PORT=3001
+     FRONTEND_URL=http://localhost:3000
+
+  5. NestJS Module Structure:
+     /backend/src
+       ├── main.ts                    # App bootstrap, CORS, validation pipe
+       ├── app.module.ts              # Root module
+       ├── /auth                      # Authentication module
+       │   ├── auth.module.ts
+       │   ├── auth.controller.ts
+       │   ├── auth.service.ts
+       │   ├── jwt.strategy.ts
+       │   ├── local.strategy.ts
+       │   ├── jwt-auth.guard.ts
+       │   ├── roles.guard.ts
+       │   ├── roles.decorator.ts
+       │   └── dto/
+       │       ├── login.dto.ts
+       │       └── register.dto.ts
+       ├── /users                     # Users module
+       │   ├── users.module.ts
+       │   ├── users.controller.ts
+       │   ├── users.service.ts
+       │   └── schemas/user.schema.ts
+       ├── /orders                    # Orders module
+       │   ├── orders.module.ts
+       │   ├── orders.controller.ts
+       │   ├── orders.service.ts
+       │   ├── schemas/order.schema.ts
+       │   └── dto/
+       ├── /quotations                # Quotations module
+       │   ├── quotations.module.ts
+       │   ├── quotations.controller.ts
+       │   ├── quotations.service.ts
+       │   ├── schemas/quotation.schema.ts
+       │   └── dto/
+       ├── /services                  # Service requests module
+       │   ├── services.module.ts
+       │   ├── services.controller.ts
+       │   ├── services.service.ts
+       │   ├── schemas/service-request.schema.ts
+       │   └── dto/
+       ├── /inventory                 # Inventory module
+       │   ├── inventory.module.ts
+       │   ├── inventory.controller.ts
+       │   ├── inventory.service.ts
+       │   ├── schemas/inventory-item.schema.ts
+       │   └── dto/
+       ├── /notifications             # Notifications module
+       │   ├── notifications.module.ts
+       │   ├── notifications.controller.ts
+       │   ├── notifications.service.ts
+       │   ├── notifications.gateway.ts  # Socket.io gateway
+       │   └── schemas/notification.schema.ts
+       └── /common                    # Shared utilities
+           ├── decorators/
+           ├── guards/
+           ├── pipes/
+           └── interceptors/
+
+  6. Configure main.ts:
+     - Enable CORS for FRONTEND_URL
+     - Use global ValidationPipe with { whitelist: true, transform: true })
+     - Set port from env
+
+  7. Configure app.module.ts:
+     - Import ConfigModule.forRoot({ isGlobal: true })
+     - Import MongooseModule.forRoot(process.env.MONGODB_URI)
+     - Import all feature modules
+
+  8. Seed admin user:
+     - Create a seed script or command that creates a default admin:
+       Email: admin@alumate.com
+       Password: Admin@123 (hashed)
+       Role: admin
+
+================================================================================
+  18. FRONTEND DEVELOPMENT INSTRUCTIONS
+================================================================================
+
+  WORKING DIRECTORY: /AluMate/frontend
+
+  COMMANDS:
+  - npm run dev        — Start development server (port 3000)
+  - npm run build      — Build for production
+  - npm run lint       — Run ESLint
+  - npm run setup      — Clean reinstall
+
+  ADDING SHADCN/UI COMPONENTS:
+  - npx shadcn@latest add input
+  - npx shadcn@latest add label
+  - npx shadcn@latest add select
+  - npx shadcn@latest add textarea
+  - npx shadcn@latest add dialog
+  - npx shadcn@latest add table
+  - npx shadcn@latest add badge
+  - npx shadcn@latest add avatar
+  - npx shadcn@latest add dropdown-menu
+  - npx shadcn@latest add sheet
+  - npx shadcn@latest add tabs
+  - npx shadcn@latest add form
+  - npx shadcn@latest add sonner       (toast notifications)
+  - npx shadcn@latest add separator
+  - npx shadcn@latest add skeleton
+  - npx shadcn@latest add tooltip
+  - npx shadcn@latest add pagination
+  - npx shadcn@latest add calendar
+  - npx shadcn@latest add popover
+  (Additional components should be installed as needed)
+
+  ADDITIONAL FRONTEND PACKAGES TO INSTALL:
+  - npm install axios                    (HTTP client, or use native fetch)
+  - npm install react-hook-form          (form management)
+  - npm install @hookform/resolvers zod  (form validation with Zod)
+  - npm install recharts                 (charts for analytics dashboard)
+  - npm install date-fns                 (date formatting utility)
+  (Install these when implementing the respective features)
+
+  CREATING NEW PAGES:
+  - Create folder under /app with page.tsx
+  - Example: /app/orders/page.tsx for the orders list page
+  - Example: /app/orders/[id]/page.tsx for order detail page
+  - Example: /app/orders/new/page.tsx for new order form
+
+  MIDDLEWARE (Route Protection):
+  - Create /frontend/middleware.ts
+  - Use NextResponse.redirect for unauthenticated/unauthorized access
+  - Check for auth token in cookies or headers
+  - Define public routes that don't need auth
+  - Define admin-only route patterns
+
+================================================================================
+  19. ENVIRONMENT VARIABLES
+================================================================================
+
+  FRONTEND (.env.local in /frontend):
+  ------------------------------------
+  NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+  NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+  NEXT_PUBLIC_APP_NAME=AluMate
+
+  BACKEND (.env in /backend):
+  ----------------------------
+  PORT=3001
+  MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/alumate_db
+  JWT_SECRET=your-super-secret-jwt-key-min-32-characters
+  JWT_EXPIRATION=7d
+  FRONTEND_URL=http://localhost:3000
+  NODE_ENV=development
+
+================================================================================
+  20. DEVELOPMENT PHASES & PRIORITIES
+================================================================================
+
+  PHASE 1 — FOUNDATION (Current → Next):
+  ========================================
+  Priority: CRITICAL
+  1. Initialize NestJS backend project
+  2. Set up MongoDB Atlas + Mongoose connection
+  3. Create User schema and Users module
+  4. Implement Auth module (register, login, JWT, guards)
+  5. Build Login page and Register page UI
+  6. Implement useAuth hook + AuthContext
+  7. Implement API client with auth
+  8. Create middleware.ts for route protection
+  9. Create DashboardLayout (sidebar + topnav)
+
+  PHASE 2 — CORE FEATURES:
+  ==========================
+  Priority: HIGH
+  10. Build Customer Dashboard page (overview cards, recent orders)
+  11. Create Orders module (backend: schema, CRUD, controller)
+  12. Build Orders pages (list, create, detail)
+  13. Create Quotations module (backend)
+  14. Build Quotations pages (list, request, detail, accept/reject)
+  15. Build Admin Dashboard page
+  16. Build Admin Order Management page
+  17. Build Admin Customer Management page
+  18. Build basic Notification system (backend + frontend)
+
+  PHASE 3 — ENHANCEMENT:
+  ========================
+  Priority: MEDIUM
+  19. Create Service Requests module (backend)
+  20. Build Service Request pages (customer + admin)
+  21. Create Inventory module (backend)
+  22. Build Inventory Management page (admin)
+  23. Build Admin Quotation creation/management
+  24. Build Analytics dashboard with charts
+  25. Implement real-time updates with Socket.io
+  26. Build Announcements feature
+  27. Build Profile page with edit + change password
+  28. Add search and filtering to all list pages
+
+  PHASE 4 — POLISH & DEPLOYMENT:
+  ================================
+  Priority: MEDIUM-LOW
+  29. Error pages (404, 500)
+  30. Loading skeletons throughout
+  31. Toast notifications for all actions
+  32. Responsive design testing and fixes
+  33. Unit tests (NestJS services)
+  34. Integration tests (API endpoints)
+  35. E2E tests (optional, Cypress/Playwright)
+  36. Security audit (sanitization, rate limiting)
+  37. Performance optimization
+  38. Build and deploy (Vercel for frontend, Railway/Render for backend)
+
+================================================================================
+  21. BUSINESS LOGIC & WORKFLOWS
+================================================================================
+
+  ORDER LIFECYCLE:
+  ----------------
+  1. Customer creates order (status: pending)
+  2. Admin reviews order, creates quotation → (status: quoted)
+  3. Customer receives quotation notification
+  4. Customer accepts quotation → (status: confirmed)
+     OR Customer rejects quotation → admin may re-quote
+  5. Admin assigns order to workforce → (status: in-progress)
+  6. Admin marks order complete → (status: completed)
+  At any point before in-progress, customer can cancel → (status: cancelled)
+
+  QUOTATION LIFECYCLE:
+  --------------------
+  1. Customer requests quotation (or admin creates one for an order)
+  2. Admin creates quotation with line items (status: draft)
+  3. Admin sends quotation to customer (status: sent)
+  4. Customer accepts (status: accepted) → linked order moves to confirmed
+     OR Customer rejects (status: rejected)
+
+  SERVICE REQUEST LIFECYCLE:
+  --------------------------
+  1. Customer submits service request (status: pending)
+  2. Admin reviews and schedules (status: scheduled, sets scheduledDate)
+  3. Work begins (status: in-progress)
+  4. Work completed (status: completed, sets completedDate)
+
+  NOTIFICATION TRIGGERS:
+  -----------------------
+  - Order status changes → notify customer
+  - New quotation sent → notify customer
+  - Quotation accepted/rejected → notify admin
+  - New order placed → notify admin
+  - New service request → notify admin
+  - Service request scheduled → notify customer
+  - Low stock alert → notify admin
+  - Announcements → notify targeted users
+
+  INVENTORY RULES:
+  ----------------
+  - When quantity <= reorderLevel, item shows "Low Stock" warning
+  - Admin can manually update quantities (stock in/out)
+  - Ideally track stock transactions with timestamps (future enhancement)
+
+================================================================================
+  22. SECURITY REQUIREMENTS
+================================================================================
+
+  AUTHENTICATION:
+  - JWT tokens with expiration (7 days default)
+  - Passwords hashed with bcrypt (10 salt rounds)
+  - Tokens stored securely (HTTP-only cookies preferred, or localStorage)
+
+  AUTHORIZATION:
+  - Role-based access control on every API endpoint
+  - Customers can only access their own data (filter by customerId)
+  - Admins can access all data
+  - Frontend route protection via middleware.ts
+  - Backend guards on controllers
+
+  INPUT VALIDATION:
+  - class-validator on all DTOs (backend)
+  - Zod/react-hook-form validation on all forms (frontend)
+  - Sanitize inputs to prevent XSS
+  - MongoDB injection prevention (Mongoose handles this)
+
+  API SECURITY:
+  - CORS restricted to frontend origin only
+  - Rate limiting on auth endpoints (optional but recommended)
+  - Helmet.js for HTTP headers (optional)
+  - No sensitive data in JWT payload (no passwords)
+
+  DATA SECURITY:
+  - Environment variables for all secrets
+  - .env files in .gitignore
+  - MongoDB Atlas with IP whitelist
+  - No plaintext passwords anywhere
+
+================================================================================
+  23. TESTING STRATEGY
+================================================================================
+
+  BACKEND TESTING:
+  - Unit tests for services (NestJS built-in testing with Jest)
+  - Example: ordersService.create(), authService.login()
+  - Integration tests for controllers (supertest)
+  - Example: POST /api/v1/auth/login returns token
+
+  FRONTEND TESTING (Optional):
+  - Unit tests for hooks (useAuth) with React Testing Library
+  - Component tests for forms
+  - E2E tests with Cypress or Playwright (optional)
+
+  PRIORITY: Backend unit + integration tests first, frontend tests optional
+  for academic submission scope.
+
+================================================================================
+  24. DEPLOYMENT STRATEGY
+================================================================================
+
+  FRONTEND:
+  - Platform: Vercel (free tier, native Next.js support)
+  - Connect GitHub repo, auto-deploy on push
+  - Set environment variables in Vercel dashboard
+
+  BACKEND:
+  - Platform: Railway, Render, or Fly.io (free/low-cost tiers)
+  - Deploy NestJS as a Node.js application
+  - Set environment variables on the platform
+
+  DATABASE:
+  - MongoDB Atlas free tier (M0 cluster)
+  - Configure network access for deployment platform IPs
+
+  DOMAIN (Optional):
+  - Custom domain pointing to Vercel frontend
+  - API subdomain or path for backend
+
+================================================================================
+  25. IMPORTANT RULES & CONVENTIONS
+================================================================================
+
+  NAMING:
+  - Files: PascalCase for components (OrderCard.tsx), camelCase for utils
+  - Variables/functions: camelCase
+  - Types/interfaces: PascalCase
+  - Constants: UPPER_SNAKE_CASE
+  - API routes: kebab-case (service-requests)
+  - Database collections: snake_case (service_requests)
+  - CSS classes: Tailwind utility classes only (no custom CSS unless necessary)
+
+  CODE STYLE:
+  - TypeScript strict mode
+  - All components are functional components
+  - Use "use client" directive only for client components
+  - Server components by default where possible (Next.js 16)
+  - Proper TypeScript typing — no 'any' types
+  - All API responses follow { success, data, message } format
+  - Error handling with try/catch on all async operations
+
+  DO NOT:
+  - Use any alumni/community/reunion/event-related terminology
+  - Store passwords in plain text
+  - Expose API keys or secrets in frontend code
+  - Use inline styles (use Tailwind classes)
+  - Skip form validation
+  - Forget loading and error states
+  - Create components without TypeScript props interfaces
+
+  ALWAYS:
+  - Match the dark zinc theme of the existing landing page
+  - Use shadcn/ui components for consistent UI
+  - Include proper TypeScript types
+  - Handle loading, error, and empty states
+  - Make pages responsive
+  - Add proper form validation
+  - Protect routes based on authentication and role
+  - Send notifications for important status changes
+  - Use constants from /constants/index.ts instead of hardcoding strings
+
+================================================================================
+  END OF PROJECT GUIDE
+================================================================================
+
+  This file was created on: March 3, 2026
+  Project Version: 0.1.0
+  Guide Version: 1.0
+
+  Any AI agent or developer reading this file has everything needed to
+  continue developing AluMate from its current state to completion.
+
+================================================================================

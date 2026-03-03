@@ -4,39 +4,39 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Calendar, Bell, TrendingUp, Network, Shield } from "lucide-react";
+import { ClipboardList, Package, Bell, BarChart3, Wrench, Shield } from "lucide-react";
 
 export default function Home() {
   const features = [
     {
-      icon: Users,
-      title: "Alumni Network",
-      description: "Connect with fellow alumni and expand your professional network",
+      icon: ClipboardList,
+      title: "Order Management",
+      description: "Place and track aluminium fabrication orders with real-time status updates",
     },
     {
-      icon: Calendar,
-      title: "Events & Reunions",
-      description: "Stay updated with upcoming events, reunions, and workshops",
+      icon: Package,
+      title: "Quotation Requests",
+      description: "Request and receive accurate quotations for custom fabrication work",
     },
     {
       icon: Bell,
       title: "Real-time Updates",
-      description: "Get instant notifications about important announcements",
+      description: "Get instant notifications on order progress and service updates",
     },
     {
-      icon: TrendingUp,
-      title: "Career Growth",
-      description: "Access job opportunities and mentorship programs",
+      icon: BarChart3,
+      title: "Business Analytics",
+      description: "Monitor orders, inventory, and business performance at a glance",
     },
     {
-      icon: Network,
-      title: "Community Engagement",
-      description: "Participate in discussions and share your experiences",
+      icon: Wrench,
+      title: "Service Requests",
+      description: "Submit and manage maintenance, repair, and installation requests",
     },
     {
       icon: Shield,
       title: "Secure Platform",
-      description: "Your data is protected with enterprise-grade security",
+      description: "Your data is protected with enterprise-grade security and role-based access",
     },
   ];
 
@@ -44,7 +44,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
       {/* Grid overlay for industrial effect */}
       <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-      
+
       <div className="relative">
         {/* Navigation */}
         <nav className="border-b border-zinc-800/50 bg-black/20 backdrop-blur-xl">
@@ -77,20 +77,20 @@ export default function Home() {
             className="text-center"
           >
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-              Connect, Engage, and Grow
+              Streamline Your
               <br />
               <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                with Your Alumni Community
+                Aluminium Fabrication Business
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-              AluMate is your comprehensive platform for staying connected with your university alumni network.
-              Join events, share experiences, and build lasting professional relationships.
+              AluMate is a comprehensive platform for managing aluminium fabrication orders, quotations,
+              inventory, and services — all in one place. Simplify your workflow and delight your customers.
             </p>
             <div className="mt-10 flex items-center justify-center gap-4">
               <Link href="/register">
                 <Button size="lg" className="text-base bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500 shadow-[0_0_30px_rgba(161,161,170,0.3)]">
-                  Join Now
+                  Get Started
                 </Button>
               </Link>
               <Link href="/login">
@@ -112,10 +112,10 @@ export default function Home() {
             className="text-center"
           >
             <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent sm:text-4xl">
-              Everything You Need to Stay Connected
+              Everything You Need to Run Your Business
             </h2>
             <p className="mt-4 text-lg text-zinc-400">
-              Powerful features designed to strengthen your alumni community
+              Powerful features designed to streamline aluminium fabrication operations
             </p>
           </motion.div>
 
@@ -156,10 +156,10 @@ export default function Home() {
               <CardContent className="p-12 text-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-300 bg-clip-text text-transparent sm:text-4xl relative z-10">
-                  Ready to Reconnect?
+                  Ready to Get Started?
                 </h2>
                 <p className="mt-4 text-lg text-zinc-300 relative z-10">
-                  Join thousands of alumni already connected on AluMate
+                  Join businesses already managing their fabrication workflow with AluMate
                 </p>
                 <div className="mt-8 relative z-10">
                   <Link href="/register">
@@ -178,7 +178,7 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <div className="text-center text-sm text-zinc-500">
               <p>&copy; 2026 AluMate. All rights reserved.</p>
-              <p className="mt-2">Alumni Management & Engagement Platform</p>
+              <p className="mt-2">Aluminium Fabrication & Service Management System</p>
             </div>
           </div>
         </footer>
