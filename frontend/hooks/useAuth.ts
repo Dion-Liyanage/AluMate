@@ -1,12 +1,19 @@
 /**
  * Authentication hook
+ * Provides access to auth context (user, login, register, logout)
  */
 
+"use client";
+
+import { useContext } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
+
 export function useAuth() {
-  // Add authentication logic here
-  return {
-    user: null,
-    isLoading: false,
-    isAuthenticated: false,
-  };
+  const context = useContext(AuthContext);
+
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
+  return context;
 }

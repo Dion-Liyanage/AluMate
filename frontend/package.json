@@ -10,16 +10,24 @@
     "setup": "rm -rf node_modules .next && npm install"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-slot": "^1.2.4",
+    "axios": "^1.13.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.26.2",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
+    "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.2",
+    "recharts": "^3.7.0",
     "socket.io-client": "^4.8.3",
-    "tailwind-merge": "^3.4.0"
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
