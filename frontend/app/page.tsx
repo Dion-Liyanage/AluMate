@@ -322,14 +322,17 @@ export default function Home() {
                   viewport={{ once: true }}
                 >
                   <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-700 hover:shadow-[0_0_30px_rgba(161,161,170,0.1)]">
-                    <CardContent className="p-6">
-                      <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-                        <feature.icon className="h-6 w-6 text-zinc-400" />
+                    <CardContent className="p-6 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                      <div className="relative z-10">
+                        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
+                          <feature.icon className="h-6 w-6 text-zinc-400" />
+                        </div>
+                        <h3 className="mb-2 text-xl font-semibold text-zinc-200">
+                          {feature.title}
+                        </h3>
+                        <p className="text-zinc-400">{feature.description}</p>
                       </div>
-                      <h3 className="mb-2 text-xl font-semibold text-zinc-200">
-                        {feature.title}
-                      </h3>
-                      <p className="text-zinc-400">{feature.description}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -375,27 +378,30 @@ export default function Home() {
                   viewport={{ once: true }}
                 >
                   <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-600 hover:shadow-[0_0_40px_rgba(161,161,170,0.1)] group">
-                    <CardContent className="p-8">
-                      <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 group-hover:from-zinc-700 group-hover:to-zinc-800 transition-colors">
-                        <service.icon className="h-7 w-7 text-zinc-300" />
+                    <CardContent className="p-8 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                      <div className="relative z-10">
+                        <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 group-hover:from-zinc-700 group-hover:to-zinc-800 transition-colors">
+                          <service.icon className="h-7 w-7 text-zinc-300" />
+                        </div>
+                        <h3 className="mb-3 text-xl font-semibold text-zinc-100">
+                          {service.title}
+                        </h3>
+                        <p className="text-zinc-400 mb-6 leading-relaxed">
+                          {service.description}
+                        </p>
+                        <ul className="space-y-2">
+                          {service.highlights.map((item) => (
+                            <li
+                              key={item}
+                              className="flex items-center gap-2.5 text-sm text-zinc-300"
+                            >
+                              <CheckCircle2 className="h-4 w-4 text-zinc-500 flex-shrink-0" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <h3 className="mb-3 text-xl font-semibold text-zinc-100">
-                        {service.title}
-                      </h3>
-                      <p className="text-zinc-400 mb-6 leading-relaxed">
-                        {service.description}
-                      </p>
-                      <ul className="space-y-2">
-                        {service.highlights.map((item) => (
-                          <li
-                            key={item}
-                            className="flex items-center gap-2.5 text-sm text-zinc-300"
-                          >
-                            <CheckCircle2 className="h-4 w-4 text-zinc-500 flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -604,7 +610,9 @@ export default function Home() {
                 className="lg:col-span-3"
               >
                 <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
-                  <CardContent className="p-8">
+                  <CardContent className="p-8 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                    <div className="relative z-10">
                     {contactSubmitted ? (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -669,6 +677,7 @@ export default function Home() {
                         </Button>
                       </form>
                     )}
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
