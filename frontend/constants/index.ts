@@ -24,13 +24,18 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
 
-  // Customer Routes
+  // Public Pages (no login required)
+  SERVICES_PUBLIC: '/services',
+  ABOUT: '/about',
+  CONTACT: '/contact',
+
+  // Customer Routes (login required)
   CUSTOMER_DASHBOARD: '/dashboard',
   ORDERS: '/orders',
   QUOTATIONS: '/quotations',
-  SERVICES: '/services',
+  SERVICES_REQUESTS: '/services/my-requests',
 
-  // Admin Routes
+  // Admin Routes (admin login required)
   ADMIN_DASHBOARD: '/admin',
   ADMIN_ORDERS: '/admin/orders',
   ADMIN_INVENTORY: '/admin/inventory',

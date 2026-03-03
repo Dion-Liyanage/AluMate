@@ -47,12 +47,25 @@ export default function Home() {
 
       <div className="relative">
         {/* Navigation */}
-        <nav className="border-b border-zinc-800/50 bg-black/20 backdrop-blur-xl">
+        <nav className="border-b border-zinc-800/50 bg-black/20 backdrop-blur-xl sticky top-0 z-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
-                <span className="text-xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">AluMate</span>
+                <Link href="/" className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
+                  <span className="text-xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">AluMate</span>
+                </Link>
+              </div>
+              <div className="hidden md:flex items-center gap-6">
+                <Link href="/services" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                  Services
+                </Link>
+                <Link href="/about" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                  About
+                </Link>
+                <Link href="/contact" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
+                  Contact
+                </Link>
               </div>
               <div className="flex items-center gap-4">
                 <Link href="/login">

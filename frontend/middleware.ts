@@ -3,46 +3,30 @@ import type { NextRequest } from "next/server";
 
 /**
  * Route protection middleware
- * - Redirects unauthenticated users to /login for protected routes
- * - Redirects customers away from /admin routes
- * - Redirects authenticated users away from auth pages
+ * - Most of the site is PUBLIC so visitors can browse freely
+ * - Only action/personal routes require authentication
+ * - Admin routes require admin role
  */
 
-// Routes that don't require authentication
-const publicRoutes = ["/", "/login", "/register", "/forgot-password"];
+// Routes that REQUIRE authentication (everything else is public)
+const protectedRoutes = [
+  "/dashboard",
+  "/orders",
+  "/quotations/request",
+  "/profile",
+];
 
 // Routes that require admin role
 const adminRoutes = ["/admin"];
 
+// Auth pages — redirect if already logged in
+const authPages = ["/login", "/register", "/forgot-password"];
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Get the auth token from cookies or Authorization header
+  // Get the auth token from cookies
   const token = request.cookies.get("alumate_token")?.value;
-
-  // Check if this is a public route
-  const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-
-  // Check if this only "/" exact (landing page)
-  const isLandingPage = pathname === "/";
-
-  // Check if this is an auth page
-  const isAuthPage =
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/forgot-password";
-
-  // Check if this is an admin route
-  const isAdminRoute = adminRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-
-  // Public routes — allow access
-  if (isLandingPage) {
-    return NextResponse.next();
-  }
 
   // Static files and API routes — skip middleware
   if (
@@ -53,28 +37,34 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Note: Full JWT validation would require backend verification.
-  // For now, we check token presence. The client-side AuthContext
-  // handles the actual token validation on page load.
-  // When the backend is set up, we can add proper JWT verification here.
+  // Check if this is a protected route
+  const isProtectedRoute = protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
 
-  if (!token) {
-    // User is not authenticated
-    if (!isPublicRoute) {
-      // Redirect to login for protected routes
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-    return NextResponse.next();
+  // Check if this is an admin route
+  const isAdminRoute = adminRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+
+  // Check if this is an auth page
+  const isAuthPage = authPages.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+
+  // Protected or admin routes — require token
+  if ((isProtectedRoute || isAdminRoute) && !token) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // User has a token
-  if (isAuthPage) {
-    // Redirect authenticated users away from auth pages
+  // Auth pages — redirect to dashboard if already logged in
+  if (isAuthPage && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  // Everything else is public — allow access
   return NextResponse.next();
 }
 
