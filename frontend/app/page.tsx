@@ -285,7 +285,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-base border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 hover:text-white cursor-pointer"
+                  className="text-base cursor-pointer"
                   onClick={() => scrollToSection("services")}
                 >
                   Explore Services
@@ -412,7 +412,6 @@ export default function Home() {
               <Link href="/services">
                 <Button
                   variant="outline"
-                  className="border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 hover:text-white"
                 >
                   View All Services
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -458,7 +457,6 @@ export default function Home() {
                   <Link href="/about">
                     <Button
                       variant="outline"
-                      className="border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 hover:text-white"
                     >
                       Learn More About Us
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -589,7 +587,6 @@ export default function Home() {
                   <Link href="/contact">
                     <Button
                       variant="outline"
-                      className="border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 hover:text-white"
                     >
                       Full Contact Page
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -623,7 +620,7 @@ export default function Home() {
                         </p>
                         <Button
                           variant="outline"
-                          className="border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 cursor-pointer"
+                          className="cursor-pointer"
                           onClick={() => setContactSubmitted(false)}
                         >
                           Send Another

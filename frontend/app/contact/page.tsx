@@ -197,7 +197,6 @@ export default function ContactPage() {
                       </p>
                       <Button
                         variant="outline"
-                        className="border-zinc-700 text-zinc-300 hover:bg-zinc-800/50"
                         onClick={() => setSubmitted(false)}
                       >
                         Send Another Message

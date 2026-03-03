@@ -195,7 +195,7 @@ export default function ServicesPage() {
                     <Link href="/register">
                       <Button
                         variant="outline"
-                        className="w-full border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 hover:text-white hover:border-zinc-600 group/btn"
+                        className="w-full group/btn"
                       >
                         Request This Service
                         <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -282,7 +282,7 @@ export default function ServicesPage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-base border-zinc-600 text-zinc-300 hover:bg-zinc-800/50 hover:text-white"
+                      className="text-base"
                     >
                       Contact Us
                     </Button>
