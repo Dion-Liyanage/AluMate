@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
+// import { MongooseModule } from '@nestjs/mongoose';
+import { AppController } from './app.controller';
 
-// Feature Modules
-import { UsersModule } from './users/users.module';
-import { OrdersModule } from './orders/orders.module';
-import { QuotationsModule } from './quotations/quotations.module';
-import { ServicesModule } from './services/services.module';
-import { InventoryModule } from './inventory/inventory.module';
-import { NotificationsModule } from './notifications/notifications.module';
+// Feature Modules (uncomment when MongoDB is connected)
+// import { UsersModule } from './users/users.module';
+// import { OrdersModule } from './orders/orders.module';
+// import { QuotationsModule } from './quotations/quotations.module';
+// import { ServicesModule } from './services/services.module';
+// import { InventoryModule } from './inventory/inventory.module';
+// import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -19,23 +20,26 @@ import { NotificationsModule } from './notifications/notifications.module';
     }),
 
     // MongoDB connection via Mongoose
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
-      }),
-      inject: [ConfigService],
-    }),
+    // TODO: Uncomment after whitelisting your IP in MongoDB Atlas
+    // MongooseModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   useFactory: async (configService: ConfigService) => ({
+    //     uri: configService.get<string>('MONGODB_URI'),
+    //     serverSelectionTimeoutMS: 5000,
+    //     connectTimeoutMS: 10000,
+    //   }),
+    //   inject: [ConfigService],
+    // }),
 
-    // Feature modules
-    UsersModule,
-    OrdersModule,
-    QuotationsModule,
-    ServicesModule,
-    InventoryModule,
-    NotificationsModule,
+    // Feature modules (uncomment when MongoDB is connected)
+    // UsersModule,
+    // OrdersModule,
+    // QuotationsModule,
+    // ServicesModule,
+    // InventoryModule,
+    // NotificationsModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
