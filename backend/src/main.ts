@@ -16,8 +16,10 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Global API prefix
-  app.setGlobalPrefix('api/v1');
+  // Global API prefix (exclude root health-check route)
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/'],
+  });
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -31,7 +33,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = configService.get<number>('PORT', 3001);
+  const port = configService.get<number>('PORT', 4000);
   await app.listen(port);
 
   console.log(`🚀 AluMate Backend is running on: http://localhost:${port}`);
