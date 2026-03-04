@@ -284,7 +284,7 @@ export default function AboutPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-base border-zinc-600 text-zinc-300 hover:bg-zinc-800/50 hover:text-white"
+                  className="text-base"
                 >
                   Contact Us
                 </Button>

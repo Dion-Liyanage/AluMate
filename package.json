@@ -1,0 +1,16 @@
+{
+  "name": "alumate",
+  "version": "1.0.0",
+  "description": "AluMate - Web based Aluminium Fabrication and Service Management System",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n frontend,backend -c cyan,yellow \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build": "concurrently \"npm run build --prefix frontend\" \"npm run build --prefix backend\"",
+    "install:all": "npm install --prefix frontend && npm install --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
