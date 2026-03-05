@@ -39,40 +39,40 @@ const navSections = [
 // ─── Data ────────────────────────────────────────────────────────────────────
 const features = [
   {
-    icon: ClipboardList,
-    title: "Order Management",
-    description:
-      "Place and track aluminium fabrication orders with real-time status updates",
-  },
-  {
     icon: Package,
-    title: "Quotation Requests",
+    title: "Aluminium Products",
     description:
-      "Request and receive accurate quotations for custom fabrication work",
-  },
-  {
-    icon: Bell,
-    title: "Real-time Updates",
-    description:
-      "Get instant notifications on order progress and service updates",
-  },
-  {
-    icon: BarChart3,
-    title: "Business Analytics",
-    description:
-      "Monitor orders, inventory, and business performance at a glance",
+      "Browse and order from a wide range of high-quality aluminium profiles, sections, and structural materials for any project.",
   },
   {
     icon: Wrench,
-    title: "Service Requests",
+    title: "Customized Designs",
     description:
-      "Submit and manage maintenance, repair, and installation requests",
+      "Get aluminium solutions tailored to your exact specifications — custom shapes, sizes, and finishes crafted to your requirements.",
   },
   {
-    icon: Shield,
-    title: "Secure Platform",
+    icon: ClipboardList,
+    title: "Catalogue Explore",
     description:
-      "Your data is protected with enterprise-grade security and role-based access",
+      "Explore our full product and service catalogue to find the right aluminium solutions for residential, commercial, or industrial use.",
+  },
+  {
+    icon: MapPin,
+    title: "On Site Visiting",
+    description:
+      "Request a professional on-site visit for measurement, assessment, and consultation before fabrication or installation begins.",
+  },
+  {
+    icon: BarChart3,
+    title: "Quotation Generation",
+    description:
+      "Receive fast, accurate, and transparent pricing for your projects — all through a simple and streamlined quotation process.",
+  },
+  {
+    icon: Mail,
+    title: "Easy to Communicate",
+    description:
+      "Stay connected with our team through seamless in-platform messaging, real-time updates, and responsive customer support.",
   },
 ];
 
@@ -180,7 +180,7 @@ export default function Home() {
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      const offset = 64; // navbar height
+      const offset = 80; // navbar height
       const top = el.offsetTop - offset;
       window.scrollTo({ top, behavior: "smooth" });
     }
@@ -200,7 +200,7 @@ export default function Home() {
         {/* ─── Sticky Scroll-Spy Navbar ─────────────────────────────────── */}
         <nav className="border-b border-zinc-800/50 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
+            <div className="flex h-20 items-center justify-between">
               {/* Logo */}
               <button
                 onClick={() => scrollToSection("home")}
@@ -254,7 +254,7 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════ */}
         <section id="home">
           {/* Hero */}
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
+          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-16">
               {/* Left — Aluminum Bars Image */}
               <motion.div
@@ -263,14 +263,14 @@ export default function Home() {
                 transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className="relative flex items-center justify-center"
               >
-                <div className="relative w-full max-w-lg mx-auto">
+                <div className="relative w-full max-w-none lg:w-[125%] lg:ml-4 xl:ml-8 scale-115">
                   {/* Glow effect behind image */}
                   <div className="absolute -inset-4 bg-gradient-to-r from-zinc-500/20 via-zinc-400/10 to-transparent rounded-2xl blur-2xl" />
                   <Image
-                    src="/landing-page/hero.png"
+                    src="/landing-page/hero2.png"
                     alt="Premium aluminum extrusion bars and profiles"
-                    width={600}
-                    height={500}
+                    width={1000}
+                    height={800}
                     className="relative z-10 w-full h-auto rounded-xl object-cover drop-shadow-[0_0_40px_rgba(161,161,170,0.2)]"
                     priority
                   />
@@ -285,14 +285,14 @@ export default function Home() {
                 className="text-center lg:text-left"
               >
                 <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                  Streamline Your
+                  Delivering a
                   <br />
                   <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                    Aluminium Fabrication Business
+                  Seamless Aluminium Service Experience.
                   </span>
                 </h1>
                 <p className="mx-auto lg:mx-0 mt-6 max-w-2xl text-lg text-zinc-400">
-                  AluMate is a comprehensive platform for managing aluminium
+                  A comprehensive platform for managing aluminium
                   fabrication orders, quotations, inventory, and services — all in
                   one place. Simplify your workflow and delight your customers.
                 </p>
@@ -321,7 +321,7 @@ export default function Home() {
           </div>
 
           {/* Features grid */}
-          <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 pt-12 pb-24 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -329,8 +329,8 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent sm:text-4xl">
-                Everything You Need to Run Your Business
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent sm:text-3xl pb-2">
+                Everything You Need in One Place
               </h2>
               <p className="mt-4 text-lg text-zinc-400">
                 Powerful features designed for aluminium fabrication operations
@@ -373,7 +373,7 @@ export default function Home() {
           id="services"
           className="border-t border-zinc-800/50 bg-zinc-950/60"
         >
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -456,7 +456,7 @@ export default function Home() {
         {/* ─── ABOUT SECTION ────────────────────────────────────────────── */}
         {/* ═══════════════════════════════════════════════════════════════ */}
         <section id="about" className="border-t border-zinc-800/50">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="grid gap-16 lg:grid-cols-2 items-center">
               {/* Left — story */}
               <motion.div
@@ -564,7 +564,7 @@ export default function Home() {
           id="contact"
           className="border-t border-zinc-800/50 bg-zinc-950/60"
         >
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -735,7 +735,7 @@ export default function Home() {
                         size="lg"
                         className="text-base bg-gradient-to-r from-zinc-200 to-zinc-300 hover:from-zinc-100 hover:to-zinc-200 text-black font-semibold shadow-[0_0_30px_rgba(228,228,231,0.3)]"
                       >
-                        Create Your Account
+                        Explore
                       </Button>
                     </Link>
                   </div>
