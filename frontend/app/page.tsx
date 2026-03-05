@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -254,45 +255,69 @@ export default function Home() {
         <section id="home">
           {/* Hero */}
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-                Streamline Your
-                <br />
-                <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                  Aluminium Fabrication Business
-                </span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-                AluMate is a comprehensive platform for managing aluminium
-                fabrication orders, quotations, inventory, and services — all in
-                one place. Simplify your workflow and delight your customers.
-              </p>
-              <div className="mt-10 flex items-center justify-center gap-4">
-                <Link href="/register">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-16">
+              {/* Left — Aluminum Bars Image */}
+              <motion.div
+                initial={{ opacity: 0, x: -80, filter: "blur(8px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="relative flex items-center justify-center"
+              >
+                <div className="relative w-full max-w-lg mx-auto">
+                  {/* Glow effect behind image */}
+                  <div className="absolute -inset-4 bg-gradient-to-r from-zinc-500/20 via-zinc-400/10 to-transparent rounded-2xl blur-2xl" />
+                  <Image
+                    src="/aluminum-bars.png"
+                    alt="Premium aluminum extrusion bars and profiles"
+                    width={600}
+                    height={500}
+                    className="relative z-10 w-full h-auto rounded-xl object-cover drop-shadow-[0_0_40px_rgba(161,161,170,0.2)]"
+                    priority
+                  />
+                </div>
+              </motion.div>
+
+              {/* Right — Hero Text */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+                className="text-center lg:text-left"
+              >
+                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                  Streamline Your
+                  <br />
+                  <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+                    Aluminium Fabrication Business
+                  </span>
+                </h1>
+                <p className="mx-auto lg:mx-0 mt-6 max-w-2xl text-lg text-zinc-400">
+                  AluMate is a comprehensive platform for managing aluminium
+                  fabrication orders, quotations, inventory, and services — all in
+                  one place. Simplify your workflow and delight your customers.
+                </p>
+                <div className="mt-10 flex items-center justify-center lg:justify-start gap-4">
+                  <Link href="/register">
+                    <Button
+                      size="lg"
+                      className="text-base bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500 shadow-[0_0_30px_rgba(161,161,170,0.3)]"
+                    >
+                      Get Started
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Button
                     size="lg"
-                    className="text-base bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500 shadow-[0_0_30px_rgba(161,161,170,0.3)]"
+                    variant="outline"
+                    className="text-base cursor-pointer"
+                    onClick={() => scrollToSection("services")}
                   >
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    Explore Services
+                    <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
-                </Link>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-base cursor-pointer"
-                  onClick={() => scrollToSection("services")}
-                >
-                  Explore Services
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
+                </div>
+              </motion.div>
+            </div>
           </div>
 
           {/* Features grid */}
