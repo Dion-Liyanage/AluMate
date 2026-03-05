@@ -267,7 +267,7 @@ export default function Home() {
                   {/* Glow effect behind image */}
                   <div className="absolute -inset-4 bg-gradient-to-r from-zinc-500/20 via-zinc-400/10 to-transparent rounded-2xl blur-2xl" />
                   <Image
-                    src="/aluminum-bars.png"
+                    src="/landing-page/hero.png"
                     alt="Premium aluminum extrusion bars and profiles"
                     width={600}
                     height={500}
