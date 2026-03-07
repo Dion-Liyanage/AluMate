@@ -207,7 +207,7 @@ export default function Home() {
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
-                <span className="text-xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+                <span className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">
                   AluMate
                 </span>
               </button>
@@ -590,37 +590,43 @@ export default function Home() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 viewport={{ once: true }}
-                className="space-y-5"
               >
-                {contactInfo.map((item, index) => (
-                  <motion.div
-                    key={item.title}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.2 + index * 0.08 }}
-                    viewport={{ once: true }}
-                    className="flex gap-4 items-start"
-                  >
-                    <div className="flex-shrink-0 h-11 w-11 rounded-lg bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-zinc-300" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-zinc-200">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-zinc-400">{item.detail}</p>
-                    </div>
-                  </motion.div>
-                ))}
+                <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
+                  <CardContent className="p-8 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                    <div className="relative z-10 space-y-5">
+                      {contactInfo.map((item, index) => (
+                        <motion.div
+                          key={item.title}
+                          initial={{ opacity: 0, y: 10 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: 0.2 + index * 0.08 }}
+                          viewport={{ once: true }}
+                          className="flex gap-4 items-start"
+                        >
+                          <div className="flex-shrink-0 h-11 w-11 rounded-lg bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center">
+                            <item.icon className="h-5 w-5 text-zinc-300" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-zinc-200">
+                              {item.title}
+                            </h3>
+                            <p className="text-sm text-zinc-400">{item.detail}</p>
+                          </div>
+                        </motion.div>
+                      ))}
 
-                <div className="pt-4">
-                  <Link href="/contact">
-                    <Button variant="outline">
-                      Full Contact Page
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
+                      <div className="pt-4">
+                        <Link href="/contact">
+                          <Button variant="outline">
+                            Full Contact Page
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
 
               {/* Quick contact form */}

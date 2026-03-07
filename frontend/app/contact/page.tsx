@@ -21,7 +21,7 @@ const contactInfo = [
   {
     icon: MapPin,
     title: "Visit Us",
-    details: ["123 Industrial Zone", "Colombo, Sri Lanka"],
+    details: ["123 Industrial Zone, Colombo, Sri Lanka"],
   },
   {
     icon: Phone,
@@ -135,41 +135,47 @@ export default function ContactPage() {
 
         {/* Content */}
         <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-5">
+          <div className="grid gap-16 lg:grid-cols-2 items-center">
             {/* Contact Info */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="lg:col-span-2 space-y-6"
             >
-              <h2 className="text-2xl font-bold text-zinc-100 mb-6">
-                Contact Information
-              </h2>
+              <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
+                <CardContent className="p-8 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                  <div className="relative z-10 space-y-6">
+                    <h2 className="text-xl font-semibold text-zinc-100 mb-4">
+                      Contact Information
+                    </h2>
 
-              {contactInfo.map((item, index) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                  className="flex gap-4"
-                >
-                  <div className="flex-shrink-0 h-11 w-11 rounded-lg bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center">
-                    <item.icon className="h-5 w-5 text-zinc-300" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-zinc-200">
-                      {item.title}
-                    </h3>
-                    {item.details.map((detail) => (
-                      <p key={detail} className="text-sm text-zinc-400">
-                        {detail}
-                      </p>
+                    {contactInfo.map((item, index) => (
+                      <motion.div
+                        key={item.title}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
+                        className="flex gap-4 items-start"
+                      >
+                        <div className="flex-shrink-0 h-11 w-11 rounded-lg bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center">
+                          <item.icon className="h-5 w-5 text-zinc-300" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-zinc-200">
+                            {item.title}
+                          </h3>
+                          {item.details.map((detail) => (
+                            <p key={detail} className="text-sm text-zinc-400">
+                              {detail}
+                            </p>
+                          ))}
+                        </div>
+                      </motion.div>
                     ))}
                   </div>
-                </motion.div>
-              ))}
+                </CardContent>
+              </Card>
             </motion.div>
 
             {/* Contact Form */}
@@ -177,10 +183,11 @@ export default function ContactPage() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="lg:col-span-3"
             >
               <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
-                <CardContent className="p-8">
+                <CardContent className="p-8 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                  <div className="relative z-10">
                   {submitted ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
@@ -280,6 +287,7 @@ export default function ContactPage() {
                       </Button>
                     </form>
                   )}
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
