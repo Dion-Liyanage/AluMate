@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,40 +39,40 @@ const navSections = [
 // ─── Data ────────────────────────────────────────────────────────────────────
 const features = [
   {
-    icon: ClipboardList,
-    title: "Order Management",
-    description:
-      "Place and track aluminium fabrication orders with real-time status updates",
-  },
-  {
     icon: Package,
-    title: "Quotation Requests",
+    title: "Aluminium Products",
     description:
-      "Request and receive accurate quotations for custom fabrication work",
-  },
-  {
-    icon: Bell,
-    title: "Real-time Updates",
-    description:
-      "Get instant notifications on order progress and service updates",
-  },
-  {
-    icon: BarChart3,
-    title: "Business Analytics",
-    description:
-      "Monitor orders, inventory, and business performance at a glance",
+      "Browse and order from a wide range of high-quality aluminium profiles, sections, and structural materials for any project.",
   },
   {
     icon: Wrench,
-    title: "Service Requests",
+    title: "Customized Designs",
     description:
-      "Submit and manage maintenance, repair, and installation requests",
+      "Get aluminium solutions tailored to your exact specifications — custom shapes, sizes, and finishes crafted to your requirements.",
   },
   {
-    icon: Shield,
-    title: "Secure Platform",
+    icon: ClipboardList,
+    title: "Catalogue Explore",
     description:
-      "Your data is protected with enterprise-grade security and role-based access",
+      "Explore our full product and service catalogue to find the right aluminium solutions for residential, commercial, or industrial use.",
+  },
+  {
+    icon: MapPin,
+    title: "On Site Visiting",
+    description:
+      "Request a professional on-site visit for measurement, assessment, and consultation before fabrication or installation begins.",
+  },
+  {
+    icon: BarChart3,
+    title: "Quotation Generation",
+    description:
+      "Receive fast, accurate, and transparent pricing for your projects — all through a simple and streamlined quotation process.",
+  },
+  {
+    icon: Mail,
+    title: "Easy to Communicate",
+    description:
+      "Stay connected with our team through seamless in-platform messaging, real-time updates, and responsive customer support.",
   },
 ];
 
@@ -179,7 +180,7 @@ export default function Home() {
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      const offset = 64; // navbar height
+      const offset = 80; // navbar height
       const top = el.offsetTop - offset;
       window.scrollTo({ top, behavior: "smooth" });
     }
@@ -199,7 +200,7 @@ export default function Home() {
         {/* ─── Sticky Scroll-Spy Navbar ─────────────────────────────────── */}
         <nav className="border-b border-zinc-800/50 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
+            <div className="flex h-20 items-center justify-between">
               {/* Logo */}
               <button
                 onClick={() => scrollToSection("home")}
@@ -253,50 +254,74 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════ */}
         <section id="home">
           {/* Hero */}
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center"
-            >
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-                Streamline Your
-                <br />
-                <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                  Aluminium Fabrication Business
-                </span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-                AluMate is a comprehensive platform for managing aluminium
-                fabrication orders, quotations, inventory, and services — all in
-                one place. Simplify your workflow and delight your customers.
-              </p>
-              <div className="mt-10 flex items-center justify-center gap-4">
-                <Link href="/register">
+          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-16">
+              {/* Left — Aluminum Bars Image */}
+              <motion.div
+                initial={{ opacity: 0, x: -80, filter: "blur(8px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="relative flex items-center justify-center"
+              >
+                <div className="relative w-full max-w-none lg:w-[125%] lg:ml-4 xl:ml-8 scale-115">
+                  {/* Glow effect behind image */}
+                  <div className="absolute -inset-4 bg-gradient-to-r from-zinc-500/20 via-zinc-400/10 to-transparent rounded-2xl blur-2xl" />
+                  <Image
+                    src="/landing-page/hero2.png"
+                    alt="Premium aluminum extrusion bars and profiles"
+                    width={1000}
+                    height={800}
+                    className="relative z-10 w-full h-auto rounded-xl object-cover drop-shadow-[0_0_40px_rgba(161,161,170,0.2)]"
+                    priority
+                  />
+                </div>
+              </motion.div>
+
+              {/* Right — Hero Text */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+                className="text-center lg:text-left"
+              >
+                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                  Delivering a
+                  <br />
+                  <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+                    Seamless Aluminium Service Experience.
+                  </span>
+                </h1>
+                <p className="mx-auto lg:mx-0 mt-6 max-w-2xl text-lg text-zinc-400">
+                  A comprehensive platform for managing aluminium fabrication
+                  orders, quotations, inventory, and services — all in one
+                  place. Simplify your workflow and delight your customers.
+                </p>
+                <div className="mt-10 flex items-center justify-center lg:justify-start gap-4">
+                  <Link href="/register">
+                    <Button
+                      size="lg"
+                      className="text-base bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500 shadow-[0_0_30px_rgba(161,161,170,0.3)]"
+                    >
+                      Get Started
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Button
                     size="lg"
-                    className="text-base bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500 shadow-[0_0_30px_rgba(161,161,170,0.3)]"
+                    variant="outline"
+                    className="text-base cursor-pointer"
+                    onClick={() => scrollToSection("services")}
                   >
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    Explore Services
+                    <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
-                </Link>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-base cursor-pointer"
-                  onClick={() => scrollToSection("services")}
-                >
-                  Explore Services
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
+                </div>
+              </motion.div>
+            </div>
           </div>
 
           {/* Features grid */}
-          <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 pt-12 pb-24 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -304,8 +329,8 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent sm:text-4xl">
-                Everything You Need to Run Your Business
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent sm:text-3xl pb-2">
+                Everything You Need in One Place
               </h2>
               <p className="mt-4 text-lg text-zinc-400">
                 Powerful features designed for aluminium fabrication operations
@@ -348,7 +373,7 @@ export default function Home() {
           id="services"
           className="border-t border-zinc-800/50 bg-zinc-950/60"
         >
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -416,9 +441,7 @@ export default function Home() {
               className="mt-10 text-center"
             >
               <Link href="/services">
-                <Button
-                  variant="outline"
-                >
+                <Button variant="outline">
                   View All Services
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -431,7 +454,8 @@ export default function Home() {
         {/* ─── ABOUT SECTION ────────────────────────────────────────────── */}
         {/* ═══════════════════════════════════════════════════════════════ */}
         <section id="about" className="border-t border-zinc-800/50">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            {/* Top: About text (left) + Stats (right) */}
             <div className="grid gap-16 lg:grid-cols-2 items-center">
               {/* Left — story */}
               <motion.div
@@ -461,9 +485,7 @@ export default function Home() {
 
                 <div className="mt-8">
                   <Link href="/about">
-                    <Button
-                      variant="outline"
-                    >
+                    <Button variant="outline">
                       Learn More About Us
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -471,15 +493,13 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Right — stats + values */}
+              {/* Right — Stats aligned to the About text */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.15 }}
                 viewport={{ once: true }}
-                className="space-y-6"
               >
-                {/* Stats */}
                 <div className="grid grid-cols-2 gap-4">
                   {stats.map((stat, index) => (
                     <motion.div
@@ -496,39 +516,43 @@ export default function Home() {
                       <p className="text-3xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-300 bg-clip-text text-transparent">
                         {stat.value}
                       </p>
-                      <p className="mt-1 text-sm text-zinc-400">
-                        {stat.label}
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Values */}
-                <div className="grid grid-cols-2 gap-4">
-                  {values.map((value, index) => (
-                    <motion.div
-                      key={value.title}
-                      initial={{ opacity: 0, y: 15 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        delay: 0.3 + index * 0.08,
-                      }}
-                      viewport={{ once: true }}
-                      className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/40"
-                    >
-                      <value.icon className="h-5 w-5 text-zinc-400 mb-2" />
-                      <h4 className="text-sm font-semibold text-zinc-200">
-                        {value.title}
-                      </h4>
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {value.description}
-                      </p>
+                      <p className="mt-1 text-sm text-zinc-400">{stat.label}</p>
                     </motion.div>
                   ))}
                 </div>
               </motion.div>
             </div>
+
+            {/* Bottom: 4 value cards in a horizontal row */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              {values.map((value, index) => (
+                <motion.div
+                  key={value.title}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: 0.3 + index * 0.08,
+                  }}
+                  viewport={{ once: true }}
+                  className="p-5 rounded-xl bg-zinc-900/40 border border-zinc-800/40 hover:border-zinc-700/40 transition-colors"
+                >
+                  <value.icon className="h-6 w-6 text-zinc-400 mb-3" />
+                  <h4 className="text-sm font-semibold text-zinc-200">
+                    {value.title}
+                  </h4>
+                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                    {value.description}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </section>
 
@@ -539,7 +563,7 @@ export default function Home() {
           id="contact"
           className="border-t border-zinc-800/50 bg-zinc-950/60"
         >
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -559,14 +583,14 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <div className="grid gap-12 lg:grid-cols-5">
+            <div className="grid gap-16 lg:grid-cols-2 items-center">
               {/* Contact info */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 viewport={{ once: true }}
-                className="lg:col-span-2 space-y-5"
+                className="space-y-5"
               >
                 {contactInfo.map((item, index) => (
                   <motion.div
@@ -591,9 +615,7 @@ export default function Home() {
 
                 <div className="pt-4">
                   <Link href="/contact">
-                    <Button
-                      variant="outline"
-                    >
+                    <Button variant="outline">
                       Full Contact Page
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -607,76 +629,76 @@ export default function Home() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="lg:col-span-3"
+                className=""
               >
                 <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
                   <CardContent className="p-8 relative overflow-hidden">
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
                     <div className="relative z-10">
-                    {contactSubmitted ? (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center py-8"
-                      >
-                        <CheckCircle2 className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold text-zinc-100 mb-2">
-                          Message Sent!
-                        </h3>
-                        <p className="text-zinc-400 mb-6">
-                          We&apos;ll get back to you within 24 hours.
-                        </p>
-                        <Button
-                          variant="outline"
-                          className="cursor-pointer"
-                          onClick={() => setContactSubmitted(false)}
+                      {contactSubmitted ? (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="text-center py-8"
                         >
-                          Send Another
-                        </Button>
-                      </motion.div>
-                    ) : (
-                      <form
-                        onSubmit={handleContactSubmit}
-                        className="space-y-5"
-                      >
-                        <h3 className="text-lg font-semibold text-zinc-100 mb-2">
-                          Send Us a Message
-                        </h3>
-                        <div className="grid gap-4 sm:grid-cols-2">
+                          <CheckCircle2 className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
+                          <h3 className="text-xl font-semibold text-zinc-100 mb-2">
+                            Message Sent!
+                          </h3>
+                          <p className="text-zinc-400 mb-6">
+                            We&apos;ll get back to you within 24 hours.
+                          </p>
+                          <Button
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() => setContactSubmitted(false)}
+                          >
+                            Send Another
+                          </Button>
+                        </motion.div>
+                      ) : (
+                        <form
+                          onSubmit={handleContactSubmit}
+                          className="space-y-5"
+                        >
+                          <h3 className="text-lg font-semibold text-zinc-100 mb-2">
+                            Send Us a Message
+                          </h3>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <input
+                              type="text"
+                              placeholder="Your Name"
+                              required
+                              className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
+                            />
+                            <input
+                              type="email"
+                              placeholder="Email Address"
+                              required
+                              className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
+                            />
+                          </div>
                           <input
                             type="text"
-                            placeholder="Your Name"
+                            placeholder="Subject"
                             required
                             className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
                           />
-                          <input
-                            type="email"
-                            placeholder="Email Address"
+                          <textarea
+                            placeholder="Tell us about your project..."
+                            rows={4}
                             required
-                            className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
+                            className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm resize-none"
                           />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Subject"
-                          required
-                          className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
-                        />
-                        <textarea
-                          placeholder="Tell us about your project..."
-                          rows={4}
-                          required
-                          className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm resize-none"
-                        />
-                        <Button
-                          type="submit"
-                          className="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500"
-                        >
-                          <Send className="mr-2 h-4 w-4" />
-                          Send Message
-                        </Button>
-                      </form>
-                    )}
+                          <Button
+                            type="submit"
+                            className="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500"
+                          >
+                            <Send className="mr-2 h-4 w-4" />
+                            Send Message
+                          </Button>
+                        </form>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -710,7 +732,7 @@ export default function Home() {
                         size="lg"
                         className="text-base bg-gradient-to-r from-zinc-200 to-zinc-300 hover:from-zinc-100 hover:to-zinc-200 text-black font-semibold shadow-[0_0_30px_rgba(228,228,231,0.3)]"
                       >
-                        Create Your Account
+                        Explore
                       </Button>
                     </Link>
                   </div>
