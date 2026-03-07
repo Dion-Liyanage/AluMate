@@ -288,13 +288,13 @@ export default function Home() {
                   Delivering a
                   <br />
                   <span className="bg-gradient-to-r from-zinc-300 via-zinc-100 to-zinc-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                  Seamless Aluminium Service Experience.
+                    Seamless Aluminium Service Experience.
                   </span>
                 </h1>
                 <p className="mx-auto lg:mx-0 mt-6 max-w-2xl text-lg text-zinc-400">
-                  A comprehensive platform for managing aluminium
-                  fabrication orders, quotations, inventory, and services — all in
-                  one place. Simplify your workflow and delight your customers.
+                  A comprehensive platform for managing aluminium fabrication
+                  orders, quotations, inventory, and services — all in one
+                  place. Simplify your workflow and delight your customers.
                 </p>
                 <div className="mt-10 flex items-center justify-center lg:justify-start gap-4">
                   <Link href="/register">
@@ -441,9 +441,7 @@ export default function Home() {
               className="mt-10 text-center"
             >
               <Link href="/services">
-                <Button
-                  variant="outline"
-                >
+                <Button variant="outline">
                   View All Services
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -457,6 +455,7 @@ export default function Home() {
         {/* ═══════════════════════════════════════════════════════════════ */}
         <section id="about" className="border-t border-zinc-800/50">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            {/* Top: About text (left) + Stats (right) */}
             <div className="grid gap-16 lg:grid-cols-2 items-center">
               {/* Left — story */}
               <motion.div
@@ -486,9 +485,7 @@ export default function Home() {
 
                 <div className="mt-8">
                   <Link href="/about">
-                    <Button
-                      variant="outline"
-                    >
+                    <Button variant="outline">
                       Learn More About Us
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -496,15 +493,13 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Right — stats + values */}
+              {/* Right — Stats aligned to the About text */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.15 }}
                 viewport={{ once: true }}
-                className="space-y-6"
               >
-                {/* Stats */}
                 <div className="grid grid-cols-2 gap-4">
                   {stats.map((stat, index) => (
                     <motion.div
@@ -521,39 +516,43 @@ export default function Home() {
                       <p className="text-3xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-300 bg-clip-text text-transparent">
                         {stat.value}
                       </p>
-                      <p className="mt-1 text-sm text-zinc-400">
-                        {stat.label}
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Values */}
-                <div className="grid grid-cols-2 gap-4">
-                  {values.map((value, index) => (
-                    <motion.div
-                      key={value.title}
-                      initial={{ opacity: 0, y: 15 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.4,
-                        delay: 0.3 + index * 0.08,
-                      }}
-                      viewport={{ once: true }}
-                      className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/40"
-                    >
-                      <value.icon className="h-5 w-5 text-zinc-400 mb-2" />
-                      <h4 className="text-sm font-semibold text-zinc-200">
-                        {value.title}
-                      </h4>
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {value.description}
-                      </p>
+                      <p className="mt-1 text-sm text-zinc-400">{stat.label}</p>
                     </motion.div>
                   ))}
                 </div>
               </motion.div>
             </div>
+
+            {/* Bottom: 4 value cards in a horizontal row */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              {values.map((value, index) => (
+                <motion.div
+                  key={value.title}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: 0.3 + index * 0.08,
+                  }}
+                  viewport={{ once: true }}
+                  className="p-5 rounded-xl bg-zinc-900/40 border border-zinc-800/40 hover:border-zinc-700/40 transition-colors"
+                >
+                  <value.icon className="h-6 w-6 text-zinc-400 mb-3" />
+                  <h4 className="text-sm font-semibold text-zinc-200">
+                    {value.title}
+                  </h4>
+                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                    {value.description}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </section>
 
@@ -584,14 +583,14 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <div className="grid gap-12 lg:grid-cols-5">
+            <div className="grid gap-16 lg:grid-cols-2 items-center">
               {/* Contact info */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 viewport={{ once: true }}
-                className="lg:col-span-2 space-y-5"
+                className="space-y-5"
               >
                 {contactInfo.map((item, index) => (
                   <motion.div
@@ -616,9 +615,7 @@ export default function Home() {
 
                 <div className="pt-4">
                   <Link href="/contact">
-                    <Button
-                      variant="outline"
-                    >
+                    <Button variant="outline">
                       Full Contact Page
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -632,76 +629,76 @@ export default function Home() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="lg:col-span-3"
+                className=""
               >
                 <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
                   <CardContent className="p-8 relative overflow-hidden">
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
                     <div className="relative z-10">
-                    {contactSubmitted ? (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center py-8"
-                      >
-                        <CheckCircle2 className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold text-zinc-100 mb-2">
-                          Message Sent!
-                        </h3>
-                        <p className="text-zinc-400 mb-6">
-                          We&apos;ll get back to you within 24 hours.
-                        </p>
-                        <Button
-                          variant="outline"
-                          className="cursor-pointer"
-                          onClick={() => setContactSubmitted(false)}
+                      {contactSubmitted ? (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="text-center py-8"
                         >
-                          Send Another
-                        </Button>
-                      </motion.div>
-                    ) : (
-                      <form
-                        onSubmit={handleContactSubmit}
-                        className="space-y-5"
-                      >
-                        <h3 className="text-lg font-semibold text-zinc-100 mb-2">
-                          Send Us a Message
-                        </h3>
-                        <div className="grid gap-4 sm:grid-cols-2">
+                          <CheckCircle2 className="h-12 w-12 text-emerald-400 mx-auto mb-4" />
+                          <h3 className="text-xl font-semibold text-zinc-100 mb-2">
+                            Message Sent!
+                          </h3>
+                          <p className="text-zinc-400 mb-6">
+                            We&apos;ll get back to you within 24 hours.
+                          </p>
+                          <Button
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() => setContactSubmitted(false)}
+                          >
+                            Send Another
+                          </Button>
+                        </motion.div>
+                      ) : (
+                        <form
+                          onSubmit={handleContactSubmit}
+                          className="space-y-5"
+                        >
+                          <h3 className="text-lg font-semibold text-zinc-100 mb-2">
+                            Send Us a Message
+                          </h3>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <input
+                              type="text"
+                              placeholder="Your Name"
+                              required
+                              className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
+                            />
+                            <input
+                              type="email"
+                              placeholder="Email Address"
+                              required
+                              className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
+                            />
+                          </div>
                           <input
                             type="text"
-                            placeholder="Your Name"
+                            placeholder="Subject"
                             required
                             className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
                           />
-                          <input
-                            type="email"
-                            placeholder="Email Address"
+                          <textarea
+                            placeholder="Tell us about your project..."
+                            rows={4}
                             required
-                            className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
+                            className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm resize-none"
                           />
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Subject"
-                          required
-                          className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm"
-                        />
-                        <textarea
-                          placeholder="Tell us about your project..."
-                          rows={4}
-                          required
-                          className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500/20 text-sm resize-none"
-                        />
-                        <Button
-                          type="submit"
-                          className="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500"
-                        >
-                          <Send className="mr-2 h-4 w-4" />
-                          Send Message
-                        </Button>
-                      </form>
-                    )}
+                          <Button
+                            type="submit"
+                            className="w-full bg-gradient-to-r from-zinc-600 to-zinc-700 hover:from-zinc-500 hover:to-zinc-600 text-white border border-zinc-500"
+                          >
+                            <Send className="mr-2 h-4 w-4" />
+                            Send Message
+                          </Button>
+                        </form>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
