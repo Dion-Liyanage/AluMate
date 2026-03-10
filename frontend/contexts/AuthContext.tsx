@@ -81,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(userData);
         localStorage.setItem("alumate_token", newToken);
         localStorage.setItem("alumate_user", JSON.stringify(userData));
+        // Set cookie so Next.js middleware can read it for route protection
+        document.cookie = `alumate_token=${newToken}; path=/; max-age=${60 * 60 * 24 * 7}`;
       } else {
         throw new Error(response.message || "Login failed");
       }
@@ -110,6 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     localStorage.removeItem("alumate_token");
     localStorage.removeItem("alumate_user");
+    // Clear the cookie too
+    document.cookie = `alumate_token=; path=/; max-age=0`;
 
     // Try to call backend logout (fire & forget)
     authApi.logout().catch(() => {});
