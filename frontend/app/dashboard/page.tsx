@@ -9,11 +9,13 @@ import {
   Plus,
   ArrowRight,
   Clock,
-  CheckCircle2,
   AlertCircle,
+  Ruler,
+  Save,
 } from "lucide-react";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { DesignEntryCards } from "@/components/dashboard/DesignEntryCards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +74,13 @@ const summaryStats = [
     color: "from-emerald-500/20 to-emerald-600/10",
     iconColor: "text-emerald-400",
   },
+  {
+    title: "Saved Designs",
+    value: "0",
+    icon: Save,
+    color: "from-purple-500/20 to-purple-600/10",
+    iconColor: "text-purple-400",
+  },
 ];
 
 const recentOrders: {
@@ -91,23 +100,29 @@ export default function DashboardPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-6"
+        className="space-y-8"
       >
-        {/* Welcome */}
+        {/* 1. Welcome Section */}
         <motion.div variants={itemVariants}>
           <h2 className="text-2xl font-bold text-zinc-100">
             Welcome back
             {user ? `, ${user.firstName}` : ""}! 👋
           </h2>
           <p className="mt-1 text-zinc-400">
-            Here&apos;s an overview of your fabrication orders and services.
+            Start designing your aluminium product or manage your fabrication
+            orders.
           </p>
         </motion.div>
 
-        {/* Summary Cards */}
+        {/* 2. Design Entry Section ⭐ */}
+        <motion.div variants={itemVariants}>
+          <DesignEntryCards />
+        </motion.div>
+
+        {/* 3. Statistics Cards */}
         <motion.div
           variants={itemVariants}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
         >
           {summaryStats.map((stat) => (
             <Card
@@ -133,7 +148,7 @@ export default function DashboardPage() {
           ))}
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* 4. Quick Actions */}
         <motion.div variants={itemVariants}>
           <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
             <CardHeader className="pb-3">
@@ -143,22 +158,22 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-3">
-                <Link href="/orders/new">
+                <Link href="/dashboard/orders/new">
                   <Button className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">
                     <Plus className="h-4 w-4 mr-2" />
                     New Order
                   </Button>
                 </Link>
-                <Link href="/quotations/request">
+                <Link href="/dashboard/quotations/request">
                   <Button className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">
                     <FileText className="h-4 w-4 mr-2" />
                     Request Quotation
                   </Button>
                 </Link>
-                <Link href="/services/new">
+                <Link href="/dashboard/services/measurement">
                   <Button className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">
-                    <Wrench className="h-4 w-4 mr-2" />
-                    Service Request
+                    <Ruler className="h-4 w-4 mr-2" />
+                    Request Measurement
                   </Button>
                 </Link>
               </div>
@@ -166,14 +181,14 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        {/* Recent Orders */}
+        {/* 5. Recent Orders */}
         <motion.div variants={itemVariants}>
           <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-lg text-zinc-100">
                 Recent Orders
               </CardTitle>
-              <Link href="/orders">
+              <Link href="/dashboard/orders">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -194,7 +209,7 @@ export default function DashboardPage() {
                   <p className="text-zinc-500 text-xs mt-1">
                     Place your first fabrication order to get started
                   </p>
-                  <Link href="/orders/new" className="mt-4">
+                  <Link href="/dashboard/orders/new" className="mt-4">
                     <Button
                       size="sm"
                       className="bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
@@ -209,7 +224,7 @@ export default function DashboardPage() {
                   {recentOrders.map((order, index) => (
                     <div key={order.id}>
                       <Link
-                        href={`/orders/${order.id}`}
+                        href={`/dashboard/orders/${order.id}`}
                         className="flex items-center justify-between py-2 group"
                       >
                         <div className="flex items-center gap-3">

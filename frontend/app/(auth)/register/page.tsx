@@ -190,8 +190,8 @@ export default function RegisterPage() {
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
+                      value: 6,
+                      message: "Password must be at least 6 characters",
                     },
                   })}
                 />
@@ -207,6 +207,9 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
+              <p className="text-xs text-zinc-500 mt-1">
+                Password must be at least 6 characters long.
+              </p>
               {errors.password && (
                 <p className="text-sm text-red-400">
                   {errors.password.message}
