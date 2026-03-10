@@ -127,9 +127,10 @@ export default function DashboardPage() {
           {summaryStats.map((stat) => (
             <Card
               key={stat.title}
-              className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-zinc-700 transition-colors"
+              className="relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-zinc-700 transition-colors"
             >
-              <CardContent className="p-5">
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+              <CardContent className="relative p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-zinc-400">{stat.title}</p>

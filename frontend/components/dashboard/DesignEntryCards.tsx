@@ -64,6 +64,8 @@ export function DesignEntryCards() {
             <div
               className={`relative h-full rounded-xl border bg-gradient-to-br ${card.gradient} ${card.borderColor} ${card.glowColor} p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
             >
+              {/* Shimmer wave */}
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
               {/* Featured badge */}
               {card.featured && (
                 <div className="absolute -top-2.5 left-4">

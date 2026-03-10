@@ -43,8 +43,9 @@ export default function DesignPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
             >
-              <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group hover:shadow-[0_0_20px_rgba(139,92,246,0.1)]">
-                <CardContent className="p-6 min-h-[180px] flex flex-col">
+              <Card className="h-full relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group hover:shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                <CardContent className="relative p-6 min-h-[180px] flex flex-col">
                   <div className="text-4xl mb-3">{type.emoji}</div>
                   <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-violet-300 transition-colors">
                     {type.name}
