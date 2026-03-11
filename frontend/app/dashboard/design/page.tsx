@@ -1,73 +1,122 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PenTool, ArrowRight } from "lucide-react";
+import { PenTool, ArrowRight, PlusCircle, Clock } from "lucide-react";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
-const productTypes = [
-  { name: "Window", emoji: "🪟", description: "Sliding, casement, fixed & louvre windows" },
-  { name: "Door", emoji: "🚪", description: "Entrance, sliding, folding & French doors" },
-  { name: "Cupboard", emoji: "🗄️", description: "Kitchen, wardrobe & storage cupboards" },
-  { name: "Partition", emoji: "🧱", description: "Office, bathroom & room partitions" },
-  { name: "Railing", emoji: "🏗️", description: "Balcony, staircase & boundary railings" },
-  { name: "Other", emoji: "✨", description: "Custom aluminium fabrication work" },
+// Mock saved designs
+const savedDesigns = [
+  { id: "1", name: "Modern Kitchen Cupboard", type: "Cupboard", date: "2 days ago", thumbnail: "🗄️", status: "Draft" },
+  { id: "2", name: "Living Room Partition", type: "Partition", date: "1 week ago", thumbnail: "🧱", status: "Ready to Order" },
+  { id: "3", name: "Balcony Sliding Door", type: "Door", date: "2 weeks ago", thumbnail: "🚪", status: "Draft" },
 ];
 
-export default function DesignPage() {
+export default function DesignGatewayPage() {
   return (
-    <DashboardLayout title="Customize Product">
+    <DashboardLayout title="Product Customizer">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-8"
       >
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
-            <PenTool className="h-6 w-6 text-violet-400" />
-            Select Product Type
+          <h2 className="text-3xl font-bold text-zinc-100 flex items-center gap-2">
+            <PenTool className="h-7 w-7 text-violet-400" />
+            Design Studio
           </h2>
-          <p className="mt-1 text-zinc-400">
-            Choose the type of aluminium product you want to design.
+          <p className="mt-2 text-zinc-400">
+            Create a new aluminium product from scratch or continue where you left off.
           </p>
         </div>
 
-        {/* Product Type Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {productTypes.map((type, i) => (
-            <motion.div
-              key={type.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-            >
-              <Card className="h-full relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group hover:shadow-[0_0_20px_rgba(139,92,246,0.1)]">
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-                <CardContent className="relative p-6 min-h-[180px] flex flex-col">
-                  <div className="text-4xl mb-3">{type.emoji}</div>
-                  <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-violet-300 transition-colors">
-                    {type.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-zinc-500">{type.description}</p>
-                  <div className="mt-auto pt-3 flex items-center gap-1 text-sm text-zinc-500 group-hover:text-violet-400 transition-colors">
-                    Select
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+        {/* Primary Actions */}
+        {/* Primary Actions */}
+        <div className="w-full">
+          {/* Start New */}
+          <Link href="/dashboard/design/new" className="block group">
+            <div className="relative h-full rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/10 p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] overflow-hidden">
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+              <div className="absolute top-1/2 -translate-y-1/2 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity">
+                 <PlusCircle className="w-48 h-48 text-violet-300" />
+              </div>
+              <div className="relative z-10 hidden sm:block mb-8">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-xl border border-violet-500/50 bg-violet-500/20 text-violet-300 shadow-lg">
+                  <PlusCircle className="h-8 w-8" />
+                </div>
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-3xl font-bold text-zinc-100 group-hover:text-white transition-colors mb-4">
+                  Create Your Own Design
+                </h3>
+                <p className="text-zinc-400 max-w-md mb-8 text-lg">
+                  Select a product type and use our 3D design studio to customize dimensions, colors, and materials.
+                </p>
+                <div className="flex items-center gap-2 text-base font-semibold text-violet-400 group-hover:text-violet-300 transition-colors">
+                  Create New Project
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Recent Drafts Section */}
+        <div className="pt-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
+              <Clock className="h-5 w-5 text-zinc-400" />
+              Recent Drafts & Saved Designs
+            </h3>
+            <Link href="/dashboard/designs/saved" className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1">
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {savedDesigns.map((design, i) => (
+              <motion.div
+                key={design.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden">
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                  <div className="relative h-32 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800 text-5xl">
+                    {design.thumbnail}
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                       <h4 className="font-semibold text-zinc-100 group-hover:text-violet-300 transition-colors line-clamp-1">
+                        {design.name}
+                      </h4>
+                      <Badge variant="outline" className="bg-zinc-900/50 text-xs border-zinc-700">
+                        {design.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-xs text-zinc-500 flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Edited {design.date}
+                      </span>
+                      <span className="text-sm text-zinc-500 group-hover:text-violet-400 transition-colors flex items-center gap-1">
+                        Edit
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        {/* Coming soon note */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center">
-          <p className="text-sm text-zinc-500">
-            🚧 Design Studio integration (Fabric.js / Three.js) coming soon.
-            Product selection will link to the full design editor.
-          </p>
-        </div>
       </motion.div>
     </DashboardLayout>
   );

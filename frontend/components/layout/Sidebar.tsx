@@ -64,7 +64,6 @@ const customerMenuGroups: MenuGroup[] = [
     title: "Design",
     items: [
       { href: "/dashboard/design", icon: PenTool, label: "Customize Product" },
-      { href: "/dashboard/designs/saved", icon: Save, label: "Saved Designs" },
       { href: "/dashboard/catalogue", icon: Grid3X3, label: "Design Catalogue" },
     ],
   },
