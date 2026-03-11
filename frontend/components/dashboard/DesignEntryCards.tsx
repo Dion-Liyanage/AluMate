@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { PenTool, Grid3X3, FolderOpen, ArrowRight } from "lucide-react";
+import { PenTool, Grid3X3, FolderOpen, ArrowRight, ShoppingCart } from "lucide-react";
 
 const cards = [
   {
-    title: "Customize Your Product",
+    title: "Create Your Own Design",
     description: "Create a completely new aluminium design tailored to your needs",
     icon: PenTool,
     href: "/dashboard/design",
@@ -28,10 +28,10 @@ const cards = [
     featured: false,
   },
   {
-    title: "View Past Projects",
-    description: "Explore completed fabrication work for inspiration and trust",
-    icon: FolderOpen,
-    href: "/dashboard/projects",
+    title: "View Order History",
+    description: "Track the progress and delivery details of your customized aluminium orders",
+    icon: ShoppingCart,
+    href: "/dashboard/orders",
     gradient: "from-emerald-600/20 via-green-600/10 to-teal-600/10",
     borderColor: "border-emerald-500/30 hover:border-emerald-400/50",
     iconColor: "text-emerald-400",
