@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { PenTool, Grid3X3, FolderOpen, ArrowRight } from "lucide-react";
 
 const cards = [
@@ -40,7 +40,7 @@ const cards = [
   },
 ];
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({
     opacity: 1,
