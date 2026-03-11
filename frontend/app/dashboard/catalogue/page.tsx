@@ -132,12 +132,13 @@ export default function CataloguePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }}
             >
-              <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
+              <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
                 {/* Placeholder image */}
-                <div className="h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
+                <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
                   <div className="text-zinc-600 text-sm">Design Preview</div>
                 </div>
-                <CardContent className="p-4">
+                <CardContent className="relative p-4">
                   <h3 className="font-semibold text-zinc-100 group-hover:text-sky-300 transition-colors">
                     {item.name}
                   </h3>

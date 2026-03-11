@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { PenTool, Grid3X3, FolderOpen, ArrowRight } from "lucide-react";
+import { motion, Variants } from "framer-motion";
+import { PenTool, Grid3X3, FolderOpen, ArrowRight, ShoppingCart } from "lucide-react";
 
 const cards = [
   {
-    title: "Customize Your Product",
+    title: "Create Your Own Design",
     description: "Create a completely new aluminium design tailored to your needs",
     icon: PenTool,
     href: "/dashboard/design",
@@ -28,10 +28,10 @@ const cards = [
     featured: false,
   },
   {
-    title: "View Past Projects",
-    description: "Explore completed fabrication work for inspiration and trust",
-    icon: FolderOpen,
-    href: "/dashboard/projects",
+    title: "View Order History",
+    description: "Track the progress and delivery details of your customized aluminium orders",
+    icon: ShoppingCart,
+    href: "/dashboard/orders",
     gradient: "from-emerald-600/20 via-green-600/10 to-teal-600/10",
     borderColor: "border-emerald-500/30 hover:border-emerald-400/50",
     iconColor: "text-emerald-400",
@@ -40,7 +40,7 @@ const cards = [
   },
 ];
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({
     opacity: 1,
@@ -64,6 +64,8 @@ export function DesignEntryCards() {
             <div
               className={`relative h-full rounded-xl border bg-gradient-to-br ${card.gradient} ${card.borderColor} ${card.glowColor} p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
             >
+              {/* Shimmer wave */}
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
               {/* Featured badge */}
               {card.featured && (
                 <div className="absolute -top-2.5 left-4">
