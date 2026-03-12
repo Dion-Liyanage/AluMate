@@ -77,15 +77,14 @@ const customerMenuGroups: MenuGroup[] = [
   {
     title: "Services",
     items: [
-      { href: "/dashboard/services/measurement", icon: Ruler, label: "Measurement Requests" },
-      { href: "/dashboard/services/maintenance", icon: Hammer, label: "Maintenance / Repairs" },
+      { href: "/dashboard/services/measurement", icon: Ruler, label: "On Site Visit" },
+      { href: "/dashboard/services/maintenance", icon: Hammer, label: "Repairs" },
     ],
   },
   {
     title: "More",
     items: [
-      { href: "/dashboard/projects", icon: FolderOpen, label: "Past Projects" },
-      { href: "/dashboard/messages", icon: MessageSquare, label: "Messages" },
+      { href: "/dashboard/messages", icon: MessageSquare, label: "Chat With Us" },
       { href: "/profile", icon: User, label: "Profile" },
     ],
   },
