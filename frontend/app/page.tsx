@@ -841,7 +841,7 @@ export default function Home() {
                         size="lg"
                         className="text-base bg-gradient-to-r from-zinc-200 to-zinc-300 hover:from-zinc-100 hover:to-zinc-200 text-black font-semibold shadow-[0_0_30px_rgba(228,228,231,0.3)]"
                       >
-                        Explore
+                        Get Started
                       </Button>
                     </Link>
                   </div>
