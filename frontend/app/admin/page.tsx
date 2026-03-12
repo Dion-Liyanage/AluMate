@@ -5,21 +5,24 @@ import {
   ClipboardList,
   FileText,
   Users,
-  Package,
+  LayoutGrid,
   Wrench,
   DollarSign,
   TrendingUp,
   AlertTriangle,
   ArrowRight,
   Activity,
+  FolderOpen,
 } from "lucide-react";
 import Link from "next/link";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { AdminOperationCards } from "@/components/admin/AdminOperationCards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/useAuth";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -73,15 +76,6 @@ const analyticsCards = [
     trendUp: false,
   },
   {
-    title: "Low Stock Items",
-    value: "0",
-    trend: "",
-    icon: Package,
-    color: "from-red-500/20 to-red-600/10",
-    iconColor: "text-red-400",
-    trendUp: false,
-  },
-  {
     title: "Service Requests",
     value: "0",
     trend: "",
@@ -90,12 +84,21 @@ const analyticsCards = [
     iconColor: "text-cyan-400",
     trendUp: false,
   },
+  {
+    title: "Completed Projects",
+    value: "0",
+    trend: "",
+    icon: FolderOpen,
+    color: "from-purple-500/20 to-purple-600/10",
+    iconColor: "text-purple-400",
+    trendUp: false,
+  },
 ];
 
 const quickLinks = [
   { href: "/admin/orders", label: "Manage Orders", icon: ClipboardList },
   { href: "/admin/customers", label: "View Customers", icon: Users },
-  { href: "/admin/inventory", label: "Check Inventory", icon: Package },
+  { href: "/admin/designs", label: "Design Catalogue", icon: LayoutGrid },
   { href: "/admin/quotations", label: "Quotations", icon: FileText },
   { href: "/admin/services", label: "Service Requests", icon: Wrench },
 ];
@@ -108,62 +111,69 @@ const recentActivity: {
 }[] = [];
 
 export default function AdminPage() {
+  const { user } = useAuth();
+
   return (
     <DashboardLayout title="Admin Dashboard">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-6"
+        className="space-y-8"
       >
-        {/* Header */}
+        {/* 1. Welcome Section */}
         <motion.div variants={itemVariants}>
           <h2 className="text-2xl font-bold text-zinc-100">
-            Business Overview 📊
+            Welcome back, Admin! 👋
           </h2>
           <p className="mt-1 text-zinc-400">
-            Monitor your aluminium fabrication business at a glance.
+            Monitor and manage your aluminium fabrication business operations.
           </p>
         </motion.div>
 
-        {/* Analytics Cards */}
+        {/* 2. Business Operations Section ⭐ */}
+        <motion.div variants={itemVariants}>
+          <AdminOperationCards />
+        </motion.div>
+
+        {/* 3. Statistics Cards */}
         <motion.div
           variants={itemVariants}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
         >
           {analyticsCards.map((card) => (
             <Card
               key={card.title}
-              className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-zinc-700 transition-colors"
+              className="relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-zinc-700 transition-colors"
             >
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+              <CardContent className="relative p-5">
+                <div className="flex flex-col gap-3">
+                  <div
+                    className={`h-10 w-10 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center border border-zinc-800`}
+                  >
+                    <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+                  </div>
                   <div>
-                    <p className="text-sm text-zinc-400">{card.title}</p>
-                    <p className="mt-1 text-2xl font-bold text-zinc-100">
-                      {card.value}
+                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
+                      {card.title}
                     </p>
-                    {card.trend && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <TrendingUp
-                          className={`h-3 w-3 ${
-                            card.trendUp ? "text-emerald-400" : "text-red-400"
-                          }`}
-                        />
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <p className="text-2xl font-bold text-zinc-100">
+                        {card.value}
+                      </p>
+                      {card.trend && (
                         <span
-                          className={`text-xs ${
-                            card.trendUp ? "text-emerald-400" : "text-red-400"
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                            card.trendUp
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : "bg-red-500/10 text-red-400 border border-red-500/20"
                           }`}
                         >
-                          {card.trend} this month
+                          {card.trend}
                         </span>
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className={`h-12 w-12 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center border border-zinc-800`}
-                  >
-                    <card.icon className={`h-6 w-6 ${card.iconColor}`} />
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>

@@ -20,7 +20,7 @@ import {
   Palette,
   PenTool,
   Save,
-  Grid3X3,
+  LayoutGrid,
   ShoppingCart,
   Ruler,
   Hammer,
@@ -64,7 +64,7 @@ const customerMenuGroups: MenuGroup[] = [
     title: "Design",
     items: [
       { href: "/dashboard/design", icon: PenTool, label: "New Design" },
-      { href: "/dashboard/catalogue", icon: Grid3X3, label: "Design Catalogue" },
+      { href: "/dashboard/catalogue", icon: LayoutGrid, label: "Design Catalogue" },
     ],
   },
   {
@@ -90,15 +90,40 @@ const customerMenuGroups: MenuGroup[] = [
   },
 ];
 
-const adminMenuItems: MenuItem[] = [
-  { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/admin/orders", icon: ClipboardList, label: "Orders" },
-  { href: "/admin/customers", icon: Users, label: "Customers" },
-  { href: "/admin/inventory", icon: Package, label: "Inventory" },
-  { href: "/admin/quotations", icon: FileText, label: "Quotations" },
-  { href: "/admin/services", icon: Wrench, label: "Services" },
-  { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/admin/announcements", icon: Megaphone, label: "Announcements" },
+const adminMenuGroups: MenuGroup[] = [
+  {
+    items: [{ href: "/admin", icon: LayoutDashboard, label: "Dashboard" }],
+  },
+  {
+    title: "Operations",
+    items: [
+      { href: "/admin/orders", icon: ClipboardList, label: "Orders" },
+      { href: "/admin/quotations", icon: FileText, label: "Quotations" },
+      { href: "/admin/services", icon: Wrench, label: "Services" },
+    ],
+  },
+  {
+    title: "Inventory & Designs",
+    items: [
+      { href: "/admin/designs", icon: LayoutGrid, label: "Design Catalogue" },
+      { href: "/admin/projects", icon: FolderOpen, label: "Completed Projects" },
+    ],
+  },
+  {
+    title: "Management",
+    items: [
+      { href: "/admin/customers", icon: Users, label: "Customers" },
+      { href: "/admin/messages", icon: MessageSquare, label: "Messages" },
+    ],
+  },
+  {
+    title: "More",
+    items: [
+      { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+      { href: "/admin/announcements", icon: Megaphone, label: "Announcements" },
+      { href: "/profile", icon: User, label: "Profile" },
+    ],
+  },
 ];
 
 export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
@@ -196,15 +221,9 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
-          {role === "admin" ? (
-            /* Admin: flat list */
-            <div className="space-y-1">
-              {adminMenuItems.map((item) => renderLink(item))}
-            </div>
-          ) : (
-            /* Customer: grouped sections */
-            <div className="space-y-5">
-              {customerMenuGroups.map((group, idx) => (
+          <div className="space-y-5">
+            {(role === "admin" ? adminMenuGroups : customerMenuGroups).map(
+              (group, idx) => (
                 <div key={group.title || idx}>
                   {group.title && !collapsed && (
                     <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
@@ -218,9 +237,9 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
                     {group.items.map((item) => renderLink(item))}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              )
+            )}
+          </div>
         </nav>
 
         <Separator className="bg-zinc-800/50" />

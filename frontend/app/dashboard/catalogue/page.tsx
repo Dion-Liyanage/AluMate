@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Grid3X3, Search, ArrowRight } from "lucide-react";
+import { LayoutGrid, Search, ArrowRight } from "lucide-react";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -86,7 +86,7 @@ export default function CataloguePage() {
         {/* Header */}
         <div>
           <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
-            <Grid3X3 className="h-6 w-6 text-sky-400" />
+            <LayoutGrid className="h-6 w-6 text-sky-400" />
             Design Catalogue
           </h2>
           <p className="mt-1 text-zinc-400">

@@ -2,40 +2,40 @@
 
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { PenTool, LayoutGrid, FolderOpen, ArrowRight, ShoppingCart } from "lucide-react";
+import { ClipboardList, LayoutGrid, BarChart3, ArrowRight } from "lucide-react";
 
 const cards = [
   {
-    title: "Create Your Own Design",
-    description: "Create a completely new aluminium design tailored to your needs",
-    icon: PenTool,
-    href: "/dashboard/design",
-    gradient: "from-violet-600/20 via-purple-600/10 to-fuchsia-600/10",
-    borderColor: "border-violet-500/30 hover:border-violet-400/50",
-    iconColor: "text-violet-400",
-    glowColor: "shadow-[0_0_30px_rgba(139,92,246,0.15)]",
+    title: "Manage Orders",
+    description: "Review designs, generate quotations, and track order progress",
+    icon: ClipboardList,
+    href: "/admin/orders",
+    gradient: "from-blue-600/20 via-indigo-600/10 to-violet-600/10",
+    borderColor: "border-blue-500/30 hover:border-blue-400/50",
+    iconColor: "text-blue-400",
+    glowColor: "shadow-[0_0_30px_rgba(59,130,246,0.15)]",
     featured: true,
   },
   {
-    title: "Browse Design Catalogue",
-    description: "Choose from our collection of pre-designed aluminium products",
+    title: "Manage Catalogue",
+    description: "Manage pre-designed aluminium products and categories",
     icon: LayoutGrid,
-    href: "/dashboard/catalogue",
-    gradient: "from-sky-600/20 via-blue-600/10 to-cyan-600/10",
-    borderColor: "border-sky-500/30 hover:border-sky-400/50",
-    iconColor: "text-sky-400",
-    glowColor: "shadow-[0_0_20px_rgba(56,189,248,0.1)]",
+    href: "/admin/designs",
+    gradient: "from-amber-600/20 via-orange-600/10 to-red-600/10",
+    borderColor: "border-amber-500/30 hover:border-amber-400/50",
+    iconColor: "text-amber-400",
+    glowColor: "shadow-[0_0_20px_rgba(245,158,11,0.1)]",
     featured: false,
   },
   {
-    title: "View Order History",
-    description: "Track the progress and delivery details of your customized aluminium orders",
-    icon: ShoppingCart,
-    href: "/dashboard/orders",
-    gradient: "from-emerald-600/20 via-green-600/10 to-teal-600/10",
-    borderColor: "border-emerald-500/30 hover:border-emerald-400/50",
-    iconColor: "text-emerald-400",
-    glowColor: "shadow-[0_0_20px_rgba(52,211,153,0.1)]",
+    title: "Analytics",
+    description: "Monitor business growth, revenue, and performance metrics",
+    icon: BarChart3,
+    href: "/admin/analytics",
+    gradient: "from-cyan-600/20 via-sky-600/10 to-blue-600/10",
+    borderColor: "border-cyan-500/30 hover:border-cyan-400/50",
+    iconColor: "text-cyan-400",
+    glowColor: "shadow-[0_0_20px_rgba(6,182,212,0.1)]",
     featured: false,
   },
 ];
@@ -49,7 +49,7 @@ const cardVariants: Variants = {
   }),
 };
 
-export function DesignEntryCards() {
+export function AdminOperationCards() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card, i) => (
@@ -66,11 +66,12 @@ export function DesignEntryCards() {
             >
               {/* Shimmer wave */}
               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+              
               {/* Featured badge */}
               {card.featured && (
                 <div className="absolute -top-2.5 left-4">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/90 px-3 py-0.5 text-[11px] font-semibold text-white shadow-md">
-                    🔥 Most Popular
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/90 px-3 py-0.5 text-[11px] font-semibold text-white shadow-md">
+                    ⚡ Core Operation
                   </span>
                 </div>
               )}
@@ -92,7 +93,7 @@ export function DesignEntryCards() {
 
               {/* CTA arrow */}
               <div className="mt-4 flex items-center gap-1 text-sm font-medium text-zinc-400 group-hover:text-zinc-200 transition-colors">
-                Get started
+                Manage now
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </div>
             </div>
