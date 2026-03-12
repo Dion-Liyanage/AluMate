@@ -174,7 +174,7 @@ export default function DashboardPage() {
                 <Link href="/dashboard/services/measurement">
                   <Button className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">
                     <Ruler className="h-4 w-4 mr-2" />
-                    Request Measurement
+                    Request On Site Visit
                   </Button>
                 </Link>
               </div>

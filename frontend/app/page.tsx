@@ -28,10 +28,32 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+// Component to handle falling back to jpg if png doesn't exist
+const ImageFallback = ({ src, alt, className }: { src: string, alt: string, className?: string }) => {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <Image 
+      src={hasError ? src.replace('.png', '.jpg') : imgSrc}
+      alt={alt}
+      fill
+      className={className}
+      onError={() => {
+        if (!hasError) {
+          setHasError(true);
+        }
+      }}
+    />
+  );
+};
+
+// ─── Scroll-spy navbar sections ──────────────────────────────────────────────
 // ─── Scroll-spy navbar sections ──────────────────────────────────────────────
 const navSections = [
   { id: "home", label: "Home" },
   { id: "services", label: "Services" },
+  { id: "projects", label: "Projects" },
   { id: "about", label: "About" },
   { id: "contact", label: "Contact" },
 ];
@@ -267,7 +289,7 @@ export default function Home() {
                   {/* Glow effect behind image */}
                   <div className="absolute -inset-4 bg-gradient-to-r from-zinc-500/20 via-zinc-400/10 to-transparent rounded-2xl blur-2xl" />
                   <Image
-                    src="/landing-page/hero2.png"
+                    src="/landing-page/hero_1.png"
                     alt="Premium aluminum extrusion bars and profiles"
                     width={1000}
                     height={800}
@@ -443,6 +465,87 @@ export default function Home() {
               <Link href="/services">
                 <Button variant="outline">
                   View All Services
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* ─── PROJECTS SECTION ─────────────────────────────────────────── */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section id="projects" className="border-t border-zinc-800/50">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mb-3">
+                Our Work
+              </p>
+              <h2 className="text-3xl font-bold text-white sm:text-4xl">
+                Featured Projects
+              </h2>
+              <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
+                Discover the quality and precision of our aluminium fabrication in real-world applications
+              </p>
+            </motion.div>
+
+            <div className="grid gap-8 lg:grid-cols-3">
+              {[
+                { title: "Modern Residential Windows", desc: "Minimalist black aluminium frames for a contemporary home", img: "/projects/project_1.png" },
+                { title: "Modern Ceiling", desc: "Sleek suspended aluminium ceiling grid featuring integrated lighting, providing a clean, contemporary aesthetic for corporate and commercial spaces.", img: "/projects/project_2.png" },
+                { title: "Luxury Patio Sliding Doors", desc: "Premium grey finish sliding doors connecting indoor & outdoor", img: "/projects/project_3.png" },
+              ].map((project, index) => (
+                <motion.div
+                  key={project.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.12 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-600 hover:shadow-[0_0_40px_rgba(161,161,170,0.1)] group overflow-hidden flex flex-col relative">
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
+                    <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
+                      {/* Placeholder for missing image - fallback background */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                        <span className="text-zinc-600 text-sm">Image not available</span>
+                      </div>
+                    <ImageFallback 
+                      src={project.img} 
+                      alt={project.title}
+                      className="object-cover relative z-10 transition-transform duration-500 group-hover:scale-105"
+                    />
+                    </div>
+                    <CardContent className="p-6 relative flex-grow flex flex-col justify-between">
+                      <div className="relative z-10">
+                        <h3 className="mb-2 text-xl font-semibold text-zinc-100">
+                          {project.title}
+                        </h3>
+                        <p className="text-zinc-400 text-sm leading-relaxed">
+                          {project.desc}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="mt-10 text-center"
+            >
+              <Link href="/projects">
+                <Button variant="outline">
+                  View All Projects
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
