@@ -8,7 +8,12 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { DesignsService } from './designs.service';
 import { CreateDesignDto, UpdateDesignDto } from './dto/design.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -22,8 +27,23 @@ export class DesignsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  create(@Body() createDesignDto: CreateDesignDto) {
-    return this.designsService.create(createDesignDto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/designs',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  create(
+    @Body() createDesignDto: CreateDesignDto,
+    @UploadedFile() file: any,
+  ) {
+    const imageUrl = file ? `/uploads/designs/${file.filename}` : undefined;
+    return this.designsService.create({ ...createDesignDto, imageUrl });
   }
 
   @Get()
@@ -39,8 +59,25 @@ export class DesignsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  update(@Param('id') id: string, @Body() updateDesignDto: UpdateDesignDto) {
-    return this.designsService.update(id, updateDesignDto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/designs',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  update(
+    @Param('id') id: string,
+    @Body() updateDesignDto: UpdateDesignDto,
+    @UploadedFile() file: any,
+  ) {
+    const imageUrl = file ? `/uploads/designs/${file.filename}` : undefined;
+    const updateData = imageUrl ? { ...updateDesignDto, imageUrl } : updateDesignDto;
+    return this.designsService.update(id, updateData);
   }
 
   @Delete(':id')

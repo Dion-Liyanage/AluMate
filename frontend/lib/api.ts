@@ -397,12 +397,20 @@ export const designsApi = {
     const res = await apiClient.get<ApiResponse<any>>(`/designs/${id}`);
     return res.data;
   },
-  create: async (data: any) => {
-    const res = await apiClient.post<ApiResponse<any>>('/designs', data);
+  create: async (formData: FormData) => {
+    const res = await apiClient.post<ApiResponse<any>>('/designs', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   },
-  update: async (id: string, data: any) => {
-    const res = await apiClient.patch<ApiResponse<any>>(`/designs/${id}`, data);
+  update: async (id: string, formData: FormData) => {
+    const res = await apiClient.patch<ApiResponse<any>>(`/designs/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   },
   delete: async (id: string) => {

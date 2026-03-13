@@ -119,7 +119,11 @@ export default function CataloguePage() {
                   {/* Placeholder image */}
                   <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
                     {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+                      <img 
+                        src={item.imageUrl.startsWith('/') ? `http://localhost:4000${item.imageUrl}` : item.imageUrl} 
+                        alt={item.title} 
+                        className="h-full w-full object-cover" 
+                      />
                     ) : (
                       <div className="text-zinc-600 text-sm">Design Preview</div>
                     )}

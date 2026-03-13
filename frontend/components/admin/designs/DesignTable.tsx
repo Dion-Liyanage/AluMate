@@ -73,7 +73,11 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center border border-zinc-700">
                       {design.imageUrl ? (
-                        <img src={design.imageUrl} alt={design.title} className="h-full w-full object-cover rounded-lg" />
+                        <img 
+                          src={design.imageUrl.startsWith('/') ? `http://localhost:4000${design.imageUrl}` : design.imageUrl} 
+                          alt={design.title} 
+                          className="h-full w-full object-cover rounded-lg" 
+                        />
                       ) : (
                         <LayoutGrid className="h-5 w-5 text-zinc-500" />
                       )}
