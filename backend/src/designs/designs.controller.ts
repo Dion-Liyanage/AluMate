@@ -37,7 +37,7 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 10, {
+    FilesInterceptor('images', 1, {
       storage: diskStorage({
         destination: (req, file, cb) => {
           cb(null, DesignsController.getUploadDestination());
@@ -47,7 +47,7 @@ export class DesignsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
-      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     }),
   )
   create(
@@ -72,7 +72,7 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 10, {
+    FilesInterceptor('images', 1, {
       storage: diskStorage({
         destination: (req, file, cb) => {
           cb(null, DesignsController.getUploadDestination());
@@ -82,7 +82,7 @@ export class DesignsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
-      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     }),
   )
   update(

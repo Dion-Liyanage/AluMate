@@ -18,7 +18,6 @@ interface Design {
   category: string;
   description: string;
   imageUrls?: string[];
-  isActive: boolean;
 }
 
 export default function CatalogueDesignDetailPage() {
@@ -102,18 +101,6 @@ export default function CatalogueDesignDetailPage() {
                 </div>
 
                 <p className="text-zinc-400 leading-relaxed">{design.description}</p>
-
-                <div>
-                  <Badge
-                    className={
-                      design.isActive
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
-                    }
-                  >
-                    {design.isActive ? "Available" : "Inactive"}
-                  </Badge>
-                </div>
               </CardContent>
             </Card>
           </div>
