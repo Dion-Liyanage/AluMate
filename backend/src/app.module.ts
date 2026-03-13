@@ -11,6 +11,7 @@ import { QuotationsModule } from './quotations/quotations.module';
 import { ServicesModule } from './services/services.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { DesignsModule } from './designs/designs.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     ServicesModule,
     InventoryModule,
     NotificationsModule,
+    DesignsModule,
   ],
   controllers: [AppController],
   providers: [],

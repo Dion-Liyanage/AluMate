@@ -7,7 +7,7 @@ import axios from "axios";
 import type { User, Order, Quotation, ServiceRequest, InventoryItem, Notification } from "@/types";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
 // Create axios instance
 const apiClient = axios.create({
@@ -382,6 +382,31 @@ export const adminCustomersApi = {
       `/admin/customers/${id}`,
       data
     );
+    return res.data;
+  },
+};
+
+// ---------- Designs Catalogue API ----------
+
+export const designsApi = {
+  getAll: async (params?: { category?: string }) => {
+    const res = await apiClient.get<ApiResponse<any[]>>('/designs', { params });
+    return res.data;
+  },
+  getById: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<any>>(`/designs/${id}`);
+    return res.data;
+  },
+  create: async (data: any) => {
+    const res = await apiClient.post<ApiResponse<any>>('/designs', data);
+    return res.data;
+  },
+  update: async (id: string, data: any) => {
+    const res = await apiClient.patch<ApiResponse<any>>(`/designs/${id}`, data);
+    return res.data;
+  },
+  delete: async (id: string) => {
+    const res = await apiClient.delete<ApiResponse<any>>(`/designs/${id}`);
     return res.data;
   },
 };
