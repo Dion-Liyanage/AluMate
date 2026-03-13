@@ -174,14 +174,16 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
                   </button>
                 </div>
               )}
-              <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors bg-zinc-900/50 col-span-2 h-32">
-                <ImageIcon className="h-6 w-6 text-zinc-600 mb-2" />
-                <label className="cursor-pointer text-center">
-                  <span className="text-sky-400 font-medium hover:text-sky-300">Add Image</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                </label>
-                <p className="text-[10px] text-zinc-500 mt-1">PNG, JPG up to 10MB (1 image)</p>
-              </div>
+              {!previewUrl && (
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors bg-zinc-900/50 col-span-2 h-32">
+                  <ImageIcon className="h-6 w-6 text-zinc-600 mb-2" />
+                  <label className="cursor-pointer text-center">
+                    <span className="text-sky-400 font-medium hover:text-sky-300">Add Image</span>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                  </label>
+                  <p className="text-[10px] text-zinc-500 mt-1">PNG, JPG up to 10MB (1 image)</p>
+                </div>
+              )}
             </div>
           </div>
 
