@@ -13,7 +13,8 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { DesignsService } from './designs.service';
 import { CreateDesignDto, UpdateDesignDto } from './dto/design.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -24,13 +25,23 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class DesignsController {
   constructor(private readonly designsService: DesignsService) {}
 
+  private static getUploadDestination() {
+    const uploadDir = join(__dirname, '..', '..', 'uploads', 'designs');
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true });
+    }
+    return uploadDir;
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
     FilesInterceptor('images', 10, {
       storage: diskStorage({
-        destination: './uploads/designs',
+        destination: (req, file, cb) => {
+          cb(null, DesignsController.getUploadDestination());
+        },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
@@ -63,7 +74,9 @@ export class DesignsController {
   @UseInterceptors(
     FilesInterceptor('images', 10, {
       storage: diskStorage({
-        destination: './uploads/designs',
+        destination: (req, file, cb) => {
+          cb(null, DesignsController.getUploadDestination());
+        },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);

@@ -20,6 +20,12 @@ const apiClient = axios.create({
 // Request interceptor — attach JWT token
 apiClient.interceptors.request.use(
   (config) => {
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers["Content-Type"];
+      }
+    }
+
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("alumate_token");
       if (token) {

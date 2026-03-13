@@ -83,8 +83,9 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
       setIsOpen(false);
       handleClear();
       onSuccess();
-    } catch (error) {
-      toast.error("Failed to add design");
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Failed to add design";
+      toast.error(typeof message === 'string' ? message : message[0] || "Failed to add design");
       console.error(error);
     } finally {
       setIsLoading(false);
