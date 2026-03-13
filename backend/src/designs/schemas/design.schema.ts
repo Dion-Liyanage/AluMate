@@ -14,8 +14,8 @@ export class Design {
   @Prop({ required: true, enum: ['doors', 'windows', 'cupboards', 'pantries', 'ceilings'] })
   category: string;
 
-  @Prop({ required: true })
-  imageUrl: string;
+  @Prop({ type: [String], default: [] })
+  imageUrls: string[];
 
   @Prop({ type: [String], default: [] })
   features: string[];

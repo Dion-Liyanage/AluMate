@@ -16,7 +16,7 @@ interface Design {
   title: string;
   category: string;
   description: string;
-  imageUrl?: string;
+  imageUrls?: string[];
   isActive: boolean;
 }
 
@@ -118,9 +118,9 @@ export default function CataloguePage() {
                   <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
                   {/* Placeholder image */}
                   <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
-                    {item.imageUrl ? (
+                    {item.imageUrls && item.imageUrls.length > 0 ? (
                       <img 
-                        src={item.imageUrl.startsWith('/') ? `http://localhost:4000${item.imageUrl}` : item.imageUrl} 
+                        src={item.imageUrls[0].startsWith('/') ? `http://localhost:4000${item.imageUrls[0]}` : item.imageUrls[0]} 
                         alt={item.title} 
                         className="h-full w-full object-cover" 
                       />

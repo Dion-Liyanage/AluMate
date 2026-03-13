@@ -9,9 +9,9 @@ import {
   UseGuards,
   Query,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { DesignsService } from './designs.service';
@@ -28,7 +28,7 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FileInterceptor('image', {
+    FilesInterceptor('images', 10, {
       storage: diskStorage({
         destination: './uploads/designs',
         filename: (req, file, cb) => {
@@ -36,14 +36,15 @@ export class DesignsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
+      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
     }),
   )
   create(
     @Body() createDesignDto: CreateDesignDto,
-    @UploadedFile() file: any,
+    @UploadedFiles() files: any[],
   ) {
-    const imageUrl = file ? `/uploads/designs/${file.filename}` : undefined;
-    return this.designsService.create({ ...createDesignDto, imageUrl });
+    const imageUrls = files?.map(file => `/uploads/designs/${file.filename}`) || [];
+    return this.designsService.create({ ...createDesignDto, imageUrls });
   }
 
   @Get()
@@ -60,7 +61,7 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FileInterceptor('image', {
+    FilesInterceptor('images', 10, {
       storage: diskStorage({
         destination: './uploads/designs',
         filename: (req, file, cb) => {
@@ -68,15 +69,18 @@ export class DesignsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
+      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
     }),
   )
   update(
     @Param('id') id: string,
     @Body() updateDesignDto: UpdateDesignDto,
-    @UploadedFile() file: any,
+    @UploadedFiles() files: any[],
   ) {
-    const imageUrl = file ? `/uploads/designs/${file.filename}` : undefined;
-    const updateData = imageUrl ? { ...updateDesignDto, imageUrl } : updateDesignDto;
+    const newImageUrls = files?.map(file => `/uploads/designs/${file.filename}`) || [];
+    const updateData = newImageUrls.length > 0 
+      ? { ...updateDesignDto, imageUrls: newImageUrls } 
+      : updateDesignDto;
     return this.designsService.update(id, updateData);
   }
 

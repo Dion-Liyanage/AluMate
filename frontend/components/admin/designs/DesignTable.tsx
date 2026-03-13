@@ -20,7 +20,7 @@ interface Design {
   title: string;
   category: string;
   description: string;
-  imageUrl?: string;
+  imageUrls?: string[];
   isActive: boolean;
 }
 
@@ -72,9 +72,9 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                 <TableCell className="font-medium text-zinc-100">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center border border-zinc-700">
-                      {design.imageUrl ? (
+                      {design.imageUrls && design.imageUrls.length > 0 ? (
                         <img 
-                          src={design.imageUrl.startsWith('/') ? `http://localhost:4000${design.imageUrl}` : design.imageUrl} 
+                          src={design.imageUrls[0].startsWith('/') ? `http://localhost:4000${design.imageUrls[0]}` : design.imageUrls[0]} 
                           alt={design.title} 
                           className="h-full w-full object-cover rounded-lg" 
                         />

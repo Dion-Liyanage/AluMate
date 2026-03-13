@@ -31,8 +31,8 @@ interface AddDesignDialogProps {
 export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -40,17 +40,18 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...files]);
+      const newUrls = files.map((file) => URL.createObjectURL(file));
+      setPreviewUrls((prev) => [...prev, ...newUrls]);
     }
   };
 
-  const removeImage = () => {
-    setSelectedFile(null);
-    setPreviewUrl(null);
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(previewUrls[index]);
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleClear = () => {
@@ -59,7 +60,9 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
       description: "",
       category: "doors",
     });
-    removeImage();
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    setSelectedFiles([]);
+    setPreviewUrls([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,9 +73,9 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
-    if (selectedFile) {
-      submitData.append("image", selectedFile);
-    }
+    selectedFiles.forEach((file) => {
+      submitData.append("images", file);
+    });
 
     try {
       await designsApi.create(submitData);
@@ -96,7 +99,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
           Add New Design
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100">
+      <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Catalogue Item</DialogTitle>
         </DialogHeader>
@@ -143,28 +146,29 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
           </div>
           
           <div className="space-y-2">
-            <Label>Design Image</Label>
-            {!previewUrl ? (
-              <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-6 hover:border-zinc-700 transition-colors bg-zinc-900/50">
-                <ImageIcon className="h-8 w-8 text-zinc-600 mb-2" />
-                <label className="cursor-pointer">
-                  <span className="text-sky-400 font-medium hover:text-sky-300">Upload an image</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+            <Label>Design Images</Label>
+            <div className="grid grid-cols-2 gap-4">
+              {previewUrls.map((url, index) => (
+                <div key={index} className="relative rounded-lg overflow-hidden border border-zinc-800 aspect-video">
+                  <img src={url} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors bg-zinc-900/50 col-span-2 h-32">
+                <ImageIcon className="h-6 w-6 text-zinc-600 mb-2" />
+                <label className="cursor-pointer text-center">
+                  <span className="text-sky-400 font-medium hover:text-sky-300">Add Images</span>
+                  <input type="file" className="hidden" accept="image/*" multiple onChange={handleFileChange} />
                 </label>
-                <p className="text-xs text-zinc-500 mt-1">PNG, JPG up to 10MB</p>
+                <p className="text-[10px] text-zinc-500 mt-1">PNG, JPG up to 50MB</p>
               </div>
-            ) : (
-              <div className="relative rounded-lg overflow-hidden border border-zinc-800 aspect-video">
-                <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
+            </div>
           </div>
 
           <DialogFooter className="pt-4 flex justify-between items-center sm:justify-between w-full">
