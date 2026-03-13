@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PROJECTS } from "@/constants/projects";
 
 // Component to handle falling back to jpg if png doesn't exist
 const ImageFallback = ({ src, alt, className }: { src: string, alt: string, className?: string }) => {
@@ -28,64 +29,7 @@ const ImageFallback = ({ src, alt, className }: { src: string, alt: string, clas
   );
 };
 
-const allProjects = [
-  { 
-    id: 1,
-    title: "Modern Residential Windows", 
-    category: "Windows",
-    desc: "Minimalist black aluminium frames for a contemporary home", 
-    img: "/projects/project_1.png" 
-  },
-  { 
-    id: 2,
-    title: "Modern Ceiling",
-    category: "Ceiling",
-    desc: "Sleek suspended aluminium ceiling grid featuring integrated lighting, providing a clean, contemporary aesthetic for corporate and commercial spaces.", 
-    img: "/projects/project_2.png"
-  },
-  { 
-    id: 3,
-    title: "Luxury Patio Sliding Doors", 
-    category: "Doors",
-    desc: "Premium grey finish sliding doors connecting indoor & outdoor", 
-    img: "/projects/project_3.png" 
-  },
-  { 
-    id: 4,
-    title: "Commercial Storefront", 
-    category: "Doors",
-    desc: "Sleek and inviting black aluminium frames creating a premium and contemporary retail storefront experience.", 
-    img: "/projects/project_4.png" 
-  },
-  { 
-    id: 5,
-    title: "Modern Kitchen Cupboards", 
-    category: "Cupboards",
-    desc: "Professional and bright commercial interior featuring sleek aluminium glass partitions for a modern workspace.", 
-    img: "/projects/project_5.png" 
-  },
-  { 
-    id: 6,
-    title: "Custom Aluminium Pantries", 
-    category: "Pantries",
-    desc: "Elegant residential balcony featuring a frameless glass balustrade supported by a minimalist aluminium bottom track.", 
-    img: "/projects/project_6.png" 
-  },
-  { 
-    id: 7,
-    title: "Villa Double-Height Window Wall", 
-    category: "Windows",
-    desc: "Massive double-height aluminium window wall for a stunning modern villa, showing off superior structural capabilities.", 
-    img: "/projects/project_7.png" 
-  },
-  { 
-    id: 8,
-    title: "Suspended Suspended Ceilings", 
-    category: "Ceilings",
-    desc: "Stylish aluminium louvre sunshade system installed on the exterior of a contemporary building for optimal climate control.", 
-    img: "/projects/project_8.png" 
-  }
-];
+const allProjects = [...PROJECTS].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
 const categories = ["All", ...Array.from(new Set(allProjects.map((p) => p.category)))];
 
@@ -163,51 +107,128 @@ export default function ProjectsGallery() {
         {/* Projects Grid */}
         <motion.div layout className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-[400px]">
           <AnimatePresence mode="popLayout">
-            {filteredProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
-              >
-                <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-500 hover:shadow-[0_0_40px_rgba(161,161,170,0.15)] group overflow-hidden flex flex-col cursor-pointer relative">
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
-                  <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
-                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
-                      <span className="text-zinc-600 text-sm">Image not available</span>
+            {filteredProjects.map((project, index) => {
+              const [isOpen, setIsOpen] = useState(false);
+              return (
+                <motion.div
+                  key={project.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
+                >
+                  <Card 
+                    className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-500 hover:shadow-[0_0_40px_rgba(161,161,170,0.15)] group overflow-hidden flex flex-col cursor-pointer relative"
+                    onClick={() => setIsOpen(true)}
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
+                    <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
+                      <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                        <span className="text-zinc-600 text-sm">Image not available</span>
+                      </div>
+                      <ImageFallback 
+                        src={project.img} 
+                        alt={project.title}
+                        className="object-cover relative z-10 transition-transform duration-700 group-hover:scale-110"
+                      />
+                      {/* Overlay gradent for image text */}
+                      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 to-transparent z-20" />
+                      
+                      {/* Category Badge over image */}
+                      <div className="absolute top-4 left-4 z-30">
+                        <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-xs font-medium text-zinc-200">
+                          {project.category}
+                        </span>
+                      </div>
                     </div>
-                    <ImageFallback 
-                      src={project.img} 
-                      alt={project.title}
-                      className="object-cover relative z-10 transition-transform duration-700 group-hover:scale-110"
-                    />
-                    {/* Overlay gradent for image text */}
-                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 to-transparent z-20" />
                     
-                    {/* Category Badge over image */}
-                    <div className="absolute top-4 left-4 z-30">
-                      <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-xs font-medium text-zinc-200">
-                        {project.category}
-                      </span>
+                    <CardContent className="p-6 relative flex-grow flex flex-col justify-between -mt-8 pt-0 z-30 pointer-events-none">
+                      <div className="relative pt-4">
+                        <div className="flex items-center gap-2 mb-2">
+                           <div className="flex items-center">
+                             {[...Array(5)].map((_, i) => (
+                               <Star 
+                                 key={i} 
+                                 className={`h-3 w-3 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} 
+                               />
+                             ))}
+                           </div>
+                           <span className="text-xs font-medium text-zinc-300">{project.rating}</span>
+                           <span className="text-[10px] text-zinc-500">({project.reviewCount})</span>
+                        </div>
+                        <h3 className="mb-3 text-lg font-semibold text-white group-hover:text-zinc-300 transition-colors flex items-start justify-between">
+                          <span className="line-clamp-2">{project.title}</span>
+                          <ExternalLink className="h-4 w-4 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1 ml-2" />
+                        </h3>
+                        <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3">
+                          {project.desc}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Feedback Modal Overlay - Unified with Landing Page */}
+                  {isOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl pointer-events-auto"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="relative h-64 w-full">
+                          <ImageFallback src={project.img} alt={project.title} className="object-cover" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+                          <button 
+                            onClick={() => setIsOpen(false)}
+                            className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                          <div className="absolute bottom-6 left-8">
+                             <h2 className="text-3xl font-bold text-white">{project.title}</h2>
+                             <div className="flex items-center gap-2 mt-2">
+                                <span className="px-2 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400 mb-1">{project.category}</span>
+                                <div className="flex items-center ml-2">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star key={i} className={`h-5 w-5 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
+                                  ))}
+                                </div>
+                                <span className="text-zinc-300 font-medium">{project.rating}</span>
+                             </div>
+                          </div>
+                        </div>
+                        <div className="p-8">
+                          <h3 className="text-lg font-semibold text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Customer Feedback</h3>
+                          <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            {project.feedbacks && project.feedbacks.length > 0 ? (
+                              project.feedbacks.map((fb, i) => (
+                                <div key={i} className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="font-medium text-zinc-200">{fb.name}</span>
+                                    <div className="flex items-center">
+                                      {[...Array(5)].map((_, j) => (
+                                        <Star key={j} className={`h-3 w-3 ${j < fb.rating ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <p className="text-zinc-400 text-sm italic">"{fb.comment}"</p>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center py-10">
+                                <p className="text-zinc-500 italic text-sm">No detailed feedback available yet for this project.</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
                     </div>
-                  </div>
-                  
-                  <CardContent className="p-6 relative flex-grow flex flex-col justify-between -mt-8 pt-0 z-30 pointer-events-none">
-                    <div className="relative pt-4">
-                      <h3 className="mb-3 text-lg font-semibold text-white group-hover:text-zinc-300 transition-colors flex items-start justify-between">
-                        <span className="line-clamp-2">{project.title}</span>
-                        <ExternalLink className="h-4 w-4 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1 ml-2" />
-                      </h3>
-                      <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3">
-                        {project.desc}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                  )}
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </motion.div>
         
