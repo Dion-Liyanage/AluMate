@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { LayoutGrid, Search, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -114,39 +115,40 @@ export default function CataloguePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
               >
-                <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-                  {/* Placeholder image */}
-                  <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
-                    {item.imageUrls && item.imageUrls.length > 0 ? (
-                      <img 
-                        src={item.imageUrls[0].startsWith('/') ? `http://localhost:4000${item.imageUrls[0]}` : item.imageUrls[0]} 
-                        alt={item.title} 
-                        className="h-full w-full object-cover" 
-                      />
-                    ) : (
-                      <div className="text-zinc-600 text-sm">Design Preview</div>
-                    )}
-                  </div>
-                  <CardContent className="relative p-4">
-                    <h3 className="font-semibold text-zinc-100 group-hover:text-sky-300 transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-zinc-500 mt-1 line-clamp-2">{item.description}</p>
-                    <div className="flex items-center justify-between mt-3">
-                      <Badge
-                        variant="outline"
-                        className="text-zinc-400 border-zinc-700 capitalize"
-                      >
-                        {item.category}
-                      </Badge>
-                      <span className="flex items-center gap-1 text-sm text-zinc-500 group-hover:text-sky-400 transition-colors">
-                        Use Design
-                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                      </span>
+                <Link href={`/dashboard/catalogue/${item._id}`} className="block">
+                  <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                    <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
+                      {item.imageUrls && item.imageUrls.length > 0 ? (
+                        <img 
+                          src={item.imageUrls[0].startsWith('/') ? `http://localhost:4000${item.imageUrls[0]}` : item.imageUrls[0]} 
+                          alt={item.title} 
+                          className="h-full w-full object-cover" 
+                        />
+                      ) : (
+                        <div className="text-zinc-600 text-sm">Design Preview</div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
+                    <CardContent className="relative p-4">
+                      <h3 className="font-semibold text-zinc-100 group-hover:text-sky-300 transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-zinc-500 mt-1 line-clamp-2">{item.description}</p>
+                      <div className="flex items-center justify-between mt-3">
+                        <Badge
+                          variant="outline"
+                          className="text-zinc-400 border-zinc-700 capitalize"
+                        >
+                          {item.category}
+                        </Badge>
+                        <span className="flex items-center gap-1 text-sm text-zinc-500 group-hover:text-sky-400 transition-colors">
+                          Use Design
+                          <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               </motion.div>
             ))}
           </div>

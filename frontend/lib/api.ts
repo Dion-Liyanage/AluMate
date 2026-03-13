@@ -396,12 +396,18 @@ export const adminCustomersApi = {
 
 export const designsApi = {
   getAll: async (params?: { category?: string }) => {
-    const res = await apiClient.get<ApiResponse<any[]>>('/designs', { params });
-    return res.data;
+    const res = await apiClient.get<any>('/designs', { params });
+    if (Array.isArray(res.data)) {
+      return { success: true, data: res.data } as ApiResponse<any[]>;
+    }
+    return res.data as ApiResponse<any[]>;
   },
   getById: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<any>>(`/designs/${id}`);
-    return res.data;
+    const res = await apiClient.get<any>(`/designs/${id}`);
+    if (res.data && typeof res.data === 'object' && 'success' in res.data) {
+      return res.data as ApiResponse<any>;
+    }
+    return { success: true, data: res.data } as ApiResponse<any>;
   },
   create: async (formData: FormData) => {
     const res = await apiClient.post<ApiResponse<any>>('/designs', formData);
