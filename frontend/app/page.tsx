@@ -24,9 +24,12 @@ import {
   Phone,
   Mail,
   Send,
+  X,
   CheckCircle2,
   ChevronDown,
+  Star,
 } from "lucide-react";
+import { PROJECTS } from "@/constants/projects";
 
 // Component to handle falling back to jpg if png doesn't exist
 const ImageFallback = ({ src, alt, className }: { src: string, alt: string, className?: string }) => {
@@ -496,44 +499,126 @@ export default function Home() {
             </motion.div>
 
             <div className="grid gap-8 lg:grid-cols-3">
-              {[
-                { title: "Modern Residential Windows", desc: "Minimalist black aluminium frames for a contemporary home", img: "/projects/project_1.png" },
-                { title: "Modern Ceiling", desc: "Sleek suspended aluminium ceiling grid featuring integrated lighting, providing a clean, contemporary aesthetic for corporate and commercial spaces.", img: "/projects/project_2.png" },
-                { title: "Luxury Patio Sliding Doors", desc: "Premium grey finish sliding doors connecting indoor & outdoor", img: "/projects/project_3.png" },
-              ].map((project, index) => (
-                <motion.div
-                  key={project.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.12 }}
-                  viewport={{ once: true }}
-                >
-                  <Card className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-600 hover:shadow-[0_0_40px_rgba(161,161,170,0.1)] group overflow-hidden flex flex-col relative">
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
-                    <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
-                      {/* Placeholder for missing image - fallback background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
-                        <span className="text-zinc-600 text-sm">Image not available</span>
+              {[...PROJECTS]
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .slice(0, 3)
+                .map((project, index) => {
+                const [isOpen, setIsOpen] = useState(false);
+                return (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.12 }}
+                    viewport={{ once: true }}
+                  >
+                    <Card 
+                      className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-600 hover:shadow-[0_0_40px_rgba(161,161,170,0.1)] group overflow-hidden flex flex-col relative cursor-pointer"
+                      onClick={() => setIsOpen(true)}
+                    >
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
+                      <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
+                        {/* Placeholder for missing image - fallback background */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                          <span className="text-zinc-600 text-sm">Image not available</span>
+                        </div>
+                        <ImageFallback 
+                          src={project.img} 
+                          alt={project.title}
+                          className="object-cover relative z-10 transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {/* Category Badge over image - Matching Gallery Theory */}
+                        <div className="absolute top-4 left-4 z-30">
+                          <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-xs font-medium text-zinc-200">
+                            {project.category}
+                          </span>
+                        </div>
                       </div>
-                    <ImageFallback 
-                      src={project.img} 
-                      alt={project.title}
-                      className="object-cover relative z-10 transition-transform duration-500 group-hover:scale-105"
-                    />
-                    </div>
-                    <CardContent className="p-6 relative flex-grow flex flex-col justify-between">
-                      <div className="relative z-10">
-                        <h3 className="mb-2 text-xl font-semibold text-zinc-100">
-                          {project.title}
-                        </h3>
-                        <p className="text-zinc-400 text-sm leading-relaxed">
-                          {project.desc}
-                        </p>
+                      <CardContent className="p-6 relative flex-grow flex flex-col justify-between">
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-2 mb-2">
+                             <div className="flex items-center">
+                               {[...Array(5)].map((_, i) => (
+                                 <Star 
+                                   key={i} 
+                                   className={`h-4 w-4 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} 
+                                 />
+                               ))}
+                             </div>
+                             <span className="text-sm font-medium text-zinc-300">{project.rating}</span>
+                             <span className="text-xs text-zinc-500">({project.reviewCount})</span>
+                          </div>
+                          <h3 className="mb-2 text-xl font-semibold text-zinc-100">
+                            {project.title}
+                          </h3>
+                          <p className="text-zinc-400 text-sm leading-relaxed">
+                            {project.desc}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Feedback Modal Overlay - Unified with Projects Gallery */}
+                    {isOpen && (
+                      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl pointer-events-auto"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="relative h-64 w-full">
+                            <ImageFallback src={project.img} alt={project.title} className="object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 to-transparent" />
+                            <button 
+                              onClick={() => setIsOpen(false)}
+                              className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                            >
+                              <X className="h-5 w-5" />
+                            </button>
+                            <div className="absolute bottom-6 left-8">
+                               <h2 className="text-3xl font-bold text-white">{project.title}</h2>
+                               <div className="flex items-center gap-2 mt-2">
+                                  <span className="px-2 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400 mb-1">{project.category}</span>
+                                  <div className="flex items-center ml-2">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star key={i} className={`h-5 w-5 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
+                                    ))}
+                                  </div>
+                                  <span className="text-zinc-300 font-medium">{project.rating}</span>
+                               </div>
+                            </div>
+                          </div>
+                          <div className="p-8">
+                            <h3 className="text-lg font-semibold text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Customer Feedback</h3>
+                            <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                              {project.feedbacks && project.feedbacks.length > 0 ? (
+                                project.feedbacks.map((fb, i) => (
+                                  <div key={i} className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="font-medium text-zinc-200">{fb.name}</span>
+                                      <div className="flex items-center">
+                                        {[...Array(5)].map((_, j) => (
+                                          <Star key={j} className={`h-3 w-3 ${j < fb.rating ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <p className="text-zinc-400 text-sm italic">"{fb.comment}"</p>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="text-center py-10">
+                                  <p className="text-zinc-500 italic text-sm">No detailed feedback available yet for this project.</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
 
             <motion.div
