@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Star, X } from "lucide-react";
+import { ArrowRight, Star, X, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PROJECTS } from "@/constants/projects";
@@ -19,6 +19,8 @@ interface DisplayProject {
   rating: number;
   reviewCount: number;
   feedbacks: { name: string; comment: string; rating: number }[];
+  location?: string;
+  completedAt?: string;
   createdAt: string;
 }
 
@@ -67,11 +69,11 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
       viewport={{ once: true }}
     >
       <Card
-        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-600 hover:shadow-[0_0_40px_rgba(161,161,170,0.1)] group overflow-hidden flex flex-col relative cursor-pointer"
+        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-purple-500/40 hover:shadow-[0_0_40px_rgba(139,92,246,0.1)] group overflow-hidden flex flex-col relative cursor-pointer"
         onClick={() => setIsOpen(true)}
       >
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
-        <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
+        <div className="relative h-40 w-full overflow-hidden bg-zinc-800 shrink-0 z-10 border-b border-zinc-800">
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
             <span className="text-zinc-600 text-sm">Image not available</span>
           </div>
@@ -86,7 +88,7 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
             </span>
           </div>
         </div>
-        <CardContent className="p-6 relative flex-grow flex flex-col justify-between">
+        <CardContent className="p-4 relative flex-grow flex flex-col justify-between">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
                <div className="flex items-center">
@@ -142,6 +144,26 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
               </div>
             </div>
             <div className="p-8">
+              {/* Project Details */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-zinc-100 mb-3 border-b border-zinc-800 pb-2">About This Project</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">{project.description}</p>
+                <div className="flex flex-wrap items-center gap-4 mt-4">
+                  {project.location && (
+                    <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+                      <MapPin className="h-4 w-4 text-zinc-500" />
+                      <span>{project.location}</span>
+                    </div>
+                  )}
+                  {project.completedAt && (
+                    <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+                      <Calendar className="h-4 w-4 text-zinc-500" />
+                      <span>Completed {new Date(project.completedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <h3 className="text-lg font-semibold text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Customer Feedback</h3>
               <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {project.feedbacks && project.feedbacks.length > 0 ? (
@@ -198,6 +220,8 @@ function transformApiProject(project: any): DisplayProject {
     rating: project.rating || 0,
     reviewCount: project.reviewCount || 0,
     feedbacks: project.feedbacks || [],
+    location: project.location || "",
+    completedAt: project.completedAt || "",
     createdAt: project.createdAt,
   };
 }
@@ -231,7 +255,7 @@ export function ProjectsSection() {
 
   const sortedProjects = [...projects]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 3);
+    .slice(0, 4);
 
   return (
     <section id="projects" className="border-t border-zinc-800/50">
@@ -259,7 +283,7 @@ export function ProjectsSection() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {sortedProjects.map((project, index) => (
               <ProjectCard key={project.id} project={project} index={index} />
             ))}

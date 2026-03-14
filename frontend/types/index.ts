@@ -94,6 +94,7 @@ export interface Project {
   location?: string;
   materialUsed?: string;
   isActive: boolean;
+  completedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

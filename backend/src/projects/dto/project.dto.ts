@@ -59,6 +59,10 @@ export class CreateProjectDto {
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   isActive?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
+  completedAt?: Date;
 }
 
 export class UpdateProjectDto {
@@ -109,4 +113,8 @@ export class UpdateProjectDto {
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   isActive?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
+  completedAt?: Date;
 }

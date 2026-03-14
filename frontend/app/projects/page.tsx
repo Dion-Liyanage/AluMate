@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ExternalLink, Star, X } from "lucide-react";
+import { ArrowLeft, ExternalLink, Star, X, Search, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { PROJECTS } from "@/constants/projects";
 import { projectsApi } from "@/lib/api";
 
@@ -19,6 +20,8 @@ interface DisplayProject {
   rating: number;
   reviewCount: number;
   feedbacks: { name: string; comment: string; rating: number }[];
+  location?: string;
+  completedAt?: string;
   createdAt: string;
 }
 
@@ -61,11 +64,11 @@ function ProjectCard({ project }: { project: DisplayProject }) {
   return (
     <>
       <Card
-        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-500 hover:shadow-[0_0_40px_rgba(161,161,170,0.15)] group overflow-hidden flex flex-col cursor-pointer relative"
+        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-purple-500/40 hover:shadow-[0_0_40px_rgba(139,92,246,0.1)] group overflow-hidden flex flex-col cursor-pointer relative"
         onClick={() => setIsOpen(true)}
       >
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
-        <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
+        <div className="relative h-40 w-full overflow-hidden bg-zinc-800 shrink-0 z-10 border-b border-zinc-800">
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
             <span className="text-zinc-600 text-sm">Image not available</span>
           </div>
@@ -83,7 +86,7 @@ function ProjectCard({ project }: { project: DisplayProject }) {
           </div>
         </div>
 
-        <CardContent className="p-6 relative flex-grow flex flex-col justify-between -mt-8 pt-0 z-30 pointer-events-none">
+        <CardContent className="p-4 relative flex-grow flex flex-col justify-between">
           <div className="relative pt-4">
             <div className="flex items-center gap-2 mb-2">
                <div className="flex items-center">
@@ -140,6 +143,26 @@ function ProjectCard({ project }: { project: DisplayProject }) {
               </div>
             </div>
             <div className="p-8">
+              {/* Project Details */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-zinc-100 mb-3 border-b border-zinc-800 pb-2">About This Project</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">{project.description}</p>
+                <div className="flex flex-wrap items-center gap-4 mt-4">
+                  {project.location && (
+                    <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+                      <MapPin className="h-4 w-4 text-zinc-500" />
+                      <span>{project.location}</span>
+                    </div>
+                  )}
+                  {project.completedAt && (
+                    <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+                      <Calendar className="h-4 w-4 text-zinc-500" />
+                      <span>Completed {new Date(project.completedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <h3 className="text-lg font-semibold text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Customer Feedback</h3>
               <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {project.feedbacks && project.feedbacks.length > 0 ? (
@@ -196,6 +219,8 @@ function transformApiProject(project: any): DisplayProject {
     rating: project.rating || 0,
     reviewCount: project.reviewCount || 0,
     feedbacks: project.feedbacks || [],
+    location: project.location || "",
+    completedAt: project.completedAt || "",
     createdAt: project.createdAt,
   };
 }
@@ -204,6 +229,7 @@ export default function ProjectsGallery() {
   const [projects, setProjects] = useState<DisplayProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     async function fetchProjects() {
@@ -234,11 +260,14 @@ export default function ProjectsGallery() {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  const categories = ["All", ...Array.from(new Set(sortedProjects.map((p) => p.category)))];
-
-  const filteredProjects = sortedProjects.filter((project) =>
-    activeCategory === "All" || project.category === activeCategory
-  );
+  const categories = ["All", "Windows", "Doors", "Cupboards", "Pantries", "Ceilings"];
+  
+  const filteredProjects = sortedProjects.filter((project) => {
+    const matchesCategory =
+      activeCategory === "All" || project.category.toLowerCase() === activeCategory.toLowerCase();
+    const matchesSearch = project.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black pb-24">
@@ -287,21 +316,32 @@ export default function ProjectsGallery() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex flex-wrap items-center gap-2 mb-12"
+          className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-12"
         >
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeCategory === category
-                  ? "bg-zinc-100 text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-                  : "bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+            <Input
+              placeholder="Search projects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-700"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeCategory === category
+                    ? "bg-zinc-100 text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                    : "bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* Loading state */}
@@ -312,7 +352,7 @@ export default function ProjectsGallery() {
         ) : (
           <>
             {/* Projects Grid */}
-            <motion.div layout className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-[400px]">
+            <motion.div layout className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 min-h-[400px]">
               <AnimatePresence mode="popLayout">
                 {filteredProjects.map((project) => (
                   <motion.div

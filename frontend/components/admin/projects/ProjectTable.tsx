@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Edit, Trash2, FolderOpen, Star, MapPin, Eye, EyeOff } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 import { projectsApi } from "@/lib/api";
 import { toast } from "sonner";
 import type { Project } from "@/types";
@@ -43,8 +44,7 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
     description: "",
     category: "Windows",
     location: "",
-    materialUsed: "",
-    isActive: true,
+    completedDate: "",
   });
 
   const openEditDialog = (project: Project) => {
@@ -55,8 +55,7 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
       description: project.description,
       category: project.category,
       location: project.location || "",
-      materialUsed: project.materialUsed || "",
-      isActive: project.isActive,
+      completedDate: project.completedAt ? project.completedAt.split('T')[0] : "",
     });
   };
 
@@ -85,12 +84,11 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
-    submitData.append("isActive", String(formData.isActive));
     if (formData.location) {
       submitData.append("location", formData.location);
     }
-    if (formData.materialUsed) {
-      submitData.append("materialUsed", formData.materialUsed);
+    if (formData.completedDate) {
+      submitData.append("completedAt", formData.completedDate);
     }
     selectedFiles.forEach((file) => {
       submitData.append("images", file);
@@ -121,9 +119,7 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
           {projects.map((project) => (
             <Card
               key={project._id}
-              className={`relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-purple-500/40 transition-all group overflow-hidden ${
-                !project.isActive ? "opacity-60" : ""
-              }`}
+              className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-purple-500/40 transition-all group overflow-hidden"
             >
               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
               <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
@@ -139,13 +135,6 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
                   />
                 ) : (
                   <FolderOpen className="h-8 w-8 text-zinc-600" />
-                )}
-                {!project.isActive && (
-                  <div className="absolute top-2 left-2">
-                    <Badge variant="outline" className="bg-red-500/20 text-red-300 border-red-500/40">
-                      Hidden
-                    </Badge>
-                  </div>
                 )}
                 {project.rating > 0 && (
                   <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 px-2 py-1 rounded-full">
@@ -269,49 +258,19 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-material">Material Used</Label>
-                                  <Input
-                                    id="edit-material"
-                                    value={formData.materialUsed}
-                                    onChange={(e) =>
-                                      setFormData({ ...formData, materialUsed: e.target.value })
+                                  <Label htmlFor="edit-completedDate">Completed Date (Optional)</Label>
+                                  <DatePicker
+                                    id="edit-completedDate"
+                                    value={formData.completedDate}
+                                    onChange={(val) =>
+                                      setFormData({ ...formData, completedDate: val })
                                     }
-                                    className="bg-zinc-900 border-zinc-800"
+                                    placeholder="Pick a date"
+                                    className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800"
                                   />
                                 </div>
                               </div>
 
-                              <div className="space-y-2">
-                                <Label>Visibility</Label>
-                                <div className="flex gap-2">
-                                  <Button
-                                    type="button"
-                                    variant={formData.isActive ? "default" : "outline"}
-                                    className={
-                                      formData.isActive
-                                        ? "bg-green-600 hover:bg-green-500"
-                                        : "border-zinc-700 text-zinc-400"
-                                    }
-                                    onClick={() => setFormData({ ...formData, isActive: true })}
-                                  >
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Visible
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant={!formData.isActive ? "default" : "outline"}
-                                    className={
-                                      !formData.isActive
-                                        ? "bg-red-600 hover:bg-red-500"
-                                        : "border-zinc-700 text-zinc-400"
-                                    }
-                                    onClick={() => setFormData({ ...formData, isActive: false })}
-                                  >
-                                    <EyeOff className="h-4 w-4 mr-2" />
-                                    Hidden
-                                  </Button>
-                                </div>
-                              </div>
 
                               <div className="space-y-2">
                                 <Label htmlFor="edit-images">Replace Images (Optional)</Label>
@@ -322,19 +281,23 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
                                   multiple
                                   className="bg-zinc-900 border-zinc-800"
                                   onChange={(e) => {
-                                    const files = Array.from(e.target.files || []);
-                                    const validFiles = files.filter((file) => {
-                                      if (file.size > 10 * 1024 * 1024) {
-                                        toast.error(`${file.name} is too large. Max 10MB.`);
-                                        return false;
-                                      }
-                                      return true;
-                                    });
-                                    setSelectedFiles(validFiles);
+                                    const selectedFiles = Array.from(e.target.files || []);
+                                    if (selectedFiles.length > 5) {
+                                      toast.error("You can only upload a maximum of 5 images");
+                                      e.target.value = "";
+                                      return;
+                                    }
+                                    const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
+                                    if (totalSize > 20 * 1024 * 1024) {
+                                      toast.error("Total size of all images cannot exceed 20MB");
+                                      e.target.value = "";
+                                      return;
+                                    }
+                                    setSelectedFiles(selectedFiles);
                                   }}
                                 />
                                 <p className="text-xs text-zinc-500">
-                                  Leave empty to keep current images. Max 5 images, 10MB each.
+                                  Leave empty to keep current images. Max 5 images, 20MB total capacity.
                                 </p>
                               </div>
 

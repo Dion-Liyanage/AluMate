@@ -10,6 +10,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -37,7 +38,7 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 1, {
+    FilesInterceptor('images', 5, {
       storage: diskStorage({
         destination: (req, file, cb) => {
           cb(null, DesignsController.getUploadDestination());
@@ -47,13 +48,17 @@ export class DesignsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+      limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
     }),
   )
   create(
     @Body() createDesignDto: CreateDesignDto,
     @UploadedFiles() files: any[],
   ) {
+    const totalSize = files?.reduce((acc, file) => acc + file.size, 0) || 0;
+    if (totalSize > 20 * 1024 * 1024) {
+      throw new BadRequestException('Total file size exceeds 20MB limit for 5 images');
+    }
     const imageUrls = files?.map(file => `/uploads/designs/${file.filename}`) || [];
     return this.designsService.create({ ...createDesignDto, imageUrls });
   }
@@ -72,7 +77,7 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 1, {
+    FilesInterceptor('images', 5, {
       storage: diskStorage({
         destination: (req, file, cb) => {
           cb(null, DesignsController.getUploadDestination());
@@ -82,7 +87,7 @@ export class DesignsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+      limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
     }),
   )
   update(
@@ -90,6 +95,10 @@ export class DesignsController {
     @Body() updateDesignDto: UpdateDesignDto,
     @UploadedFiles() files: any[],
   ) {
+    const totalSize = files?.reduce((acc, file) => acc + file.size, 0) || 0;
+    if (totalSize > 20 * 1024 * 1024) {
+      throw new BadRequestException('Total file size exceeds 20MB limit for 5 images');
+    }
     const newImageUrls = files?.map(file => `/uploads/designs/${file.filename}`) || [];
     const updateData = newImageUrls.length > 0 
       ? { ...updateDesignDto, imageUrls: newImageUrls } 

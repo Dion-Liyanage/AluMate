@@ -34,7 +34,7 @@ export const PROJECTS: Project[] = [
   { 
     id: 2,
     title: "Modern Ceiling",
-    category: "Ceiling",
+    category: "Ceilings",
     desc: "Sleek suspended aluminium ceiling grid featuring integrated lighting, providing a clean, contemporary aesthetic for corporate and commercial spaces.", 
     img: "/projects/project_2.png",
     rating: 4.9,
