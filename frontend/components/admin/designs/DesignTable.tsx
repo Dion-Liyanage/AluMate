@@ -120,7 +120,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
               <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
                 {design.imageUrls && design.imageUrls.length > 0 ? (
                   <img
-                    src={design.imageUrls[0].startsWith("/") ? `http://localhost:4000${design.imageUrls[0]}` : design.imageUrls[0]}
+                    src={design.imageUrls[0].startsWith("/") ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${design.imageUrls[0]}` : design.imageUrls[0]}
                     alt={design.title}
                     className="h-full w-full object-cover"
                   />

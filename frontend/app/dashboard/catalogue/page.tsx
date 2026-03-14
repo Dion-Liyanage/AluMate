@@ -121,7 +121,7 @@ export default function CataloguePage() {
                     <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
                       {item.imageUrls && item.imageUrls.length > 0 ? (
                         <img 
-                          src={item.imageUrls[0].startsWith('/') ? `http://localhost:4000${item.imageUrls[0]}` : item.imageUrls[0]} 
+                          src={item.imageUrls[0].startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${item.imageUrls[0]}` : item.imageUrls[0]} 
                           alt={item.title} 
                           className="h-full w-full object-cover" 
                         />
