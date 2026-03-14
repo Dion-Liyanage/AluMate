@@ -15,18 +15,18 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-import { DesignsService } from './designs.service';
-import { CreateDesignDto, UpdateDesignDto } from './dto/design.dto';
+import { ProjectsService } from './projects.service';
+import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
-@Controller('designs')
-export class DesignsController {
-  constructor(private readonly designsService: DesignsService) {}
+@Controller('projects')
+export class ProjectsController {
+  constructor(private readonly projectsService: ProjectsService) {}
 
   private static getUploadDestination() {
-    const uploadDir = join(__dirname, '..', '..', 'uploads', 'designs');
+    const uploadDir = join(__dirname, '..', '..', 'uploads', 'projects');
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, { recursive: true });
     }
@@ -37,10 +37,10 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 1, {
+    FilesInterceptor('images', 5, {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          cb(null, DesignsController.getUploadDestination());
+          cb(null, ProjectsController.getUploadDestination());
         },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -51,31 +51,44 @@ export class DesignsController {
     }),
   )
   create(
-    @Body() createDesignDto: CreateDesignDto,
+    @Body() createProjectDto: CreateProjectDto,
     @UploadedFiles() files: any[],
   ) {
-    const imageUrls = files?.map(file => `/uploads/designs/${file.filename}`) || [];
-    return this.designsService.create({ ...createDesignDto, imageUrls });
+    const imageUrls = files?.map(file => `/uploads/projects/${file.filename}`) || [];
+    return this.projectsService.create({ ...createProjectDto, imageUrls });
   }
 
   @Get()
   findAll(@Query('category') category?: string) {
-    return this.designsService.findAll(category);
+    return this.projectsService.findAll(category);
+  }
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  findAllAdmin(@Query('category') category?: string) {
+    return this.projectsService.findAllAdmin(category);
+  }
+
+  @Get('count')
+  async getCount() {
+    const count = await this.projectsService.count();
+    return { count };
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.designsService.findOne(id);
+    return this.projectsService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 1, {
+    FilesInterceptor('images', 5, {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          cb(null, DesignsController.getUploadDestination());
+          cb(null, ProjectsController.getUploadDestination());
         },
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -87,20 +100,20 @@ export class DesignsController {
   )
   update(
     @Param('id') id: string,
-    @Body() updateDesignDto: UpdateDesignDto,
+    @Body() updateProjectDto: UpdateProjectDto,
     @UploadedFiles() files: any[],
   ) {
-    const newImageUrls = files?.map(file => `/uploads/designs/${file.filename}`) || [];
-    const updateData = newImageUrls.length > 0 
-      ? { ...updateDesignDto, imageUrls: newImageUrls } 
-      : updateDesignDto;
-    return this.designsService.update(id, updateData);
+    const newImageUrls = files?.map(file => `/uploads/projects/${file.filename}`) || [];
+    const updateData = newImageUrls.length > 0
+      ? { ...updateProjectDto, imageUrls: newImageUrls }
+      : updateProjectDto;
+    return this.projectsService.update(id, updateData);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   remove(@Param('id') id: string) {
-    return this.designsService.remove(id);
+    return this.projectsService.remove(id);
   }
 }

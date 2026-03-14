@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { ClipboardList, LayoutGrid, BarChart3, ArrowRight } from "lucide-react";
+import { ClipboardList, LayoutGrid, BarChart3, ArrowRight, FolderOpen } from "lucide-react";
 
 const cards = [
   {
@@ -25,6 +25,17 @@ const cards = [
     borderColor: "border-amber-500/30 hover:border-amber-400/50",
     iconColor: "text-amber-400",
     glowColor: "shadow-[0_0_20px_rgba(245,158,11,0.1)]",
+    featured: false,
+  },
+  {
+    title: "Completed Projects",
+    description: "Showcase finished projects on the landing page gallery",
+    icon: FolderOpen,
+    href: "/admin/projects",
+    gradient: "from-purple-600/20 via-violet-600/10 to-fuchsia-600/10",
+    borderColor: "border-purple-500/30 hover:border-purple-400/50",
+    iconColor: "text-purple-400",
+    glowColor: "shadow-[0_0_20px_rgba(168,85,247,0.1)]",
     featured: false,
   },
   {
@@ -51,7 +62,7 @@ const cardVariants: Variants = {
 
 export function AdminOperationCards() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card, i) => (
         <motion.div
           key={card.href}

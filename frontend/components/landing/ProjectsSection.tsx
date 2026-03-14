@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ExternalLink, Star, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PROJECTS } from "@/constants/projects";
@@ -27,7 +27,6 @@ const ImageFallback = ({ src, alt, className }: { src: string, alt: string, clas
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
 
-  // Handle API URLs vs static URLs
   const getImageSrc = () => {
     if (!src) return "/projects/project_1.png";
     if (src.startsWith("/uploads/")) {
@@ -51,14 +50,19 @@ const ImageFallback = ({ src, alt, className }: { src: string, alt: string, clas
   );
 };
 
-// Separate component for project cards to properly handle useState
-function ProjectCard({ project }: { project: DisplayProject }) {
+// Separate component for project cards
+function ProjectCard({ project, index }: { project: DisplayProject; index: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.12 }}
+      viewport={{ once: true }}
+    >
       <Card
-        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-500 hover:shadow-[0_0_40px_rgba(161,161,170,0.15)] group overflow-hidden flex flex-col cursor-pointer relative"
+        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-600 hover:shadow-[0_0_40px_rgba(161,161,170,0.1)] group overflow-hidden flex flex-col relative cursor-pointer"
         onClick={() => setIsOpen(true)}
       >
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
@@ -69,36 +73,32 @@ function ProjectCard({ project }: { project: DisplayProject }) {
           <ImageFallback
             src={project.imageUrl}
             alt={project.title}
-            className="object-cover relative z-10 transition-transform duration-700 group-hover:scale-110"
+            className="object-cover relative z-10 transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 to-transparent z-20" />
-
           <div className="absolute top-4 left-4 z-30">
             <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-xs font-medium text-zinc-200">
               {project.category}
             </span>
           </div>
         </div>
-
-        <CardContent className="p-6 relative flex-grow flex flex-col justify-between -mt-8 pt-0 z-30 pointer-events-none">
-          <div className="relative pt-4">
+        <CardContent className="p-6 relative flex-grow flex flex-col justify-between">
+          <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
                <div className="flex items-center">
                  {[...Array(5)].map((_, i) => (
                    <Star
                      key={i}
-                     className={`h-3 w-3 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`}
+                     className={`h-4 w-4 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`}
                    />
                  ))}
                </div>
-               <span className="text-xs font-medium text-zinc-300">{project.rating}</span>
-               <span className="text-[10px] text-zinc-500">({project.reviewCount})</span>
+               <span className="text-sm font-medium text-zinc-300">{project.rating}</span>
+               <span className="text-xs text-zinc-500">({project.reviewCount})</span>
             </div>
-            <h3 className="mb-3 text-lg font-semibold text-white group-hover:text-zinc-300 transition-colors flex items-start justify-between">
-              <span className="line-clamp-2">{project.title}</span>
-              <ExternalLink className="h-4 w-4 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1 ml-2" />
+            <h3 className="mb-2 text-xl font-semibold text-zinc-100">
+              {project.title}
             </h3>
-            <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3">
+            <p className="text-zinc-400 text-sm leading-relaxed">
               {project.description}
             </p>
           </div>
@@ -163,7 +163,7 @@ function ProjectCard({ project }: { project: DisplayProject }) {
           </motion.div>
         </div>
       )}
-    </>
+    </motion.div>
   );
 }
 
@@ -197,10 +197,9 @@ function transformApiProject(project: any): DisplayProject {
   };
 }
 
-export default function ProjectsGallery() {
+export function ProjectsSection() {
   const [projects, setProjects] = useState<DisplayProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     async function fetchProjects() {
@@ -212,12 +211,10 @@ export default function ProjectsGallery() {
         if (apiProjects.length > 0) {
           setProjects(apiProjects);
         } else {
-          // Fallback to static data if no API data
           setProjects(PROJECTS.map(transformStaticProject));
         }
       } catch (error) {
         console.error("Failed to fetch projects, using fallback:", error);
-        // Fallback to static data on error
         setProjects(PROJECTS.map(transformStaticProject));
       } finally {
         setIsLoading(false);
@@ -227,114 +224,58 @@ export default function ProjectsGallery() {
     fetchProjects();
   }, []);
 
-  const sortedProjects = [...projects].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  const categories = ["All", ...Array.from(new Set(sortedProjects.map((p) => p.category)))];
-
-  const filteredProjects = sortedProjects.filter((project) =>
-    activeCategory === "All" || project.category === activeCategory
-  );
+  const sortedProjects = [...projects]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black pb-24">
-      {/* Grid overlay */}
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] pointer-events-none" />
-
-      <div className="relative pt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        {/* Navigation Bar */}
-        <nav className="flex items-center justify-between mb-16">
-          <Link href="/">
-            <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 -ml-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
-            <span className="text-xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-              AluMate
-            </span>
-          </div>
-        </nav>
-
-        {/* Header Content */}
-        <div className="max-w-3xl mb-12">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl sm:text-5xl font-bold text-white mb-6"
-          >
-            Our Work Repository
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-lg text-zinc-400 leading-relaxed"
-          >
-            Explore our extensive portfolio of premium aluminium fabrication projects across residential, commercial, and architectural sectors. Every project represents our commitment to precision engineering and quality excellence.
-          </motion.p>
-        </div>
-
-        {/* Filter Categories */}
+    <section id="projects" className="border-t border-zinc-800/50">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex flex-wrap items-center gap-2 mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
         >
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeCategory === category
-                  ? "bg-zinc-100 text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-                  : "bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mb-3">
+            Our Work
+          </p>
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">
+            Featured Projects
+          </h2>
+          <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
+            Discover the quality and precision of our aluminium fabrication in real-world applications
+          </p>
         </motion.div>
 
-        {/* Loading state */}
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
           </div>
         ) : (
-          <>
-            {/* Projects Grid */}
-            <motion.div layout className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-h-[400px]">
-              <AnimatePresence mode="popLayout">
-                {filteredProjects.map((project) => (
-                  <motion.div
-                    key={project.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
-                  >
-                    <ProjectCard project={project} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-
-            {/* Empty state */}
-            {filteredProjects.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-zinc-500 text-lg">No projects found in this category.</p>
-              </div>
-            )}
-          </>
+          <div className="grid gap-8 lg:grid-cols-3">
+            {sortedProjects.map((project, index) => (
+              <ProjectCard key={project.id} project={project} index={index} />
+            ))}
+          </div>
         )}
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          viewport={{ once: true }}
+          className="mt-10 text-center"
+        >
+          <Link href="/projects">
+            <Button variant="outline">
+              View All Projects
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 }

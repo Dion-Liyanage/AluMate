@@ -99,6 +99,7 @@ const quickLinks = [
   { href: "/admin/orders", label: "Manage Orders", icon: ClipboardList },
   { href: "/admin/customers", label: "View Customers", icon: Users },
   { href: "/admin/designs", label: "Design Catalogue", icon: LayoutGrid },
+  { href: "/admin/projects", label: "Completed Projects", icon: FolderOpen },
   { href: "/admin/quotations", label: "Quotations", icon: FileText },
   { href: "/admin/services", label: "Service Requests", icon: Wrench },
 ];
@@ -139,7 +140,7 @@ export default function AdminPage() {
         {/* 3. Statistics Cards */}
         <motion.div
           variants={itemVariants}
-          className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+          className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
         >
           {analyticsCards.map((card) => (
             <Card
