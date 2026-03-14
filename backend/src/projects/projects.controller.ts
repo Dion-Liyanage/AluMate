@@ -10,6 +10,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -47,13 +48,17 @@ export class ProjectsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+      limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
     }),
   )
   create(
     @Body() createProjectDto: CreateProjectDto,
     @UploadedFiles() files: any[],
   ) {
+    const totalSize = files?.reduce((acc, file) => acc + file.size, 0) || 0;
+    if (totalSize > 20 * 1024 * 1024) {
+      throw new BadRequestException('Total file size exceeds 20MB limit for 5 images');
+    }
     const imageUrls = files?.map(file => `/uploads/projects/${file.filename}`) || [];
     return this.projectsService.create({ ...createProjectDto, imageUrls });
   }
@@ -95,7 +100,7 @@ export class ProjectsController {
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
         },
       }),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+      limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
     }),
   )
   update(
@@ -103,6 +108,10 @@ export class ProjectsController {
     @Body() updateProjectDto: UpdateProjectDto,
     @UploadedFiles() files: any[],
   ) {
+    const totalSize = files?.reduce((acc, file) => acc + file.size, 0) || 0;
+    if (totalSize > 20 * 1024 * 1024) {
+      throw new BadRequestException('Total file size exceeds 20MB limit for 5 images');
+    }
     const newImageUrls = files?.map(file => `/uploads/projects/${file.filename}`) || [];
     const updateData = newImageUrls.length > 0
       ? { ...updateProjectDto, imageUrls: newImageUrls }

@@ -31,8 +31,8 @@ interface AddDesignDialogProps {
 export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -40,29 +40,32 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image size must be 10MB or less");
-      e.target.value = "";
+    if (selectedFiles.length + files.length > 5) {
+      toast.error("You can only upload a maximum of 5 images");
       return;
     }
 
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
+    const currentTotalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+    const newFilesTotalSize = files.reduce((acc, f) => acc + f.size, 0);
+
+    if (currentTotalSize + newFilesTotalSize > 20 * 1024 * 1024) {
+      toast.error("Total size of all images cannot exceed 20MB");
+      return;
     }
 
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+
+    setSelectedFiles((prev) => [...prev, ...files]);
+    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
   };
 
-  const removeImage = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setSelectedFile(null);
-    setPreviewUrl(null);
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(previewUrls[index]);
+    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleClear = () => {
@@ -71,11 +74,9 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
       description: "",
       category: "doors",
     });
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setSelectedFile(null);
-    setPreviewUrl(null);
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    setSelectedFiles([]);
+    setPreviewUrls([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,9 +87,9 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
-    if (selectedFile) {
-      submitData.append("images", selectedFile);
-    }
+    selectedFiles.forEach((file) => {
+      submitData.append("images", file);
+    });
 
     try {
       await designsApi.create(submitData);
@@ -162,26 +163,32 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
           <div className="space-y-2">
             <Label>Design Images</Label>
             <div className="grid grid-cols-2 gap-4">
-              {previewUrl && (
-                <div className="relative rounded-lg overflow-hidden border border-zinc-800 aspect-video">
-                  <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
+              {previewUrls.map((url, index) => (
+                <div key={index} className="relative rounded-lg overflow-hidden border border-zinc-800 aspect-video">
+                  <img src={url} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
                   <button
                     type="button"
-                    onClick={removeImage}
+                    onClick={() => removeImage(index)}
                     className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-              )}
-              {!previewUrl && (
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors bg-zinc-900/50 col-span-2 h-32">
+              ))}
+              {previewUrls.length < 5 && (
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors bg-zinc-900/50 h-32 ${previewUrls.length === 0 ? "col-span-2" : ""}`}>
                   <ImageIcon className="h-6 w-6 text-zinc-600 mb-2" />
                   <label className="cursor-pointer text-center">
-                    <span className="text-sky-400 font-medium hover:text-sky-300">Add Image</span>
-                    <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                    <span className="text-sky-400 font-medium hover:text-sky-300 text-sm">Add Image</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileChange}
+                    />
                   </label>
-                  <p className="text-[10px] text-zinc-500 mt-1">PNG, JPG up to 10MB (1 image)</p>
+                  <p className="text-[10px] text-zinc-500 mt-1">PNG, JPG up to 20MB total (Max 5 images)</p>
                 </div>
               )}
             </div>

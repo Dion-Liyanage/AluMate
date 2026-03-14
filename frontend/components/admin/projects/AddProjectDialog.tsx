@@ -38,26 +38,29 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
     description: "",
     category: "Windows",
     location: "",
-    materialUsed: "",
+    completedDate: "",
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const validFiles: File[] = [];
-    const newPreviewUrls: string[] = [];
-
-    for (const file of files) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`${file.name} is too large. Max size is 10MB.`);
-        continue;
-      }
-      validFiles.push(file);
-      newPreviewUrls.push(URL.createObjectURL(file));
+    if (selectedFiles.length + files.length > 5) {
+      toast.error("You can only upload a maximum of 5 images");
+      return;
     }
 
-    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    const currentTotalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+    const newFilesTotalSize = files.reduce((acc, f) => acc + f.size, 0);
+
+    if (currentTotalSize + newFilesTotalSize > 20 * 1024 * 1024) {
+      toast.error("Total size of all images cannot exceed 20MB");
+      return;
+    }
+
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+
+    setSelectedFiles((prev) => [...prev, ...files]);
     setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
   };
 
@@ -73,7 +76,7 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
       description: "",
       category: "Windows",
       location: "",
-      materialUsed: "",
+      completedDate: "",
     });
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
     setSelectedFiles([]);
@@ -97,8 +100,8 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
     if (formData.location) {
       submitData.append("location", formData.location);
     }
-    if (formData.materialUsed) {
-      submitData.append("materialUsed", formData.materialUsed);
+    if (formData.completedDate) {
+      submitData.append("completedAt", formData.completedDate);
     }
     selectedFiles.forEach((file) => {
       submitData.append("images", file);
@@ -188,12 +191,12 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="materialUsed">Material Used (Optional)</Label>
+              <Label htmlFor="completedDate">Completed Date (Optional)</Label>
               <Input
-                id="materialUsed"
-                placeholder="e.g. Premium Black Aluminium"
-                value={formData.materialUsed}
-                onChange={(e) => setFormData({ ...formData, materialUsed: e.target.value })}
+                id="completedDate"
+                type="date"
+                value={formData.completedDate}
+                onChange={(e) => setFormData({ ...formData, completedDate: e.target.value })}
                 className="bg-zinc-900 border-zinc-800 focus:border-zinc-700"
               />
             </div>
@@ -215,7 +218,7 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
                 </div>
               ))}
               {previewUrls.length < 5 && (
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors bg-zinc-900/50 aspect-video">
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors bg-zinc-900/50 aspect-auto col-span-full h-32">
                   <ImageIcon className="h-6 w-6 text-zinc-600 mb-2" />
                   <label className="cursor-pointer text-center">
                     <span className="text-purple-400 font-medium hover:text-purple-300 text-sm">Add Image</span>
@@ -227,7 +230,7 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
                       onChange={handleFileChange}
                     />
                   </label>
-                  <p className="text-[10px] text-zinc-500 mt-1">Max 5 images, 10MB each</p>
+                  <p className="text-[10px] text-zinc-500 mt-1">Max 5 images, 20MB total capacity</p>
                 </div>
               )}
             </div>

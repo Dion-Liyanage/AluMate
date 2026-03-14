@@ -65,11 +65,11 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
       viewport={{ once: true }}
     >
       <Card
-        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-zinc-600 hover:shadow-[0_0_40px_rgba(161,161,170,0.1)] group overflow-hidden flex flex-col relative cursor-pointer"
+        className="h-full bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 transition-all hover:border-purple-500/40 hover:shadow-[0_0_40px_rgba(139,92,246,0.1)] group overflow-hidden flex flex-col relative cursor-pointer"
         onClick={() => setIsOpen(true)}
       >
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none z-0" />
-        <div className="aspect-[4/3] w-full relative overflow-hidden bg-zinc-800 shrink-0 z-10">
+        <div className="relative h-40 w-full overflow-hidden bg-zinc-800 shrink-0 z-10 border-b border-zinc-800">
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
             <span className="text-zinc-600 text-sm">Image not available</span>
           </div>
@@ -84,7 +84,7 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
             </span>
           </div>
         </div>
-        <CardContent className="p-6 relative flex-grow flex flex-col justify-between">
+        <CardContent className="p-4 relative flex-grow flex flex-col justify-between">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
                <div className="flex items-center">
@@ -229,7 +229,7 @@ export function ProjectsSection() {
 
   const sortedProjects = [...projects]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 3);
+    .slice(0, 4);
 
   return (
     <section id="projects" className="border-t border-zinc-800/50">
@@ -257,7 +257,7 @@ export function ProjectsSection() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {sortedProjects.map((project, index) => (
               <ProjectCard key={project.id} project={project} index={index} />
             ))}
