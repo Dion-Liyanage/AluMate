@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Edit, Trash2, FolderOpen, Star, MapPin, Eye, EyeOff } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 import { projectsApi } from "@/lib/api";
 import { toast } from "sonner";
 import type { Project } from "@/types";
@@ -258,14 +259,14 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
                                 </div>
                                 <div className="space-y-2">
                                   <Label htmlFor="edit-completedDate">Completed Date (Optional)</Label>
-                                  <Input
+                                  <DatePicker
                                     id="edit-completedDate"
-                                    type="date"
                                     value={formData.completedDate}
-                                    onChange={(e) =>
-                                      setFormData({ ...formData, completedDate: e.target.value })
+                                    onChange={(val) =>
+                                      setFormData({ ...formData, completedDate: val })
                                     }
-                                    className="bg-zinc-900 border-zinc-800"
+                                    placeholder="Pick a date"
+                                    className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800"
                                   />
                                 </div>
                               </div>

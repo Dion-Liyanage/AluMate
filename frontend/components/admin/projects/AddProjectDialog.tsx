@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Plus, Image as ImageIcon, X } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 import { projectsApi } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -192,12 +193,12 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="completedDate">Completed Date (Optional)</Label>
-              <Input
+              <DatePicker
                 id="completedDate"
-                type="date"
                 value={formData.completedDate}
-                onChange={(e) => setFormData({ ...formData, completedDate: e.target.value })}
-                className="bg-zinc-900 border-zinc-800 focus:border-zinc-700"
+                onChange={(val) => setFormData({ ...formData, completedDate: val })}
+                placeholder="Pick a date"
+                className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 focus:border-zinc-700"
               />
             </div>
           </div>
