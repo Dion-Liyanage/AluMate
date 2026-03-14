@@ -36,11 +36,14 @@ const ImageFallback = ({ src, alt, className }: { src: string, alt: string, clas
     return hasError ? src.replace('.png', '.jpg') : imgSrc;
   };
 
+  const resolvedSrc = getImageSrc();
+
   return (
     <Image
-      src={getImageSrc()}
+      src={resolvedSrc}
       alt={alt}
       fill
+      unoptimized={resolvedSrc.startsWith("http://")}
       className={className}
       onError={() => {
         if (!hasError) {
