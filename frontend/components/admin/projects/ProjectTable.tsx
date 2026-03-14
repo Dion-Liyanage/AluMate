@@ -131,7 +131,7 @@ export function ProjectTable({ projects, onRefresh, isStaticData = false }: Proj
                   <img
                     src={
                       project.imageUrls[0].startsWith("/")
-                        ? `http://localhost:4000${project.imageUrls[0]}`
+                        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${project.imageUrls[0]}`
                         : project.imageUrls[0]
                     }
                     alt={project.title}

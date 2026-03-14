@@ -22,6 +22,8 @@ interface DisplayProject {
   createdAt: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 // Component to handle falling back to jpg if png doesn't exist
 const ImageFallback = ({ src, alt, className }: { src: string, alt: string, className?: string }) => {
   const [imgSrc, setImgSrc] = useState(src);
@@ -30,7 +32,7 @@ const ImageFallback = ({ src, alt, className }: { src: string, alt: string, clas
   const getImageSrc = () => {
     if (!src) return "/projects/project_1.png";
     if (src.startsWith("/uploads/")) {
-      return `http://localhost:4000${src}`;
+      return `${API_BASE_URL}${src}`;
     }
     return hasError ? src.replace('.png', '.jpg') : imgSrc;
   };
