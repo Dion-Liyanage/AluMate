@@ -4,7 +4,7 @@
  */
 
 import axios from "axios";
-import type { User, Order, Quotation, ServiceRequest, InventoryItem, Notification } from "@/types";
+import type { User, Order, Quotation, ServiceRequest, InventoryItem, Notification, Project } from "@/types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
@@ -419,6 +419,48 @@ export const designsApi = {
   },
   delete: async (id: string) => {
     const res = await apiClient.delete<ApiResponse<any>>(`/designs/${id}`);
+    return res.data;
+  },
+};
+
+// ---------- Projects API ----------
+
+export const projectsApi = {
+  getAll: async (params?: { category?: string }) => {
+    const res = await apiClient.get<any>('/projects', { params });
+    if (Array.isArray(res.data)) {
+      return { success: true, data: res.data } as ApiResponse<Project[]>;
+    }
+    return res.data as ApiResponse<Project[]>;
+  },
+  getAllAdmin: async (params?: { category?: string }) => {
+    const res = await apiClient.get<any>('/projects/admin', { params });
+    if (Array.isArray(res.data)) {
+      return { success: true, data: res.data } as ApiResponse<Project[]>;
+    }
+    return res.data as ApiResponse<Project[]>;
+  },
+  getById: async (id: string) => {
+    const res = await apiClient.get<any>(`/projects/${id}`);
+    if (res.data && typeof res.data === 'object' && 'success' in res.data) {
+      return res.data as ApiResponse<Project>;
+    }
+    return { success: true, data: res.data } as ApiResponse<Project>;
+  },
+  getCount: async () => {
+    const res = await apiClient.get<{ count: number }>('/projects/count');
+    return res.data;
+  },
+  create: async (formData: FormData) => {
+    const res = await apiClient.post<ApiResponse<Project>>('/projects', formData);
+    return res.data;
+  },
+  update: async (id: string, formData: FormData) => {
+    const res = await apiClient.patch<ApiResponse<Project>>(`/projects/${id}`, formData);
+    return res.data;
+  },
+  delete: async (id: string) => {
+    const res = await apiClient.delete<ApiResponse<any>>(`/projects/${id}`);
     return res.data;
   },
 };

@@ -75,3 +75,25 @@ export interface Notification {
   isRead: boolean;
   createdAt: Date;
 }
+
+export interface ProjectFeedback {
+  name: string;
+  comment: string;
+  rating: number;
+}
+
+export interface Project {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  imageUrls: string[];
+  rating: number;
+  reviewCount: number;
+  feedbacks: ProjectFeedback[];
+  location?: string;
+  materialUsed?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
