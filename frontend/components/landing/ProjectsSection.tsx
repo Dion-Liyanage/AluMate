@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Star, X } from "lucide-react";
+import { ArrowRight, Star, X, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PROJECTS } from "@/constants/projects";
@@ -19,6 +19,8 @@ interface DisplayProject {
   rating: number;
   reviewCount: number;
   feedbacks: { name: string; comment: string; rating: number }[];
+  location?: string;
+  completedAt?: string;
   createdAt: string;
 }
 
@@ -140,6 +142,26 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
               </div>
             </div>
             <div className="p-8">
+              {/* Project Details */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-zinc-100 mb-3 border-b border-zinc-800 pb-2">About This Project</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">{project.description}</p>
+                <div className="flex flex-wrap items-center gap-4 mt-4">
+                  {project.location && (
+                    <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+                      <MapPin className="h-4 w-4 text-zinc-500" />
+                      <span>{project.location}</span>
+                    </div>
+                  )}
+                  {project.completedAt && (
+                    <div className="flex items-center gap-1.5 text-sm text-zinc-400">
+                      <Calendar className="h-4 w-4 text-zinc-500" />
+                      <span>Completed {new Date(project.completedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <h3 className="text-lg font-semibold text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Customer Feedback</h3>
               <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {project.feedbacks && project.feedbacks.length > 0 ? (
@@ -196,6 +218,8 @@ function transformApiProject(project: any): DisplayProject {
     rating: project.rating || 0,
     reviewCount: project.reviewCount || 0,
     feedbacks: project.feedbacks || [],
+    location: project.location || "",
+    completedAt: project.completedAt || "",
     createdAt: project.createdAt,
   };
 }
