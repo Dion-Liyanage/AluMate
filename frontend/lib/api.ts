@@ -7,7 +7,7 @@ import axios from "axios";
 import type { User, Order, Quotation, ServiceRequest, InventoryItem, Notification } from "@/types";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
 // Create axios instance
 const apiClient = axios.create({
@@ -20,6 +20,12 @@ const apiClient = axios.create({
 // Request interceptor — attach JWT token
 apiClient.interceptors.request.use(
   (config) => {
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers["Content-Type"];
+      }
+    }
+
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("alumate_token");
       if (token) {
@@ -382,6 +388,37 @@ export const adminCustomersApi = {
       `/admin/customers/${id}`,
       data
     );
+    return res.data;
+  },
+};
+
+// ---------- Designs Catalogue API ----------
+
+export const designsApi = {
+  getAll: async (params?: { category?: string }) => {
+    const res = await apiClient.get<any>('/designs', { params });
+    if (Array.isArray(res.data)) {
+      return { success: true, data: res.data } as ApiResponse<any[]>;
+    }
+    return res.data as ApiResponse<any[]>;
+  },
+  getById: async (id: string) => {
+    const res = await apiClient.get<any>(`/designs/${id}`);
+    if (res.data && typeof res.data === 'object' && 'success' in res.data) {
+      return res.data as ApiResponse<any>;
+    }
+    return { success: true, data: res.data } as ApiResponse<any>;
+  },
+  create: async (formData: FormData) => {
+    const res = await apiClient.post<ApiResponse<any>>('/designs', formData);
+    return res.data;
+  },
+  update: async (id: string, formData: FormData) => {
+    const res = await apiClient.patch<ApiResponse<any>>(`/designs/${id}`, formData);
+    return res.data;
+  },
+  delete: async (id: string) => {
+    const res = await apiClient.delete<ApiResponse<any>>(`/designs/${id}`);
     return res.data;
   },
 };

@@ -1,16 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { AppController } from './app.controller';
 
 // Feature Modules 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-// import { OrdersModule } from './orders/orders.module';
-// import { QuotationsModule } from './quotations/quotations.module';
-// import { ServicesModule } from './services/services.module';
-// import { InventoryModule } from './inventory/inventory.module';
-// import { NotificationsModule } from './notifications/notifications.module';
+import { OrdersModule } from './orders/orders.module';
+import { QuotationsModule } from './quotations/quotations.module';
+import { ServicesModule } from './services/services.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { DesignsModule } from './designs/designs.module';
 
 @Module({
   imports: [
@@ -18,6 +21,10 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
 
     // MongoDB connection via Mongoose
@@ -34,13 +41,12 @@ import { AuthModule } from './auth/auth.module';
     // Feature modules
     UsersModule,
     AuthModule,
-    
-    // (uncomment when needed)
-    // OrdersModule,
-    // QuotationsModule,
-    // ServicesModule,
-    // InventoryModule,
-    // NotificationsModule,
+    OrdersModule,
+    QuotationsModule,
+    ServicesModule,
+    InventoryModule,
+    NotificationsModule,
+    DesignsModule,
   ],
   controllers: [AppController],
   providers: [],
