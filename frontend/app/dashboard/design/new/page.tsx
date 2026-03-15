@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { PenTool, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +17,12 @@ const productTypes = [
 ];
 
 export default function DesignPage() {
+  const router = useRouter();
+
+  const handleSelect = (productName: string) => {
+    router.push(`/dashboard/design/studio?type=${productName.toLowerCase()}`);
+  };
+
   return (
     <DashboardLayout title="Customize Product">
       <motion.div
@@ -43,7 +50,10 @@ export default function DesignPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
             >
-              <Card className="h-full relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group hover:shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+              <Card
+                onClick={() => handleSelect(type.name)}
+                className="h-full relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group hover:shadow-[0_0_20px_rgba(139,92,246,0.1)]"
+              >
                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
                 <CardContent className="relative p-6 min-h-[180px] flex flex-col">
                   <div className="text-4xl mb-3">{type.emoji}</div>
@@ -52,21 +62,13 @@ export default function DesignPage() {
                   </h3>
                   <p className="mt-1 text-sm text-zinc-500">{type.description}</p>
                   <div className="mt-auto pt-3 flex items-center gap-1 text-sm text-zinc-500 group-hover:text-violet-400 transition-colors">
-                    Select
+                    Start Designing
                     <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
-        </div>
-
-        {/* Coming soon note */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center">
-          <p className="text-sm text-zinc-500">
-            🚧 Design Studio integration (Fabric.js / Three.js) coming soon.
-            Product selection will link to the full design editor.
-          </p>
         </div>
       </motion.div>
     </DashboardLayout>
