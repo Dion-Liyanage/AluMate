@@ -28,6 +28,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/contexts/SidebarContext";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -127,6 +128,7 @@ const adminMenuGroups: MenuGroup[] = [
 ];
 
 export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
+  const { setIsCollapsed } = useSidebar();
   const pathname = usePathname();
 
   const isActive = (href: string) => {
@@ -194,6 +196,7 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
         initial={false}
         animate={{ width: collapsed ? 72 : 256 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
+        onMouseEnter={() => collapsed && setIsCollapsed(false)}
         className="fixed left-0 top-0 z-40 h-screen bg-zinc-950 border-r border-zinc-800/50 flex flex-col"
       >
         {/* Brand */}

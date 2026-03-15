@@ -6,6 +6,7 @@ import { Sidebar } from "./Sidebar";
 import { TopNav } from "./TopNav";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const { user } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const role = (user?.role as "customer" | "admin") || "customer";
@@ -25,8 +26,8 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
       <div className="hidden lg:block">
         <Sidebar
           role={role}
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          collapsed={isCollapsed}
+          onToggle={toggleSidebar}
         />
       </div>
 
@@ -48,7 +49,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
       <motion.div
         initial={false}
         animate={{
-          marginLeft: sidebarCollapsed ? 72 : 256,
+          marginLeft: isCollapsed ? 72 : 256,
         }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
         className="hidden lg:block"
