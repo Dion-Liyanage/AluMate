@@ -16,14 +16,21 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const { user } = useAuth();
   const { isCollapsed, toggleSidebar } = useSidebar();
+  const [isHovered, setIsHovered] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const role = (user?.role as "customer" | "admin") || "customer";
 
+  const isEffectivelyCollapsed = isCollapsed && !isHovered;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
       {/* Desktop sidebar */}
-      <div className="hidden lg:block">
+      <div 
+        className="hidden lg:block"
+        onMouseEnter={() => isCollapsed && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Sidebar
           role={role}
           collapsed={isCollapsed}
@@ -49,7 +56,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
       <motion.div
         initial={false}
         animate={{
-          marginLeft: isCollapsed ? 72 : 256,
+          marginLeft: isEffectivelyCollapsed ? 72 : 256,
         }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
         className="hidden lg:block"
