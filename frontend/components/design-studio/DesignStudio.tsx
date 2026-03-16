@@ -11,7 +11,6 @@ import ProductComponentLibrary from "./ProductComponentLibrary";
 import ViewToggle from "./ViewToggle";
 import DesignToolbar from "./DesignToolbar";
 import type { FabricCanvasHandle } from "./FabricCanvas";
-import { useSidebar } from "@/contexts/SidebarContext";
 
 // Dynamic imports to avoid SSR issues with canvas/WebGL
 const FabricCanvas = dynamic(() => import("./FabricCanvas"), {
@@ -57,7 +56,6 @@ const productLabels: Record<string, string> = {
 };
 
 export default function DesignStudio({ productType }: DesignStudioProps) {
-  const { setIsCollapsed } = useSidebar();
   const [activeView, setActiveView] = useState<"2d" | "3d">("2d");
   const [hasSelection, setHasSelection] = useState(false);
   const [threeObjects, setThreeObjects] = useState<ThreeObject[]>([]);
@@ -97,10 +95,8 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
         label: comp.name,
         componentId: comp.id,
       });
-      // Automatically collapse sidebar when a component is selected
-      setIsCollapsed(true);
     },
-    [setIsCollapsed]
+    []
   );
 
   const handleSave = useCallback(() => {

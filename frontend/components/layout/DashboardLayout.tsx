@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { TopNav } from "./TopNav";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -15,29 +16,41 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const { user } = useAuth();
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed, setIsCollapsed, toggleSidebar } = useSidebar();
+  const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const role = (user?.role as "customer" | "admin") || "customer";
   const isAdmin = role === "admin";
+  const isDesignStudio = pathname.startsWith("/dashboard/design/studio");
+  const hideCustomerSidebar = !isAdmin && isDesignStudio;
 
-  const isEffectivelyCollapsed = !isAdmin && isCollapsed && !isHovered;
+  useEffect(() => {
+    if (!isAdmin && !isDesignStudio && isCollapsed) {
+      setIsCollapsed(false);
+    }
+  }, [isAdmin, isDesignStudio, isCollapsed, setIsCollapsed]);
+
+  const isEffectivelyCollapsed =
+    !isAdmin && !hideCustomerSidebar && isCollapsed && !isHovered;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
       {/* Desktop sidebar */}
-      <div 
-        className="hidden lg:block"
-        onMouseEnter={() => !isAdmin && isCollapsed && setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <Sidebar
-          role={role}
-          collapsed={isAdmin ? false : isCollapsed}
-          onToggle={isAdmin ? () => {} : toggleSidebar}
-        />
-      </div>
+      {!hideCustomerSidebar && (
+        <div
+          className="hidden lg:block"
+          onMouseEnter={() => !isAdmin && isCollapsed && setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <Sidebar
+            role={role}
+            collapsed={isAdmin ? false : isCollapsed}
+            onToggle={isAdmin ? () => {} : toggleSidebar}
+          />
+        </div>
+      )}
 
       {/* Mobile sidebar */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -57,7 +70,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
       <motion.div
         initial={false}
         animate={{
-          marginLeft: isEffectivelyCollapsed ? 72 : 256,
+          marginLeft: hideCustomerSidebar ? 0 : isEffectivelyCollapsed ? 72 : 256,
         }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
         className="hidden lg:block"

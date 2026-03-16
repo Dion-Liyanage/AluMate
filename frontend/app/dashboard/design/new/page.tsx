@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { PenTool, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSidebar } from "@/contexts/SidebarContext";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,10 +18,8 @@ const productTypes = [
 
 export default function DesignPage() {
   const router = useRouter();
-  const { setIsCollapsed } = useSidebar();
 
   const handleSelect = (productName: string) => {
-    setIsCollapsed(true);
     router.push(`/dashboard/design/studio?type=${productName.toLowerCase()}`);
   };
 
