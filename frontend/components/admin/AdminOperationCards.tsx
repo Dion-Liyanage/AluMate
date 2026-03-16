@@ -38,17 +38,6 @@ const cards = [
     glowColor: "shadow-[0_0_20px_rgba(168,85,247,0.1)]",
     featured: false,
   },
-  {
-    title: "Analytics",
-    description: "Monitor business growth, revenue, and performance metrics",
-    icon: BarChart3,
-    href: "/admin/analytics",
-    gradient: "from-cyan-600/20 via-sky-600/10 to-blue-600/10",
-    borderColor: "border-cyan-500/30 hover:border-cyan-400/50",
-    iconColor: "text-cyan-400",
-    glowColor: "shadow-[0_0_20px_rgba(6,182,212,0.1)]",
-    featured: false,
-  },
 ];
 
 const cardVariants: Variants = {
@@ -62,7 +51,7 @@ const cardVariants: Variants = {
 
 export function AdminOperationCards() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card, i) => (
         <motion.div
           key={card.href}

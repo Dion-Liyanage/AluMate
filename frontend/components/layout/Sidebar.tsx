@@ -10,16 +10,12 @@ import {
   FileText,
   Wrench,
   User,
-  Package,
   Users,
   BarChart3,
   Megaphone,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  Palette,
   PenTool,
-  Save,
   LayoutGrid,
   ShoppingCart,
   Ruler,
@@ -127,7 +123,12 @@ const adminMenuGroups: MenuGroup[] = [
 ];
 
 export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const pathname = usePathname();
+  const allowCollapse = role !== "admin";
+
+  // Effectively collapsed if the global state is collapsed AND we are not hovering
+  const isEffectivelyCollapsed = allowCollapse && collapsed && !isHovered;
 
   const isActive = (href: string) => {
     if (href === "/admin" || href === "/dashboard") {
@@ -156,7 +157,7 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
           )}
         />
         <AnimatePresence>
-          {!collapsed && (
+          {!isEffectivelyCollapsed && (
             <motion.span
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
@@ -171,7 +172,7 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
       </Link>
     );
 
-    if (collapsed) {
+    if (isEffectivelyCollapsed) {
       return (
         <Tooltip key={item.href}>
           <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
@@ -192,8 +193,10 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     <TooltipProvider delayDuration={0}>
       <motion.aside
         initial={false}
-        animate={{ width: collapsed ? 72 : 256 }}
+        animate={{ width: isEffectivelyCollapsed ? 72 : 256 }}
         transition={{ duration: 0.2, ease: "easeInOut" }}
+        onMouseEnter={() => allowCollapse && setIsHovered(true)}
+        onMouseLeave={() => allowCollapse && setIsHovered(false)}
         className="fixed left-0 top-0 z-40 h-screen bg-zinc-950 border-r border-zinc-800/50 flex flex-col"
       >
         {/* Brand */}
@@ -204,7 +207,7 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
           >
             <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
             <AnimatePresence>
-              {!collapsed && (
+              {!isEffectivelyCollapsed && (
                 <motion.span
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: "auto" }}
@@ -225,12 +228,12 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
             {(role === "admin" ? adminMenuGroups : customerMenuGroups).map(
               (group, idx) => (
                 <div key={group.title || idx}>
-                  {group.title && !collapsed && (
+                  {group.title && !isEffectivelyCollapsed && (
                     <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
                       {group.title}
                     </p>
                   )}
-                  {group.title && collapsed && (
+                  {group.title && isEffectivelyCollapsed && (
                     <Separator className="bg-zinc-800/50 my-2" />
                   )}
                   <div className="space-y-1">
@@ -242,26 +245,30 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
           </div>
         </nav>
 
-        <Separator className="bg-zinc-800/50" />
+        {allowCollapse && (
+          <>
+            <Separator className="bg-zinc-800/50" />
 
-        {/* Collapse toggle */}
-        <div className="p-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="w-full justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
-          >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <>
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                <span>Collapse</span>
-              </>
-            )}
-          </Button>
-        </div>
+            {/* Collapse toggle */}
+            <div className="p-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggle}
+                className="w-full justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              >
+                {isEffectivelyCollapsed ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <>
+                    <ChevronLeft className="h-4 w-4 mr-2" />
+                    <span>Collapse</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </>
+        )}
       </motion.aside>
     </TooltipProvider>
   );
