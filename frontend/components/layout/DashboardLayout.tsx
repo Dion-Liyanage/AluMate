@@ -20,21 +20,22 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const role = (user?.role as "customer" | "admin") || "customer";
+  const isAdmin = role === "admin";
 
-  const isEffectivelyCollapsed = isCollapsed && !isHovered;
+  const isEffectivelyCollapsed = !isAdmin && isCollapsed && !isHovered;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
       {/* Desktop sidebar */}
       <div 
         className="hidden lg:block"
-        onMouseEnter={() => isCollapsed && setIsHovered(true)}
+        onMouseEnter={() => !isAdmin && isCollapsed && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <Sidebar
           role={role}
-          collapsed={isCollapsed}
-          onToggle={toggleSidebar}
+          collapsed={isAdmin ? false : isCollapsed}
+          onToggle={isAdmin ? () => {} : toggleSidebar}
         />
       </div>
 
