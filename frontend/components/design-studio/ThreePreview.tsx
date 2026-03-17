@@ -39,7 +39,7 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
 
     // Scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#0a0a0b");
+    scene.background = new THREE.Color("#f5f5f4");
     sceneRef.current = scene;
 
     // Camera
@@ -61,14 +61,17 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
     controlsRef.current = controls;
 
     // Lights
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambient = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambient);
-    const directional = new THREE.DirectionalLight(0xffffff, 0.8);
-    directional.position.set(5, 10, 5);
+    const directional = new THREE.DirectionalLight(0xfffbeb, 1.15);
+    directional.position.set(6, 10, 8);
     scene.add(directional);
+    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.7);
+    fillLight.position.set(-6, 6, 4);
+    scene.add(fillLight);
 
     // Grid helper
-    const grid = new THREE.GridHelper(10, 20, 0x27272a, 0x1c1c1e);
+    const grid = new THREE.GridHelper(10, 20, 0xcbd5e1, 0xe7e5e4);
     scene.add(grid);
 
     // Group for design objects
@@ -136,8 +139,8 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
         color,
         transparent: obj.opacity < 1,
         opacity: obj.opacity,
-        metalness: 0.4,
-        roughness: 0.5,
+        metalness: 0.28,
+        roughness: 0.38,
       });
 
       const mesh = new THREE.Mesh(geometry, material);
@@ -149,7 +152,5 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
     });
   }, [objects]);
 
-  return (
-    <div ref={mountRef} className="w-full h-full min-h-[400px]" />
-  );
+  return <div ref={mountRef} className="h-full min-h-[400px] w-full bg-stone-100" />;
 }

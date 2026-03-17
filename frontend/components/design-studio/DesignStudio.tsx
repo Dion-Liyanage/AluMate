@@ -16,8 +16,8 @@ import type { FabricCanvasHandle } from "./FabricCanvas";
 const FabricCanvas = dynamic(() => import("./FabricCanvas"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center w-full h-full min-h-[400px] bg-zinc-900">
-      <Loader2 className="h-8 w-8 text-violet-400 animate-spin" />
+    <div className="flex items-center justify-center w-full h-full min-h-[400px] bg-stone-100">
+      <Loader2 className="h-8 w-8 text-sky-600 animate-spin" />
     </div>
   ),
 });
@@ -25,8 +25,8 @@ const FabricCanvas = dynamic(() => import("./FabricCanvas"), {
 const ThreePreview = dynamic(() => import("./ThreePreview"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center w-full h-full min-h-[400px] bg-zinc-900">
-      <Loader2 className="h-8 w-8 text-violet-400 animate-spin" />
+    <div className="flex items-center justify-center w-full h-full min-h-[400px] bg-stone-100">
+      <Loader2 className="h-8 w-8 text-sky-600 animate-spin" />
     </div>
   ),
 });
@@ -137,21 +137,21 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
+    <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
       {/* Studio header */}
-      <div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur flex-wrap">
+      <div className="flex items-center justify-between gap-4 border-b border-stone-200 bg-stone-50/95 px-4 py-3 backdrop-blur flex-wrap">
         <div className="flex items-center gap-3">
           <Link
             href="/dashboard/design/new"
-            className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-stone-500 transition-colors hover:text-stone-900"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
           </Link>
-          <div className="w-px h-5 bg-zinc-700" />
-          <h2 className="text-lg font-semibold text-zinc-100">
+          <div className="h-5 w-px bg-stone-300" />
+          <h2 className="text-lg font-semibold text-stone-900">
             Design Studio
-            <span className="ml-2 text-sm font-normal text-violet-400">
+            <span className="ml-2 text-sm font-normal text-sky-600">
               {productLabels[productType] ?? "Custom"}
             </span>
           </h2>
@@ -162,7 +162,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
 
       {/* Toolbar (visible in 2D mode) */}
       {activeView === "2d" && (
-        <div className="px-4 py-2 border-b border-zinc-800 bg-zinc-900/50">
+        <div className="border-b border-stone-200 bg-white px-4 py-2">
           <DesignToolbar
             hasSelection={hasSelection}
             onDelete={() => fabricRef.current?.deleteSelected()}
@@ -178,7 +178,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
       )}
 
       {/* Main area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex flex-1 overflow-hidden bg-stone-100">
         <AnimatePresence mode="wait">
           {activeView === "2d" ? (
             <motion.div
@@ -190,7 +190,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
               className="flex flex-1 overflow-hidden"
             >
               {/* Component library sidebar */}
-              <div className="w-52 flex-shrink-0 border-r border-zinc-800 bg-zinc-950/60 overflow-hidden flex flex-col">
+              <div className="flex w-52 flex-shrink-0 flex-col overflow-hidden border-r border-stone-200 bg-stone-50">
                 <ProductComponentLibrary
                   components={components}
                   onAddComponent={handleAddComponent}
@@ -198,7 +198,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
               </div>
 
               {/* Fabric canvas */}
-              <div className="flex-1 relative">
+              <div className="relative flex-1 bg-white">
                 <FabricCanvas
                   ref={fabricRef}
                   onSelectionChange={setHasSelection}
@@ -213,7 +213,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="flex-1"
+              className="flex-1 bg-white"
             >
               <ThreePreview objects={threeObjects} />
             </motion.div>

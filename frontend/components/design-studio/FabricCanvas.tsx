@@ -75,7 +75,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
 
       for (let x = 0; x <= width; x += GRID_SIZE) {
         const line: AnyObj = new fabric.Line([x, 0, x, height], {
-          stroke: "#27272a",
+          stroke: "#d6d3d1",
           strokeWidth: 0.5,
           selectable: false,
           evented: false,
@@ -87,7 +87,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
       }
       for (let y = 0; y <= height; y += GRID_SIZE) {
         const line: AnyObj = new fabric.Line([0, y, width, y], {
-          stroke: "#27272a",
+          stroke: "#d6d3d1",
           strokeWidth: 0.5,
           selectable: false,
           evented: false,
@@ -110,7 +110,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
       const canvas = new fabric.Canvas(canvasElRef.current, {
         width: w,
         height: h,
-        backgroundColor: "#18181b",
+        backgroundColor: "#fafaf9",
         selection: true,
         preserveObjectStacking: true,
       });
@@ -214,9 +214,9 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
           rx: opts.rx ?? 0,
           ry: opts.ry ?? 0,
           opacity: opts.opacity ?? 1,
-          cornerColor: "#8b5cf6",
-          cornerStrokeColor: "#8b5cf6",
-          borderColor: "#8b5cf6",
+          cornerColor: "#0284c7",
+          cornerStrokeColor: "#0284c7",
+          borderColor: "#0284c7",
           transparentCorners: false,
           cornerSize: 8,
         });
@@ -225,7 +225,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
 
         const label = new fabric.FabricText(opts.label, {
           fontSize: 11,
-          fill: "#a1a1aa",
+          fill: "#57534e",
           fontFamily: "sans-serif",
           originX: "center",
           originY: "center",
@@ -238,9 +238,9 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
         const group: AnyObj = new fabric.Group([rect, label], {
           left: rect.left,
           top: rect.top,
-          cornerColor: "#8b5cf6",
-          cornerStrokeColor: "#8b5cf6",
-          borderColor: "#8b5cf6",
+          cornerColor: "#0284c7",
+          cornerStrokeColor: "#0284c7",
+          borderColor: "#0284c7",
           transparentCorners: false,
           cornerSize: 8,
         });
