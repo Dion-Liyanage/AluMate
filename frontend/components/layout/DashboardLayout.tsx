@@ -16,7 +16,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const { user } = useAuth();
-  const { isCollapsed, setIsCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed, setIsCollapsed } = useSidebar();
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,7 +58,6 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
         <Sidebar
           role={role}
           collapsed={isAdmin ? false : isCollapsed}
-          onToggle={isAdmin ? () => {} : toggleSidebar}
         />
       </div>
 
@@ -71,7 +70,6 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           <Sidebar
             role={role}
             collapsed={false}
-            onToggle={() => setMobileMenuOpen(false)}
           />
         </SheetContent>
       </Sheet>
