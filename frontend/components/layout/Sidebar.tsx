@@ -13,8 +13,6 @@ import {
   Users,
   BarChart3,
   Megaphone,
-  ChevronLeft,
-  ChevronRight,
   PenTool,
   LayoutGrid,
   ShoppingCart,
@@ -24,7 +22,6 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -36,7 +33,6 @@ import {
 interface SidebarProps {
   role: "customer" | "admin";
   collapsed: boolean;
-  onToggle: () => void;
 }
 
 interface MenuItem {
@@ -122,7 +118,7 @@ const adminMenuGroups: MenuGroup[] = [
   },
 ];
 
-export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
+export function Sidebar({ role, collapsed }: SidebarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const pathname = usePathname();
   const allowCollapse = role !== "admin";
@@ -245,30 +241,6 @@ export function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
           </div>
         </nav>
 
-        {allowCollapse && (
-          <>
-            <Separator className="bg-zinc-800/50" />
-
-            {/* Collapse toggle */}
-            <div className="p-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggle}
-                className="w-full justify-center text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
-              >
-                {isEffectivelyCollapsed ? (
-                  <ChevronRight className="h-4 w-4" />
-                ) : (
-                  <>
-                    <ChevronLeft className="h-4 w-4 mr-2" />
-                    <span>Collapse</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          </>
-        )}
       </motion.aside>
     </TooltipProvider>
   );
