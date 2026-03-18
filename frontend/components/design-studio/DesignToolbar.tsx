@@ -37,10 +37,10 @@ export default function DesignToolbar({
   const btnBase =
     "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-all";
   const btnDefault =
-    "border-zinc-700 bg-zinc-800/60 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100";
-  const btnDisabled = "border-zinc-800 bg-zinc-900/40 text-zinc-600 cursor-not-allowed";
+    "border-stone-300 bg-white text-stone-700 shadow-sm hover:border-stone-400 hover:bg-stone-100 hover:text-stone-950";
+  const btnDisabled = "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400";
   const btnAccent =
-    "border-violet-500/40 bg-violet-600/20 text-violet-300 hover:bg-violet-600/30 hover:text-violet-200";
+    "border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800";
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
@@ -51,7 +51,7 @@ export default function DesignToolbar({
         <Redo2 className="h-3.5 w-3.5" /> Redo
       </button>
 
-      <div className="w-px h-5 bg-zinc-700 mx-1" />
+      <div className="mx-1 h-5 w-px bg-stone-300" />
 
       <button
         onClick={onDelete}
@@ -70,7 +70,7 @@ export default function DesignToolbar({
         <Copy className="h-3.5 w-3.5" /> Duplicate
       </button>
 
-      <div className="w-px h-5 bg-zinc-700 mx-1" />
+      <div className="mx-1 h-5 w-px bg-stone-300" />
 
       <button onClick={onToggleGrid} className={`${btnBase} ${btnDefault}`} title="Toggle grid">
         <Grid3X3 className="h-3.5 w-3.5" /> Grid
