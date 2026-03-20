@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import { MapPin } from "lucide-react";
+import { MapPin, Ruler } from "lucide-react";
 
 import { motion } from "framer-motion";
 
@@ -75,21 +75,36 @@ export function OnSiteVisitForm() {
       animate="visible"
     >
       <motion.div variants={itemVariants}>
-        <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 shadow-xl overflow-hidden relative">
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+        <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-fuchsia-950/40 border-zinc-800 shadow-xl overflow-hidden relative group">
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite]" />
           
+          {/* Decorative background glow (Fuchsia) */}
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-fuchsia-500/30 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] opacity-50" />
+
+          {/* Decorative background icon (Fuchsia) */}
+          <div className="absolute top-8 right-8 opacity-30 pointer-events-none group-hover:opacity-40 transition-opacity">
+            <MapPin className="w-48 h-48 text-fuchsia-300" />
+          </div>
+
           <CardHeader className="relative pb-4">
             <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-2xl text-zinc-100">Schedule Measurement</CardTitle>
-                <CardDescription className="text-zinc-400 mt-1">
-                  Book our experts to visit your location for precise measurements and consultation.
-                </CardDescription>
+              <div className="flex gap-4">
+                <div className="mt-1 h-12 w-12 rounded-xl bg-fuchsia-500/30 flex items-center justify-center border border-fuchsia-500/40 shadow-[0_0_15px_rgba(217,70,239,0.3)]">
+                  <Ruler className="h-6 w-6 text-fuchsia-100" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl text-zinc-100">Schedule Measurement</CardTitle>
+                  <CardDescription className="text-zinc-400 mt-1">
+                    Book our experts to visit your location for precise measurements and consultation.
+                  </CardDescription>
+                </div>
               </div>
               {status !== "Draft" && <RequestStatusBadge status={status} />}
             </div>
           </CardHeader>
-          <CardContent className="relative space-y-6">
+          <CardContent className="relative space-y-6 focus-within:z-10">
             {/* Scheduling Section */}
             <div className="grid gap-6 md:grid-cols-2">
               <DateSelector value={selectedDate} onChange={(val) => {
