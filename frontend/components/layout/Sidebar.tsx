@@ -69,7 +69,7 @@ const customerMenuGroups: MenuGroup[] = [
   {
     title: "Services",
     items: [
-      { href: "/dashboard/services/measurement", icon: Ruler, label: "On Site Visit" },
+      { href: "/dashboard/services/on-site-visit", icon: Ruler, label: "On Site Visit" },
       { href: "/dashboard/services/maintenance", icon: Hammer, label: "Repairs" },
     ],
   },
