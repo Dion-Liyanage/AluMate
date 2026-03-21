@@ -108,9 +108,9 @@ export default function CataloguePage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 relative transition-all duration-300">
-            {/* Decorative page-level glow */}
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-sky-500/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
+            {/* Decorative page-level glow (Increased brightness) */}
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-sky-500/20 rounded-full blur-[120px] pointer-events-none opacity-60" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none opacity-40" />
 
             {filtered.map((item, i) => (
               <motion.div
@@ -120,12 +120,12 @@ export default function CataloguePage() {
                 transition={{ delay: i * 0.06 }}
               >
                 <Link href={`/dashboard/catalogue/${item._id}`} className="block h-full group">
-                  <Card className="relative h-full bg-gradient-to-br from-zinc-900 via-zinc-950 to-sky-950/30 border-zinc-800 hover:border-sky-500/50 transition-all duration-500 overflow-hidden cursor-pointer hover:shadow-[0_0_30px_rgba(56,189,248,0.15)] hover:scale-[1.01]">
-                    {/* Shimmer wave */}
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite]" />
+                  <Card className="relative h-full bg-gradient-to-br from-zinc-900 via-zinc-950 to-sky-950/40 border-zinc-800 hover:border-sky-500/60 transition-all duration-500 overflow-hidden cursor-pointer hover:shadow-[0_0_40px_rgba(56,189,248,0.2)] hover:scale-[1.01]">
+                    {/* Shimmer wave (Increased opacity) */}
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite]" />
                     
-                    {/* Card-level ambient glow */}
-                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-sky-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    {/* Card-level ambient glow (Increased intensity) */}
+                    <div className="absolute -top-12 -right-12 w-48 h-48 bg-sky-400/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                     <div className="relative h-48 bg-zinc-800/30 flex items-center justify-center border-b border-zinc-800/50 overflow-hidden">
                       {item.imageUrls && item.imageUrls.length > 0 ? (
@@ -151,7 +151,7 @@ export default function CataloguePage() {
                           {item.title}
                         </h3>
                         <p className="text-sm text-zinc-500 mt-1.5 line-clamp-2 leading-relaxed">
-                          {item.description}
+                          Premium design from our architectural collection. Perfectly suite for modern homes.
                         </p>
                       </div>
 

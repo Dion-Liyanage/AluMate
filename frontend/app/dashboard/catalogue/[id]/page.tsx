@@ -77,9 +77,9 @@ export default function CatalogueDesignDetailPage() {
           </Card>
         ) : (
           <div className="grid gap-8 lg:grid-cols-5 relative">
-            {/* Page-level ambient glows */}
-            <div className="absolute -top-32 -right-32 w-80 h-80 bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute top-1/2 -left-32 -translate-y-1/2 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none" />
+            {/* Page-level ambient glows (Increased brightness) */}
+            <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-sky-500/20 rounded-full blur-[120px] pointer-events-none opacity-80" />
+            <div className="absolute top-1/2 -left-40 -translate-y-1/2 w-96 h-96 bg-indigo-500/15 rounded-full blur-[100px] pointer-events-none opacity-60" />
 
             {/* Left Column: Image/Visual */}
             <motion.div 
@@ -88,8 +88,8 @@ export default function CatalogueDesignDetailPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Card className="relative bg-gradient-to-br from-zinc-900 via-zinc-950 to-sky-950/20 border-zinc-800 shadow-2xl overflow-hidden group">
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite]" />
+              <Card className="relative bg-gradient-to-br from-zinc-900 via-zinc-950 to-sky-950/40 border-zinc-800 shadow-2xl overflow-hidden group">
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite]" />
                 
                 <div className="relative aspect-video bg-zinc-800/20 flex items-center justify-center overflow-hidden">
                   {design.imageUrls && design.imageUrls.length > 0 ? (
