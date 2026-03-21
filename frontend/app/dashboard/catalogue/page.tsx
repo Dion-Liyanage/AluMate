@@ -107,7 +107,11 @@ export default function CataloguePage() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 relative transition-all duration-300">
+            {/* Decorative page-level glow */}
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-sky-500/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
+
             {filtered.map((item, i) => (
               <motion.div
                 key={item._id}
@@ -115,35 +119,52 @@ export default function CataloguePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
               >
-                <Link href={`/dashboard/catalogue/${item._id}`} className="block">
-                  <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-                    <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
+                <Link href={`/dashboard/catalogue/${item._id}`} className="block h-full group">
+                  <Card className="relative h-full bg-gradient-to-br from-zinc-900 via-zinc-950 to-sky-950/30 border-zinc-800 hover:border-sky-500/50 transition-all duration-500 overflow-hidden cursor-pointer hover:shadow-[0_0_30px_rgba(56,189,248,0.15)] hover:scale-[1.01]">
+                    {/* Shimmer wave */}
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite]" />
+                    
+                    {/* Card-level ambient glow */}
+                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-sky-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                    <div className="relative h-48 bg-zinc-800/30 flex items-center justify-center border-b border-zinc-800/50 overflow-hidden">
                       {item.imageUrls && item.imageUrls.length > 0 ? (
                         <img 
                           src={item.imageUrls[0].startsWith('/') ? `http://localhost:4000${item.imageUrls[0]}` : item.imageUrls[0]} 
                           alt={item.title} 
-                          className="h-full w-full object-cover" 
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
                         />
                       ) : (
-                        <div className="text-zinc-600 text-sm">Design Preview</div>
+                        <div className="flex flex-col items-center gap-2 text-zinc-600">
+                          <LayoutGrid className="h-8 w-8" />
+                          <span className="text-xs uppercase tracking-wider font-semibold">No Preview</span>
+                        </div>
                       )}
+                      
+                      {/* Image Overlay Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <CardContent className="relative p-4">
-                      <h3 className="font-semibold text-zinc-100 group-hover:text-sky-300 transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-zinc-500 mt-1 line-clamp-2">{item.description}</p>
-                      <div className="flex items-center justify-between mt-3">
+
+                    <CardContent className="relative p-5 space-y-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-zinc-100 group-hover:text-sky-300 transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-zinc-500 mt-1.5 line-clamp-2 leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
                         <Badge
                           variant="outline"
-                          className="text-zinc-400 border-zinc-700 capitalize"
+                          className="bg-sky-500/5 text-zinc-400 border-zinc-800 group-hover:border-sky-500/30 group-hover:text-sky-300 transition-all capitalize"
                         >
                           {item.category}
                         </Badge>
-                        <span className="flex items-center gap-1 text-sm text-zinc-500 group-hover:text-sky-400 transition-colors">
-                          Use Design
-                          <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                        <span className="flex items-center gap-1.5 text-sm font-medium text-zinc-500 group-hover:text-sky-400 transition-colors">
+                          View Details
+                          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                         </span>
                       </div>
                     </CardContent>

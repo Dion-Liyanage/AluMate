@@ -76,33 +76,84 @@ export default function CatalogueDesignDetailPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden">
-              <div className="aspect-video bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
-                {design.imageUrls && design.imageUrls.length > 0 ? (
-                  <img
-                    src={design.imageUrls[0].startsWith("/") ? `http://localhost:4000${design.imageUrls[0]}` : design.imageUrls[0]}
-                    alt={design.title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <LayoutGrid className="h-8 w-8 text-zinc-600" />
-                )}
-              </div>
-            </Card>
+          <div className="grid gap-8 lg:grid-cols-5 relative">
+            {/* Page-level ambient glows */}
+            <div className="absolute -top-32 -right-32 w-80 h-80 bg-sky-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/2 -left-32 -translate-y-1/2 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none" />
 
-            <Card className="bg-zinc-900/50 border-zinc-800">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="text-2xl font-bold text-zinc-100">{design.title}</h2>
-                  <Badge variant="outline" className="text-zinc-400 border-zinc-700 capitalize">
-                    {design.category}
-                  </Badge>
+            {/* Left Column: Image/Visual */}
+            <motion.div 
+              className="lg:col-span-3"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card className="relative bg-gradient-to-br from-zinc-900 via-zinc-950 to-sky-950/20 border-zinc-800 shadow-2xl overflow-hidden group">
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite]" />
+                
+                <div className="relative aspect-video bg-zinc-800/20 flex items-center justify-center overflow-hidden">
+                  {design.imageUrls && design.imageUrls.length > 0 ? (
+                    <img
+                      src={design.imageUrls[0].startsWith("/") ? `http://localhost:4000${design.imageUrls[0]}` : design.imageUrls[0]}
+                      alt={design.title}
+                      className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 text-zinc-600">
+                      <LayoutGrid className="h-12 w-12" />
+                      <span className="text-sm font-semibold tracking-wider uppercase">Preview Unavailable</span>
+                    </div>
+                  )}
+                  {/* Subtle Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent" />
                 </div>
+              </Card>
+            </motion.div>
 
-                <p className="text-zinc-400 leading-relaxed">{design.description}</p>
-              </CardContent>
-            </Card>
+            {/* Right Column: Details/Info */}
+            <motion.div 
+              className="lg:col-span-2 flex flex-col gap-6"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <Card className="flex-1 bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rounded-full blur-3xl" />
+                 
+                <CardContent className="relative p-8 space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="bg-sky-500/10 text-sky-300 border-sky-500/30 font-semibold px-3 py-1 uppercase tracking-wider text-[10px]">
+                        {design.category}
+                      </Badge>
+                      <LayoutGrid className="h-5 w-5 text-zinc-700" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-zinc-100 tracking-tight leading-tight">
+                        {design.title}
+                      </h2>
+                      <div className="h-1 w-12 bg-sky-500/50 rounded-full mt-4" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Description</h4>
+                    <p className="text-zinc-500 text-sm leading-relaxed">
+                      Premium design from our architectural collection. Perfectly suite for modern homes.
+                    </p>
+                  </div>
+                  
+                  <div className="pt-8 flex flex-col gap-3">
+                    <Button className="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-6 rounded-xl shadow-[0_0_20px_rgba(2,132,199,0.3)] transition-all active:scale-[0.98]">
+                      Use this design
+                    </Button>
+                    <p className="text-center text-xs text-zinc-500">
+                      Prices are calculated based on your custom requirements.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         )}
       </motion.div>
