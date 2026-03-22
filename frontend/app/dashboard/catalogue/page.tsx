@@ -23,6 +23,19 @@ interface Design {
 
 const categories = ["All", "Windows", "Doors", "Cupboards", "Pantries", "Ceilings"];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 export default function CataloguePage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,12 +70,13 @@ export default function CataloguePage() {
   return (
     <DashboardLayout title="Design Catalogue">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         className="space-y-6"
       >
         {/* Header */}
-        <div>
+        <motion.div variants={itemVariants}>
           <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
             <LayoutGrid className="h-6 w-6 text-sky-400" />
             Design Catalogue
@@ -71,10 +85,10 @@ export default function CataloguePage() {
             Browse pre-designed aluminium products. Select a design to place an
             order.
           </p>
-        </div>
+        </motion.div>
 
         {/* Search + Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
@@ -99,21 +113,20 @@ export default function CataloguePage() {
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Design Grid */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-24">
+          <motion.div variants={itemVariants} className="flex items-center justify-center py-24">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
-          </div>
+          </motion.div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((item, i) => (
               <motion.div
                 key={item._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
+                variants={itemVariants}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
               >
                 <Link href={`/dashboard/catalogue/${item._id}`} className="block">
                   <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
@@ -151,15 +164,15 @@ export default function CataloguePage() {
                 </Link>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {filtered.length === 0 && (
-          <div className="text-center py-12">
+          <motion.div variants={itemVariants} className="text-center py-12">
             <p className="text-zinc-500">
               No designs found matching your criteria.
             </p>
-          </div>
+          </motion.div>
         )}
       </motion.div>
     </DashboardLayout>

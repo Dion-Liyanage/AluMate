@@ -7,6 +7,19 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 // Placeholder past projects
 const projects = [
   {
@@ -63,12 +76,13 @@ export default function ProjectsPage() {
   return (
     <DashboardLayout title="Past Projects">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         className="space-y-6"
       >
         {/* Header */}
-        <div>
+        <motion.div variants={itemVariants}>
           <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
             <FolderOpen className="h-6 w-6 text-emerald-400" />
             Past Projects Gallery
@@ -76,16 +90,15 @@ export default function ProjectsPage() {
           <p className="mt-1 text-zinc-400">
             Explore completed fabrication projects for inspiration.
           </p>
-        </div>
+        </motion.div>
 
         {/* Project Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project, i) => (
             <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
+              variants={itemVariants}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
             >
               <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-emerald-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(52,211,153,0.08)]">
                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
@@ -128,7 +141,7 @@ export default function ProjectsPage() {
               </Card>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </motion.div>
     </DashboardLayout>
   );

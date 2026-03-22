@@ -8,6 +8,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 // Mock saved designs
 const savedDesigns = [
   { id: "1", name: "Modern Kitchen Cupboard", type: "Cupboard", date: "2 days ago", thumbnail: "🗄️", status: "Draft" },
@@ -19,12 +32,13 @@ export default function DesignGatewayPage() {
   return (
     <DashboardLayout title="Product Customizer">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         className="space-y-8"
       >
         {/* Header */}
-        <div>
+        <motion.div variants={itemVariants}>
           <h2 className="text-3xl font-bold text-zinc-100 flex items-center gap-2">
             <PenTool className="h-7 w-7 text-violet-400" />
             Design Studio
@@ -32,11 +46,11 @@ export default function DesignGatewayPage() {
           <p className="mt-2 text-zinc-400">
             Create a new aluminium product from scratch or continue where you left off.
           </p>
-        </div>
+        </motion.div>
 
         {/* Primary Actions */}
         {/* Primary Actions */}
-        <div className="w-full">
+        <motion.div variants={itemVariants} className="w-full">
           {/* Start New */}
           <Link href="/dashboard/design/new" className="block group">
             <div className="relative h-full rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/10 p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] overflow-hidden">
@@ -63,10 +77,10 @@ export default function DesignGatewayPage() {
               </div>
             </div>
           </Link>
-        </div>
+        </motion.div>
 
         {/* Recent Drafts Section */}
-        <div className="pt-6">
+        <motion.div variants={itemVariants} className="pt-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
               <Clock className="h-5 w-5 text-zinc-400" />
@@ -82,9 +96,8 @@ export default function DesignGatewayPage() {
             {savedDesigns.map((design, i) => (
               <motion.div
                 key={design.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
+                variants={itemVariants}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
               >
                 <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
@@ -115,7 +128,7 @@ export default function DesignGatewayPage() {
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
       </motion.div>
     </DashboardLayout>
