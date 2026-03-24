@@ -7,6 +7,19 @@ import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 const productTypes = [
   { name: "Window", emoji: "🪟", description: "Sliding, casement, fixed & louvre windows" },
   { name: "Door", emoji: "🚪", description: "Entrance, sliding, folding & French doors" },
@@ -26,12 +39,13 @@ export default function DesignPage() {
   return (
     <DashboardLayout title="Customize Product">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         className="space-y-6"
       >
         {/* Header */}
-        <div>
+        <motion.div variants={itemVariants}>
           <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
             <PenTool className="h-6 w-6 text-violet-400" />
             Select Product Type
@@ -39,16 +53,15 @@ export default function DesignPage() {
           <p className="mt-1 text-zinc-400">
             Choose the type of aluminium product you want to design.
           </p>
-        </div>
+        </motion.div>
 
         {/* Product Type Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {productTypes.map((type, i) => (
             <motion.div
               key={type.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
+              variants={itemVariants}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
             >
               <Card
                 onClick={() => handleSelect(type.name)}
@@ -69,7 +82,7 @@ export default function DesignPage() {
               </Card>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </motion.div>
     </DashboardLayout>
   );

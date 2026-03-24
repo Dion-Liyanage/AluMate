@@ -12,6 +12,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { designsApi } from "@/lib/api";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 interface Design {
   _id: string;
   title: string;
@@ -49,11 +62,12 @@ export default function CatalogueDesignDetailPage() {
   return (
     <DashboardLayout title="Design Details">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         className="space-y-6"
       >
-        <div className="flex items-center justify-between gap-4">
+        <motion.div variants={itemVariants} className="flex items-center justify-between gap-4">
           <Link href="/dashboard/catalogue">
             <Button
               variant="outline"
@@ -63,20 +77,22 @@ export default function CatalogueDesignDetailPage() {
               Back to Catalogue
             </Button>
           </Link>
-        </div>
+        </motion.div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-24">
+          <motion.div variants={itemVariants} className="flex items-center justify-center py-24">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
-          </div>
+          </motion.div>
         ) : !design ? (
+          <motion.div variants={itemVariants}>
           <Card className="bg-zinc-900/50 border-zinc-800">
             <CardContent className="py-12 text-center text-zinc-400">
               Design not found.
             </CardContent>
           </Card>
+          </motion.div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <motion.div variants={itemVariants} className="grid gap-6 lg:grid-cols-2">
             <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden">
               <div className="aspect-video bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
                 {design.imageUrls && design.imageUrls.length > 0 ? (
@@ -103,7 +119,7 @@ export default function CatalogueDesignDetailPage() {
                 <p className="text-zinc-400 leading-relaxed">{design.description}</p>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         )}
       </motion.div>
     </DashboardLayout>
