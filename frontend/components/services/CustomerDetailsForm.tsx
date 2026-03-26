@@ -20,7 +20,7 @@ export function CustomerDetailsForm({ formData, onChange }: CustomerDetailsProps
           placeholder="e.g. John Doe" 
           value={formData.fullName}
           onChange={(e) => onChange("fullName", e.target.value)}
-          className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-zinc-700 placeholder:text-zinc-600"
+          className="!bg-zinc-800/80 border-zinc-700 text-zinc-100 focus-visible:ring-zinc-700 placeholder:text-zinc-400 [color-scheme:dark] autofill:shadow-[inset_0_0_0px_1000px_rgba(39,39,42,0.8)] autofill:[-webkit-text-fill-color:#f4f4f5]"
         />
       </div>
       <div className="space-y-2">
@@ -30,7 +30,7 @@ export function CustomerDetailsForm({ formData, onChange }: CustomerDetailsProps
           placeholder="e.g. 0771234567" 
           value={formData.contactNumber}
           onChange={(e) => onChange("contactNumber", e.target.value)}
-          className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-zinc-700 placeholder:text-zinc-600"
+          className="!bg-zinc-800/80 border-zinc-700 text-zinc-100 focus-visible:ring-zinc-700 placeholder:text-zinc-400 [color-scheme:dark] autofill:shadow-[inset_0_0_0px_1000px_rgba(39,39,42,0.8)] autofill:[-webkit-text-fill-color:#f4f4f5]"
         />
       </div>
       <div className="space-y-2">
@@ -40,7 +40,7 @@ export function CustomerDetailsForm({ formData, onChange }: CustomerDetailsProps
           placeholder="e.g. Kalutara" 
           value={formData.nearestTown}
           onChange={(e) => onChange("nearestTown", e.target.value)}
-          className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-zinc-700 placeholder:text-zinc-600"
+          className="!bg-zinc-800/80 border-zinc-700 text-zinc-100 focus-visible:ring-zinc-700 placeholder:text-zinc-400 [color-scheme:dark] autofill:shadow-[inset_0_0_0px_1000px_rgba(39,39,42,0.8)] autofill:[-webkit-text-fill-color:#f4f4f5]"
         />
       </div>
     </div>
