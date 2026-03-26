@@ -198,7 +198,7 @@ export function OnSiteVisitForm() {
                     value={manualAddress}
                     onChange={(e) => setManualAddress(e.target.value)}
                     placeholder="Enter address manually (optional)"
-                    className="min-h-24 border-zinc-700 bg-zinc-900/40 text-zinc-200 placeholder:text-zinc-500"
+                    className="min-h-24 !bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 [color-scheme:dark] autofill:shadow-[inset_0_0_0px_1000px_rgba(39,39,42,0.8)] autofill:[-webkit-text-fill-color:#f4f4f5]"
                   />
                   <p className="text-xs text-zinc-500">You can provide an address instead of selecting on the map.</p>
                 </div>
