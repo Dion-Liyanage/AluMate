@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Ruler } from "lucide-react";
+import { LocationPickerModal } from "@/components/location/LocationPickerModal";
+import { LocationPreview } from "@/components/location/LocationPreview";
 
 import { motion } from "framer-motion";
 
@@ -34,6 +36,8 @@ export function OnSiteVisitForm() {
     contactNumber: "",
     nearestTown: "",
   });
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isMapOpen, setIsMapOpen] = useState(false);
   const [status, setStatus] = useState("Draft"); // Draft -> Request Sent
 
   const handleFormChange = (field: string, value: string) => {
@@ -45,7 +49,8 @@ export function OnSiteVisitForm() {
     selectedSlot !== "" && 
     formData.fullName.trim() !== "" && 
     formData.contactNumber.trim() !== "" && 
-    formData.nearestTown.trim() !== "";
+    formData.nearestTown.trim() !== "" &&
+    location !== null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +62,7 @@ export function OnSiteVisitForm() {
       date: selectedDate,
       timeSlot: selectedSlot,
       ...formData,
+      location: location ? { lat: location.lat, lng: location.lng } : null,
       status: "Request Sent",
       createdAt: new Date().toISOString()
     };
@@ -133,21 +139,40 @@ export function OnSiteVisitForm() {
 
             <Separator className="bg-zinc-800/50" />
 
-            {/* Location Placeholder */}
+            {/* Location Selection */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-zinc-200">Location</h3>
-              <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="bg-zinc-800/80 rounded-full p-4 shadow-sm border border-zinc-700/50">
-                  <MapPin className="h-6 w-6 text-zinc-400" />
+              {location ? (
+                <LocationPreview
+                  location={location}
+                  onChangeLocation={() => setIsMapOpen(true)}
+                />
+              ) : (
+                <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="bg-fuchsia-500/20 rounded-full p-4 shadow-sm border border-fuchsia-500/30">
+                    <MapPin className="h-6 w-6 text-fuchsia-300" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-zinc-300">Select Your Location</p>
+                    <p className="text-sm text-zinc-500 mt-1">Click below to open the map and pin your location.</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="mt-3 border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-200 hover:bg-fuchsia-500/20 hover:text-fuchsia-100"
+                    type="button"
+                    onClick={() => setIsMapOpen(true)}
+                  >
+                    <MapPin className="h-4 w-4 mr-1.5" />
+                    Select Location on Map
+                  </Button>
                 </div>
-                <div>
-                  <p className="font-medium text-zinc-300">Location Selection</p>
-                  <p className="text-sm text-zinc-500 mt-1">Interactive map will be available in Section 2.</p>
-                </div>
-                <Button disabled variant="outline" className="mt-3 border-zinc-700 bg-zinc-800/50 text-zinc-500" type="button">
-                  Select Location on Map
-                </Button>
-              </div>
+              )}
+              <LocationPickerModal
+                open={isMapOpen}
+                onOpenChange={setIsMapOpen}
+                onConfirm={setLocation}
+                initialLocation={location}
+              />
             </div>
             
           </CardContent>
