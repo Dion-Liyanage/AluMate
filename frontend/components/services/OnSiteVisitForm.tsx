@@ -105,7 +105,7 @@ export function OnSiteVisitForm() {
                   <Ruler className="h-6 w-6 text-fuchsia-100" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl text-zinc-100">Schedule Measurement</CardTitle>
+                  <CardTitle className="text-2xl text-zinc-100">Schedule a Visit</CardTitle>
                   <CardDescription className="text-zinc-400 mt-1">
                     Book our experts to visit your location for precise measurements and consultation.
                   </CardDescription>
@@ -146,22 +146,25 @@ export function OnSiteVisitForm() {
             {/* Location Selection */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-zinc-200">Location</h3>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid w-full items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
                 <Button
                   type="button"
                   variant={locationInputMode === "map" ? "default" : "outline"}
                   onClick={() => setLocationInputMode("map")}
-                  className={locationInputMode === "map" ? "bg-fuchsia-600 hover:bg-fuchsia-700" : "border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
+                  className={locationInputMode === "map" ? "h-11 border border-fuchsia-400/40 !bg-fuchsia-500/20 text-zinc-100 backdrop-blur-sm hover:!bg-fuchsia-500/30" : "h-11 border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
                 >
                   Select Location
                 </Button>
+                <span className="rounded-full border border-zinc-600 bg-zinc-900 px-3 py-1 text-center text-xs font-semibold uppercase tracking-wider text-zinc-200 shadow-sm">
+                  or
+                </span>
                 <Button
                   type="button"
                   variant={locationInputMode === "manual" ? "default" : "outline"}
                   onClick={() => setLocationInputMode("manual")}
-                  className={locationInputMode === "manual" ? "bg-fuchsia-600 hover:bg-fuchsia-700" : "border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
+                  className={locationInputMode === "manual" ? "h-11 border border-fuchsia-400/40 !bg-fuchsia-500/20 text-zinc-100 backdrop-blur-sm hover:!bg-fuchsia-500/30" : "h-11 border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
                 >
-                  Enter Address (Optional)
+                  Enter Address
                 </Button>
               </div>
 
@@ -197,7 +200,7 @@ export function OnSiteVisitForm() {
                   <Textarea
                     value={manualAddress}
                     onChange={(e) => setManualAddress(e.target.value)}
-                    placeholder="Enter address manually (optional)"
+                    placeholder="Enter address manually"
                     className="min-h-24 !bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 [color-scheme:dark] autofill:shadow-[inset_0_0_0px_1000px_rgba(39,39,42,0.8)] autofill:[-webkit-text-fill-color:#f4f4f5]"
                   />
                   <p className="text-xs text-zinc-500">You can provide an address instead of selecting on the map.</p>
