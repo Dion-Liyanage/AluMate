@@ -125,7 +125,7 @@ export function LocationPickerModal({
             }
             zoom={12}
             className="h-full w-full"
-            theme="dark"
+            theme="light"
           >
             {selectedLocation && (
               <MapMarker
