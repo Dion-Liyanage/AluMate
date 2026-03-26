@@ -7,9 +7,12 @@ import { CustomerDetailsForm } from "./CustomerDetailsForm";
 import { RequestStatusBadge } from "./RequestStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Ruler } from "lucide-react";
+import { LocationPickerModal } from "@/components/location/LocationPickerModal";
+import { LocationPreview } from "@/components/location/LocationPreview";
 
 import { motion } from "framer-motion";
 
@@ -34,6 +37,10 @@ export function OnSiteVisitForm() {
     contactNumber: "",
     nearestTown: "",
   });
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [manualAddress, setManualAddress] = useState("");
+  const [locationInputMode, setLocationInputMode] = useState<"map" | "manual">("map");
+  const [isMapOpen, setIsMapOpen] = useState(false);
   const [status, setStatus] = useState("Draft"); // Draft -> Request Sent
 
   const handleFormChange = (field: string, value: string) => {
@@ -45,7 +52,8 @@ export function OnSiteVisitForm() {
     selectedSlot !== "" && 
     formData.fullName.trim() !== "" && 
     formData.contactNumber.trim() !== "" && 
-    formData.nearestTown.trim() !== "";
+    formData.nearestTown.trim() !== "" &&
+    (location !== null || manualAddress.trim() !== "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +65,8 @@ export function OnSiteVisitForm() {
       date: selectedDate,
       timeSlot: selectedSlot,
       ...formData,
+      manualAddress: manualAddress.trim() || null,
+      location: location ? { lat: location.lat, lng: location.lng } : null,
       status: "Request Sent",
       createdAt: new Date().toISOString()
     };
@@ -95,7 +105,7 @@ export function OnSiteVisitForm() {
                   <Ruler className="h-6 w-6 text-fuchsia-100" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl text-zinc-100">Schedule Measurement</CardTitle>
+                  <CardTitle className="text-2xl text-zinc-100">Schedule a Visit</CardTitle>
                   <CardDescription className="text-zinc-400 mt-1">
                     Book our experts to visit your location for precise measurements and consultation.
                   </CardDescription>
@@ -133,21 +143,87 @@ export function OnSiteVisitForm() {
 
             <Separator className="bg-zinc-800/50" />
 
-            {/* Location Placeholder */}
+            {/* Location Selection */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-zinc-200">Location</h3>
-              <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="bg-zinc-800/80 rounded-full p-4 shadow-sm border border-zinc-700/50">
-                  <MapPin className="h-6 w-6 text-zinc-400" />
-                </div>
-                <div>
-                  <p className="font-medium text-zinc-300">Location Selection</p>
-                  <p className="text-sm text-zinc-500 mt-1">Interactive map will be available in Section 2.</p>
-                </div>
-                <Button disabled variant="outline" className="mt-3 border-zinc-700 bg-zinc-800/50 text-zinc-500" type="button">
-                  Select Location on Map
+              <div className="grid w-full items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
+                <Button
+                  type="button"
+                  variant={locationInputMode === "map" ? "default" : "outline"}
+                  onClick={() => setLocationInputMode("map")}
+                  className={locationInputMode === "map" ? "h-11 border border-fuchsia-400/40 !bg-fuchsia-500/20 text-zinc-100 backdrop-blur-sm hover:!bg-fuchsia-500/30" : "h-11 border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
+                >
+                  Select Location
+                </Button>
+                <span className="rounded-full border border-zinc-600 bg-zinc-900 px-3 py-1 text-center text-xs font-semibold uppercase tracking-wider text-zinc-200 shadow-sm">
+                  or
+                </span>
+                <Button
+                  type="button"
+                  variant={locationInputMode === "manual" ? "default" : "outline"}
+                  onClick={() => setLocationInputMode("manual")}
+                  className={locationInputMode === "manual" ? "h-11 border border-fuchsia-400/40 !bg-fuchsia-500/20 text-zinc-100 backdrop-blur-sm hover:!bg-fuchsia-500/30" : "h-11 border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
+                >
+                  Enter Address
                 </Button>
               </div>
+
+              {locationInputMode === "map" ? (
+                location ? (
+                  <LocationPreview
+                    location={location}
+                    onChangeLocation={() => setIsMapOpen(true)}
+                  />
+                ) : (
+                  <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="bg-fuchsia-500/20 rounded-full p-4 shadow-sm border border-fuchsia-500/30">
+                      <MapPin className="h-6 w-6 text-fuchsia-300" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-zinc-300">Select Your Location</p>
+                      <p className="text-sm text-zinc-500 mt-1">Click below to open the map and pin your location.</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="mt-3 border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-200 hover:bg-fuchsia-500/20 hover:text-fuchsia-100"
+                      type="button"
+                      onClick={() => setIsMapOpen(true)}
+                    >
+                      <MapPin className="h-4 w-4 mr-1.5" />
+                      Select Location on Map
+                    </Button>
+                  </div>
+                )
+              ) : (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-300">Manual Address</label>
+                  <Textarea
+                    value={manualAddress}
+                    onChange={(e) => setManualAddress(e.target.value)}
+                    placeholder="Enter address manually"
+                    className="min-h-24 !bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 [color-scheme:dark] autofill:shadow-[inset_0_0_0px_1000px_rgba(39,39,42,0.8)] autofill:[-webkit-text-fill-color:#f4f4f5]"
+                  />
+                  <p className="text-xs text-zinc-500">You can provide an address instead of selecting on the map.</p>
+                </div>
+              )}
+
+              <LocationPickerModal
+                open={isMapOpen}
+                onOpenChange={setIsMapOpen}
+                onConfirm={setLocation}
+                initialLocation={location}
+              />
+
+              {locationInputMode === "manual" && location && (
+                <div className="rounded-md border border-zinc-800/50 bg-zinc-900/30 p-3 text-xs text-zinc-400">
+                  Map location is already selected and will be submitted together with the manual address.
+                </div>
+              )}
+              {locationInputMode === "map" && manualAddress.trim() !== "" && (
+                <div className="rounded-md border border-zinc-800/50 bg-zinc-900/30 p-3 text-xs text-zinc-400">
+                  Manual address is filled and will be submitted together with map location.
+                </div>
+              )}
             </div>
             
           </CardContent>

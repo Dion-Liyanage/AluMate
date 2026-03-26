@@ -20,6 +20,7 @@
     "fabric": "^6.9.1",
     "framer-motion": "^12.26.2",
     "lucide-react": "^0.562.0",
+    "maplibre-gl": "^5.21.1",
     "mongoose": "^9.2.4",
     "next": "16.1.1",
     "radix-ui": "^1.4.3",
