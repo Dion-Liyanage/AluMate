@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useCallback, useRef } from "react";
 import {
   Dialog,
@@ -10,14 +11,26 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Map,
-  MapMarker,
-  MarkerContent,
-  MapControls,
-} from "@/components/ui/map";
 import { MapPin, Navigation, Check } from "lucide-react";
 import type MapLibreGL from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+
+const Map = dynamic(
+  () => import("@/components/ui/map").then((m) => m.Map),
+  { ssr: false },
+);
+const MapMarker = dynamic(
+  () => import("@/components/ui/map").then((m) => m.MapMarker),
+  { ssr: false },
+);
+const MarkerContent = dynamic(
+  () => import("@/components/ui/map").then((m) => m.MarkerContent),
+  { ssr: false },
+);
+const MapControls = dynamic(
+  () => import("@/components/ui/map").then((m) => m.MapControls),
+  { ssr: false },
+);
 
 interface LocationPickerModalProps {
   open: boolean;

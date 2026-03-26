@@ -184,9 +184,15 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
   const [mapInstance, setMapInstance] = useState<MapLibreGL.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const currentStyleRef = useRef<MapStyleOption | null>(null);
   const styleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const internalUpdateRef = useRef(false);
+  const mapHandlersRef = useRef<{
+    styleDataHandler?: () => void;
+    loadHandler?: () => void;
+    handleMove?: () => void;
+  }>({});
   const resolvedTheme = useResolvedTheme(themeProp);
 
   const isControlled = viewport !== undefined && onViewportChange !== undefined;
@@ -212,62 +218,63 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
     }
   }, []);
 
-  // Initialize the map
+  // Ensure component is mounted before initializing map (Mapcn/Mapbox SSR safety)
   useEffect(() => {
-    if (!containerRef.current) return;
+    setIsMounted(true);
+  }, []);
 
-    const initialStyle =
-      resolvedTheme === "dark" ? mapStyles.dark : mapStyles.light;
-    currentStyleRef.current = initialStyle;
+  // Initialize the map (Turbopack/Mapcn safety: add delay before instantiation)
+  useEffect(() => {
+    if (!isMounted || !containerRef.current) return;
 
-    const map = new MapLibreGL.Map({
-      container: containerRef.current,
-      style: initialStyle,
-      renderWorldCopies: false,
-      attributionControl: {
-        compact: true,
-      },
-      ...props,
-      ...viewport,
-    });
+    // CRITICAL: small delay fixes Turbopack + Mapcn issues
+    const initTimer = setTimeout(() => {
+      try {
+        const initialStyle =
+          resolvedTheme === "dark" ? mapStyles.dark : mapStyles.light;
+        currentStyleRef.current = initialStyle;
 
-    const styleDataHandler = () => {
-      clearStyleTimeout();
-      // Delay to ensure style is fully processed before allowing layer operations
-      // This is a workaround to avoid race conditions with the style loading
-      // else we have to force update every layer on setStyle change
-      styleTimeoutRef.current = setTimeout(() => {
-        setIsStyleLoaded(true);
-        if (projection) {
-          map.setProjection(projection);
-        }
-      }, 100);
-    };
-    const loadHandler = () => setIsLoaded(true);
+        const map = new MapLibreGL.Map({
+          container: containerRef.current!,
+          style: initialStyle,
+          renderWorldCopies: false,
+          attributionControl: {
+            compact: true,
+          },
+          ...props,
+          ...viewport,
+        });
 
-    // Viewport change handler - skip if triggered by internal update
-    const handleMove = () => {
-      if (internalUpdateRef.current) return;
-      onViewportChangeRef.current?.(getViewport(map));
-    };
+        const styleDataHandler = () => {
+          clearStyleTimeout();
+          styleTimeoutRef.current = setTimeout(() => {
+            setIsStyleLoaded(true);
+          }, 100);
+        };
+        const loadHandler = () => setIsLoaded(true);
 
-    map.on("load", loadHandler);
-    map.on("styledata", styleDataHandler);
-    map.on("move", handleMove);
-    setMapInstance(map);
+        const handleMove = () => {
+          if (internalUpdateRef.current) return;
+          onViewportChangeRef.current?.(getViewport(map));
+        };
+
+        // Store handlers for cleanup
+        mapHandlersRef.current = { styleDataHandler, loadHandler, handleMove };
+
+        map.on("load", loadHandler);
+        map.on("styledata", styleDataHandler);
+        map.on("move", handleMove);
+        setMapInstance(map);
+      } catch (error) {
+        console.error("Failed to initialize map:", error);
+      }
+    }, 100); // CRITICAL: 100ms delay for Turbopack compat
 
     return () => {
+      clearTimeout(initTimer);
       clearStyleTimeout();
-      map.off("load", loadHandler);
-      map.off("styledata", styleDataHandler);
-      map.off("move", handleMove);
-      map.remove();
-      setIsLoaded(false);
-      setIsStyleLoaded(false);
-      setMapInstance(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isMounted, resolvedTheme, mapStyles, clearStyleTimeout]);
 
   // Sync controlled viewport to map
   useEffect(() => {
@@ -312,6 +319,33 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
 
     mapInstance.setStyle(newStyle, { diff: true });
   }, [mapInstance, resolvedTheme, mapStyles, clearStyleTimeout]);
+
+  // Apply projection only after map style is fully loaded (Mapcn/Mapbox SSR safety)
+  useEffect(() => {
+    if (!mapInstance || !projection || !isStyleLoaded) return;
+
+    if (!mapInstance.getStyle()) return;
+
+    try {
+      mapInstance.setProjection(projection);
+    } catch {
+      // Ignore transient style/projection race conditions during hot reload/re-init.
+    }
+  }, [mapInstance, projection, isStyleLoaded]);
+
+  // Cleanup map instance on unmount or when mapInstance changes
+  useEffect(() => {
+    return () => {
+      if (mapInstance) {
+        const { styleDataHandler, loadHandler, handleMove } = mapHandlersRef.current;
+        if (styleDataHandler) mapInstance.off("styledata", styleDataHandler);
+        if (loadHandler) mapInstance.off("load", loadHandler);
+        if (handleMove) mapInstance.off("move", handleMove);
+        mapInstance.remove();
+      }
+      clearStyleTimeout();
+    };
+  }, [mapInstance, clearStyleTimeout]);
 
   const contextValue = useMemo(
     () => ({

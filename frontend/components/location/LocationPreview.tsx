@@ -1,12 +1,22 @@
 "use client";
 
-import {
-  Map,
-  MapMarker,
-  MarkerContent,
-} from "@/components/ui/map";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { MapPin, Pencil, CheckCircle2 } from "lucide-react";
+import "maplibre-gl/dist/maplibre-gl.css";
+
+const Map = dynamic(
+  () => import("@/components/ui/map").then((m) => m.Map),
+  { ssr: false },
+);
+const MapMarker = dynamic(
+  () => import("@/components/ui/map").then((m) => m.MapMarker),
+  { ssr: false },
+);
+const MarkerContent = dynamic(
+  () => import("@/components/ui/map").then((m) => m.MarkerContent),
+  { ssr: false },
+);
 
 interface LocationPreviewProps {
   location: { lat: number; lng: number };
