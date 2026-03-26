@@ -35,7 +35,7 @@ export function LocationPreview({
           center={[location.lng, location.lat]}
           zoom={14}
           className="h-full w-full"
-          theme="light"
+          theme="dark"
           interactive={false}
         >
           <MapMarker longitude={location.lng} latitude={location.lat}>
