@@ -7,6 +7,7 @@ import { CustomerDetailsForm } from "./CustomerDetailsForm";
 import { RequestStatusBadge } from "./RequestStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Ruler } from "lucide-react";
@@ -37,6 +38,8 @@ export function OnSiteVisitForm() {
     nearestTown: "",
   });
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [manualAddress, setManualAddress] = useState("");
+  const [locationInputMode, setLocationInputMode] = useState<"map" | "manual">("map");
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [status, setStatus] = useState("Draft"); // Draft -> Request Sent
 
@@ -50,7 +53,7 @@ export function OnSiteVisitForm() {
     formData.fullName.trim() !== "" && 
     formData.contactNumber.trim() !== "" && 
     formData.nearestTown.trim() !== "" &&
-    location !== null;
+    (location !== null || manualAddress.trim() !== "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +65,7 @@ export function OnSiteVisitForm() {
       date: selectedDate,
       timeSlot: selectedSlot,
       ...formData,
+      manualAddress: manualAddress.trim() || null,
       location: location ? { lat: location.lat, lng: location.lng } : null,
       status: "Request Sent",
       createdAt: new Date().toISOString()
@@ -142,37 +146,81 @@ export function OnSiteVisitForm() {
             {/* Location Selection */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-zinc-200">Location</h3>
-              {location ? (
-                <LocationPreview
-                  location={location}
-                  onChangeLocation={() => setIsMapOpen(true)}
-                />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant={locationInputMode === "map" ? "default" : "outline"}
+                  onClick={() => setLocationInputMode("map")}
+                  className={locationInputMode === "map" ? "bg-fuchsia-600 hover:bg-fuchsia-700" : "border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
+                >
+                  Select Location
+                </Button>
+                <Button
+                  type="button"
+                  variant={locationInputMode === "manual" ? "default" : "outline"}
+                  onClick={() => setLocationInputMode("manual")}
+                  className={locationInputMode === "manual" ? "bg-fuchsia-600 hover:bg-fuchsia-700" : "border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:bg-zinc-800"}
+                >
+                  Enter Address (Optional)
+                </Button>
+              </div>
+
+              {locationInputMode === "map" ? (
+                location ? (
+                  <LocationPreview
+                    location={location}
+                    onChangeLocation={() => setIsMapOpen(true)}
+                  />
+                ) : (
+                  <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="bg-fuchsia-500/20 rounded-full p-4 shadow-sm border border-fuchsia-500/30">
+                      <MapPin className="h-6 w-6 text-fuchsia-300" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-zinc-300">Select Your Location</p>
+                      <p className="text-sm text-zinc-500 mt-1">Click below to open the map and pin your location.</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="mt-3 border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-200 hover:bg-fuchsia-500/20 hover:text-fuchsia-100"
+                      type="button"
+                      onClick={() => setIsMapOpen(true)}
+                    >
+                      <MapPin className="h-4 w-4 mr-1.5" />
+                      Select Location on Map
+                    </Button>
+                  </div>
+                )
               ) : (
-                <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-8 flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="bg-fuchsia-500/20 rounded-full p-4 shadow-sm border border-fuchsia-500/30">
-                    <MapPin className="h-6 w-6 text-fuchsia-300" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-zinc-300">Select Your Location</p>
-                    <p className="text-sm text-zinc-500 mt-1">Click below to open the map and pin your location.</p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="mt-3 border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-200 hover:bg-fuchsia-500/20 hover:text-fuchsia-100"
-                    type="button"
-                    onClick={() => setIsMapOpen(true)}
-                  >
-                    <MapPin className="h-4 w-4 mr-1.5" />
-                    Select Location on Map
-                  </Button>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-300">Manual Address</label>
+                  <Textarea
+                    value={manualAddress}
+                    onChange={(e) => setManualAddress(e.target.value)}
+                    placeholder="Enter address manually (optional)"
+                    className="min-h-24 border-zinc-700 bg-zinc-900/40 text-zinc-200 placeholder:text-zinc-500"
+                  />
+                  <p className="text-xs text-zinc-500">You can provide an address instead of selecting on the map.</p>
                 </div>
               )}
+
               <LocationPickerModal
                 open={isMapOpen}
                 onOpenChange={setIsMapOpen}
                 onConfirm={setLocation}
                 initialLocation={location}
               />
+
+              {locationInputMode === "manual" && location && (
+                <div className="rounded-md border border-zinc-800/50 bg-zinc-900/30 p-3 text-xs text-zinc-400">
+                  Map location is already selected and will be submitted together with the manual address.
+                </div>
+              )}
+              {locationInputMode === "map" && manualAddress.trim() !== "" && (
+                <div className="rounded-md border border-zinc-800/50 bg-zinc-900/30 p-3 text-xs text-zinc-400">
+                  Manual address is filled and will be submitted together with map location.
+                </div>
+              )}
             </div>
             
           </CardContent>
