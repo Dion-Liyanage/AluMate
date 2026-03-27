@@ -9,6 +9,7 @@ export interface OrderDetails {
   productType: string;
   designType: string;
   installationDate: string;
+  imageUrl?: string;
 }
 
 interface OrderPreviewCardProps {

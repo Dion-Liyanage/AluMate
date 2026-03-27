@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { OrderSelector } from "./OrderSelector";
 import { OrderPreviewCard, OrderDetails } from "./OrderPreviewCard";
+import { ProductImageCard } from "./ProductImageCard";
 import { IssueInput } from "./IssueInput";
 import { ImageUpload } from "./ImageUpload";
 import { RepairStatusBadge } from "./RepairStatusBadge";
@@ -11,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { PenTool, Wrench } from "lucide-react";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,6 +35,7 @@ const MOCK_ORDERS: OrderDetails[] = [
     productType: "Sliding Window",
     designType: "Custom Dimensions",
     installationDate: "2026-02-10",
+    imageUrl: "https://images.unsplash.com/photo-1503708928676-1cb796a0891e?q=80&w=200&auto=format&fit=crop",
   },
   {
     id: "ORD-1002",
@@ -41,6 +43,7 @@ const MOCK_ORDERS: OrderDetails[] = [
     productType: "Casement Door",
     designType: "Standard Premium",
     installationDate: "2025-11-22",
+    imageUrl: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=200&auto=format&fit=crop",
   },
 ];
 
@@ -113,18 +116,29 @@ export function RepairForm() {
           
           <CardContent className="relative space-y-6 focus-within:z-10">
             {/* Order Selection & Preview */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="flex flex-col gap-2 h-full">
-                 <OrderSelector 
+            <div className="space-y-6">
+              <div className="max-w-md">
+                <OrderSelector 
                   orders={MOCK_ORDERS}
                   selectedOrderId={selectedOrderId}
                   onSelect={setSelectedOrderId}
                   disabled={isSubmitted}
                 />
               </div>
-              <div className="h-full">
-                 <OrderPreviewCard order={selectedOrder} />
-              </div>
+              
+              <AnimatePresence mode="wait">
+                {selectedOrder && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="grid gap-6 md:grid-cols-2"
+                  >
+                    <OrderPreviewCard order={selectedOrder} />
+                    <ProductImageCard order={selectedOrder} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <Separator className="bg-zinc-800/50" />
