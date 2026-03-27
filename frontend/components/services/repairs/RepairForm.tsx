@@ -88,6 +88,9 @@ export function RepairForm() {
       <motion.div variants={itemVariants}>
         <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-fuchsia-950/20 border-zinc-800 shadow-xl overflow-hidden relative group">
           
+          {/* Shimmer wave */}
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite] pointer-events-none" />
+
           {/* Decorative background glow (Fuchsia) */}
           <div className="absolute -top-24 -right-24 w-80 h-80 bg-fuchsia-500/20 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] opacity-50" />
