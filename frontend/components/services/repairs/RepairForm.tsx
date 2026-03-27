@@ -86,17 +86,17 @@ export function RepairForm() {
       animate="visible"
     >
       <motion.div variants={itemVariants}>
-        <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-cyan-950/30 border-zinc-800 shadow-xl overflow-hidden relative group">
+        <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-cyan-950/40 border-zinc-800 shadow-xl overflow-hidden relative group">
           
           {/* Shimmer wave */}
           <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite] pointer-events-none" />
 
           {/* Decorative background glow (Cyan) */}
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/20 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/30 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] opacity-50" />
 
           {/* Decorative background icon */}
-          <div className="absolute top-8 right-8 opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity">
+          <div className="absolute top-8 right-8 opacity-30 pointer-events-none group-hover:opacity-40 transition-opacity">
             <Wrench className="w-48 h-48 text-cyan-300" />
           </div>
 
