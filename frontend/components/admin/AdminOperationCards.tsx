@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { ClipboardList, LayoutGrid, BarChart3, ArrowRight, FolderOpen } from "lucide-react";
+import { ClipboardList, LayoutGrid, ArrowRight, Wrench } from "lucide-react";
 
 const cards = [
   {
@@ -28,14 +28,14 @@ const cards = [
     featured: false,
   },
   {
-    title: "Completed Projects",
-    description: "Showcase finished projects on the landing page gallery",
-    icon: FolderOpen,
-    href: "/admin/projects",
-    gradient: "from-teal-600/20 via-cyan-600/10 to-sky-600/10",
-    borderColor: "border-teal-500/30 hover:border-teal-400/50",
-    iconColor: "text-teal-400",
-    glowColor: "shadow-[0_0_20px_rgba(20,184,166,0.1)]",
+    title: "Service Requests",
+    description: "Manage on-site visits and repair requests from customers",
+    icon: Wrench,
+    href: "/admin/services",
+    gradient: "from-fuchsia-600/20 via-pink-600/10 to-rose-600/10",
+    borderColor: "border-fuchsia-500/30 hover:border-fuchsia-400/50",
+    iconColor: "text-fuchsia-400",
+    glowColor: "shadow-[0_0_30px_rgba(217,70,239,0.15)]",
     featured: false,
   },
 ];
