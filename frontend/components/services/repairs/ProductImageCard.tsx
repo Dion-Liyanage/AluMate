@@ -31,7 +31,7 @@ export function ProductImageCard({ order }: ProductImageCardProps) {
       />
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
         <div className="space-y-0.5">
-          <p className="text-[10px] text-fuchsia-400 font-bold tracking-widest uppercase">{order.orderNumber}</p>
+          <p className="text-[10px] text-cyan-400 font-bold tracking-widest uppercase">{order.orderNumber}</p>
           <p className="text-xs text-zinc-200 font-medium">{order.productType}</p>
         </div>
       </div>
