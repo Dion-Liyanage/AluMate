@@ -34,7 +34,7 @@ export function ImageUpload({ onImageChange, disabled }: ImageUploadProps) {
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium text-zinc-300">
-        Upload Image <span className="text-zinc-500 font-normal">(Optional)</span>
+        Upload Image
       </Label>
       
       {!previewUrl ? (

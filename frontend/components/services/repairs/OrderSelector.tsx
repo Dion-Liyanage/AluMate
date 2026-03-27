@@ -21,7 +21,7 @@ export function OrderSelector({ orders, selectedOrderId, onSelect, disabled }: O
   return (
     <div className="space-y-2">
       <Label htmlFor="order-select" className="text-sm font-medium text-zinc-300">
-        Select Order Number <span className="text-red-400">*</span>
+        Select Order Number
       </Label>
       <Select
         value={selectedOrderId}

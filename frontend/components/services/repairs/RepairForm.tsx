@@ -55,7 +55,7 @@ export function RepairForm() {
 
   const selectedOrder = MOCK_ORDERS.find((o) => o.id === selectedOrderId) || null;
 
-  const isFormValid = selectedOrderId !== "" && issueDescription.trim() !== "";
+  const isFormValid = selectedOrderId !== "" && issueDescription.trim() !== "" && imageFile !== null;
   const isSubmitted = status !== "Draft";
 
   const handleSubmit = (e: React.FormEvent) => {

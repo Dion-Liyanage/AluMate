@@ -145,7 +145,12 @@ export function OnSiteVisitForm() {
 
             {/* Location Selection */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-zinc-200">Location</h3>
+              <h3 className="text-lg font-medium text-zinc-200">
+                Location
+              </h3>
+              <p className="text-xs text-zinc-500 -mt-2">
+                Please provide your location either by pinning it on the map or entering a manual address. 
+              </p>
               <div className="grid w-full items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
                 <Button
                   type="button"
@@ -196,14 +201,16 @@ export function OnSiteVisitForm() {
                 )
               ) : (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-300">Manual Address</label>
+                  <label className="text-sm font-medium text-zinc-300">
+                    Manual Address
+                  </label>
                   <Textarea
                     value={manualAddress}
                     onChange={(e) => setManualAddress(e.target.value)}
                     placeholder="Enter address manually"
                     className="min-h-24 !bg-zinc-800/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 [color-scheme:dark] autofill:shadow-[inset_0_0_0px_1000px_rgba(39,39,42,0.8)] autofill:[-webkit-text-fill-color:#f4f4f5]"
                   />
-                  <p className="text-xs text-zinc-500">You can provide an address instead of selecting on the map.</p>
+                  <p className="text-xs text-zinc-500">Provide a detailed address where the visit should occur.</p>
                 </div>
               )}
 

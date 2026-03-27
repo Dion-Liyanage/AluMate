@@ -13,7 +13,7 @@ export function IssueInput({ value, onChange, disabled }: IssueInputProps) {
   return (
     <div className="space-y-2">
       <Label htmlFor="issue-description" className="text-sm font-medium text-zinc-300">
-        Issue Description <span className="text-red-400">*</span>
+        Issue Description
       </Label>
       <Textarea
         id="issue-description"
