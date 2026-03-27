@@ -30,7 +30,7 @@ export function OrderSelector({ orders, selectedOrderId, onSelect, disabled }: O
       >
         <SelectTrigger 
           id="order-select"
-          className="w-full h-11 bg-zinc-900 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 transition-all focus:ring-1 focus:ring-fuchsia-500 focus:border-fuchsia-500"
+          className="w-full h-11 bg-zinc-900 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 transition-all focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
         >
           <SelectValue placeholder="Select a previously completed order" />
         </SelectTrigger>

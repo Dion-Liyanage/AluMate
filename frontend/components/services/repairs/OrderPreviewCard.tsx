@@ -35,7 +35,7 @@ export function OrderPreviewCard({ order }: OrderPreviewCardProps) {
     <Card className="bg-zinc-900 border-zinc-800 shadow-sm h-full flex flex-col justify-center">
       <CardHeader className="pb-3 pt-4 px-5">
         <CardTitle className="text-sm font-medium flex items-center text-zinc-300">
-          <Package className="w-4 h-4 mr-2 text-fuchsia-400" />
+          <Package className="w-4 h-4 mr-2 text-cyan-400" />
           Order Preview
         </CardTitle>
       </CardHeader>

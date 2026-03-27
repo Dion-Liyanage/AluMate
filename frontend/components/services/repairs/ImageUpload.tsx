@@ -44,11 +44,11 @@ export function ImageUpload({ onImageChange, disabled }: ImageUploadProps) {
             border-2 border-dashed border-zinc-700 bg-zinc-900/50 
             rounded-lg flex flex-col items-center justify-center p-6
             transition-colors duration-200
-            ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-zinc-800 hover:border-fuchsia-500/50"}
+            ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-zinc-800 hover:border-cyan-500/50"}
           `}
         >
           <div className="bg-zinc-800 rounded-full p-3 mb-3">
-            <ImagePlus className="h-6 w-6 text-zinc-400 group-hover:text-fuchsia-400" />
+            <ImagePlus className="h-6 w-6 text-zinc-400 group-hover:text-cyan-400" />
           </div>
           <span className="text-sm font-medium text-zinc-300">Click to upload</span>
           <span className="text-xs text-zinc-500 mt-1">PNG, JPG, JPEG up to 5MB</span>

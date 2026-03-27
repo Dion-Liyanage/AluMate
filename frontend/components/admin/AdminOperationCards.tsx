@@ -67,6 +67,11 @@ export function AdminOperationCards() {
               {/* Shimmer wave */}
               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
               
+              {/* Decorative background icon */}
+              <div className="absolute top-8 right-8 opacity-[0.07] pointer-events-none group-hover:opacity-10 transition-opacity">
+                <card.icon className={`w-48 h-48 ${card.iconColor}`} />
+              </div>
+              
               {/* Featured badge */}
               {card.featured && (
                 <div className="absolute -top-2.5 left-4">
