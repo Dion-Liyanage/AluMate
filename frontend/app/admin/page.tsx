@@ -12,7 +12,6 @@ import {
   AlertTriangle,
   ArrowRight,
   Activity,
-  FolderOpen,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -84,22 +83,12 @@ const analyticsCards = [
     iconColor: "text-cyan-400",
     trendUp: false,
   },
-  {
-    title: "Completed Projects",
-    value: "0",
-    trend: "",
-    icon: FolderOpen,
-    color: "from-purple-500/20 to-purple-600/10",
-    iconColor: "text-purple-400",
-    trendUp: false,
-  },
 ];
 
 const quickLinks = [
   { href: "/admin/orders", label: "Manage Orders", icon: ClipboardList },
   { href: "/admin/customers", label: "View Customers", icon: Users },
   { href: "/admin/designs", label: "Design Catalogue", icon: LayoutGrid },
-  { href: "/admin/projects", label: "Completed Projects", icon: FolderOpen },
   { href: "/admin/quotations", label: "Quotations", icon: FileText },
   { href: "/admin/services", label: "Service Requests", icon: Wrench },
 ];
