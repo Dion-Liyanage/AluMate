@@ -2,6 +2,7 @@
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ServiceManagement } from "@/components/admin/services/ServiceManagement";
+import { ServiceOverviewCard } from "@/components/admin/services/ServiceOverviewCard";
 import { motion } from "framer-motion";
 
 const containerVariants = {
@@ -33,6 +34,10 @@ export default function AdminServicesPage() {
               Manage on-site measurements and repair requests from your customers.
             </p>
           </div>
+        </motion.div>
+
+        <motion.div variants={itemVariants}>
+          <ServiceOverviewCard />
         </motion.div>
 
         <motion.div variants={itemVariants}>
