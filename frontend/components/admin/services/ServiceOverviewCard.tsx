@@ -12,6 +12,7 @@ export function ServiceOverviewCard() {
     pendingRequests: 0,
     completedRequests: 0,
     onSiteVisits: 0,
+    repairRequests: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,6 +27,7 @@ export function ServiceOverviewCard() {
             pendingRequests: requests.filter((r: any) => r.status === "Pending" || r.status === "Request Sent").length,
             completedRequests: requests.filter((r: any) => r.status === "Completed").length,
             onSiteVisits: requests.filter((r: any) => r.serviceType === "on-site-visit").length,
+            repairRequests: requests.filter((r: any) => r.serviceType === "repair").length,
           });
         }
       } catch (error) {
@@ -56,20 +58,28 @@ export function ServiceOverviewCard() {
       borderColor: "border-amber-500/40",
     },
     {
-      icon: Map,
-      label: "On-Site Visits",
-      value: stats.onSiteVisits,
-      color: "from-cyan-500/30 to-cyan-600/20",
-      iconColor: "text-cyan-300",
-      borderColor: "border-cyan-500/40",
-    },
-    {
       icon: CheckCircle2,
       label: "Completed",
       value: stats.completedRequests,
+      color: "from-sky-500/30 to-sky-600/20",
+      iconColor: "text-sky-300",
+      borderColor: "border-sky-500/40",
+    },
+    {
+      icon: Map,
+      label: "On-Site Visits",
+      value: stats.onSiteVisits,
       color: "from-emerald-500/30 to-emerald-600/20",
       iconColor: "text-emerald-300",
       borderColor: "border-emerald-500/40",
+    },
+    {
+      icon: Wrench,
+      label: "Repair Requests",
+      value: stats.repairRequests,
+      color: "from-cyan-500/30 to-cyan-600/20",
+      iconColor: "text-cyan-300",
+      borderColor: "border-cyan-500/40",
     },
   ];
 
@@ -107,7 +117,7 @@ export function ServiceOverviewCard() {
         </CardHeader>
 
         <CardContent className="relative">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {statCards.map((stat, index) => {
               const Icon = stat.icon;
               return (
