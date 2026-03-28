@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { servicesApi } from "@/lib/api";
 import { DateSelector } from "./DateSelector";
 import { TimeSlotSelector } from "./TimeSlotSelector";
 import { CustomerDetailsForm } from "./CustomerDetailsForm";
@@ -42,6 +43,7 @@ export function OnSiteVisitForm() {
   const [locationInputMode, setLocationInputMode] = useState<"map" | "manual">("map");
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [status, setStatus] = useState("Draft"); // Draft -> Request Sent
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -55,25 +57,30 @@ export function OnSiteVisitForm() {
     formData.nearestTown.trim() !== "" &&
     (location !== null || manualAddress.trim() !== "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid) return;
+    if (!isFormValid || isSubmitting) return;
 
-    // Simulate form submission
-    const submissionData = {
-      userId: "dummy-user-id", // Later replaced with actual user logic
-      date: selectedDate,
-      timeSlot: selectedSlot,
-      ...formData,
-      manualAddress: manualAddress.trim() || null,
-      location: location ? { lat: location.lat, lng: location.lng } : null,
-      status: "Request Sent",
-      createdAt: new Date().toISOString()
-    };
-    
-    console.log("Submitting Request:", submissionData);
-    setStatus("Request Sent");
-    toast.success("Visit request submitted successfully");
+    setIsSubmitting(true);
+    try {
+      await servicesApi.createOnSiteVisit({
+        date: selectedDate,
+        timeSlot: selectedSlot,
+        fullName: formData.fullName,
+        contactNumber: formData.contactNumber,
+        nearestTown: formData.nearestTown,
+        location: location ? { lat: location.lat, lng: location.lng } : undefined,
+        manualAddress: manualAddress.trim() || undefined,
+      });
+
+      setStatus("Request Sent");
+      toast.success("Visit request submitted successfully");
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to submit request. Please try again.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -238,9 +245,9 @@ export function OnSiteVisitForm() {
             <Button 
               type="submit" 
               className="w-full sm:w-auto ml-auto bg-emerald-600 hover:bg-emerald-700 text-white border-0" 
-              disabled={!isFormValid || status === "Request Sent" || status === "Approved"}
+              disabled={!isFormValid || isSubmitting || status === "Request Sent" || status === "Approved"}
             >
-              {status === "Draft" ? "Submit Request" : "Request Already Submitted"}
+              {isSubmitting ? "Submitting..." : status === "Draft" ? "Submit Request" : "Request Already Submitted"}
             </Button>
           </CardFooter>
         </Card>

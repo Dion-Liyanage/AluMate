@@ -48,12 +48,26 @@ export interface QuotationItem {
 
 export interface ServiceRequest {
   id: string;
+  _id?: string;
   customerId: string;
-  type: 'maintenance' | 'repair' | 'installation';
-  description: string;
-  status: 'pending' | 'scheduled' | 'in-progress' | 'completed';
-  scheduledDate?: Date;
-  createdAt: Date;
+  customerName: string;
+  serviceType: 'on-site-visit' | 'repair';
+  status: 'Request Sent' | 'Pending' | 'Approved' | 'In Progress' | 'Completed' | 'Rejected';
+  date: string;
+  // On-site visit fields
+  timeSlot?: string;
+  contactNumber?: string;
+  nearestTown?: string;
+  location?: { lat: number; lng: number };
+  manualAddress?: string;
+  // Repair fields
+  orderId?: string;
+  issueDescription?: string;
+  imageUrl?: string;
+  // Admin fields
+  adminNotes?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface InventoryItem {
