@@ -31,6 +31,7 @@ export class ServiceRequest {
       'In Progress',
       'Completed',
       'Rejected',
+      'Cancelled by Customer',
     ],
     default: 'Request Sent',
   })

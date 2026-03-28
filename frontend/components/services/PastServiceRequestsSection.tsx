@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CalendarDays, Clock3, Loader2, RefreshCw, Wrench, MapPin } from "lucide-react";
 import type { ServiceRequest } from "@/types";
+import { toast } from "sonner";
 
 interface PastServiceRequestsSectionProps {
   serviceType?: "repair" | "on-site-visit";
@@ -31,10 +32,18 @@ function getStatusClasses(status: string) {
       return "bg-zinc-500/20 text-zinc-300 border-zinc-500/40";
     case "Rejected":
       return "bg-red-500/20 text-red-300 border-red-500/40";
+    case "Cancelled by Customer":
+      return "bg-zinc-600/20 text-zinc-300 border-zinc-500/40";
     default:
       return "bg-zinc-700/30 text-zinc-300 border-zinc-600/50";
   }
 }
+
+const CANCELLABLE_STATUSES: ServiceRequest["status"][] = [
+  "Request Sent",
+  "Pending",
+  "Approved",
+];
 
 export function PastServiceRequestsSection({
   serviceType,
@@ -45,6 +54,7 @@ export function PastServiceRequestsSection({
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancellingRequestId, setCancellingRequestId] = useState<string | null>(null);
 
   const fetchRequests = useCallback(async () => {
     setIsLoading(true);
@@ -72,6 +82,23 @@ export function PastServiceRequestsSection({
     if (!serviceType) return requests;
     return requests.filter((request) => request.serviceType === serviceType);
   }, [requests, serviceType]);
+
+  const handleCancelRequest = useCallback(
+    async (requestId: string) => {
+      setCancellingRequestId(requestId);
+      try {
+        await servicesApi.cancelMyRequest(requestId);
+        toast.success("Service request cancelled successfully.");
+        await fetchRequests();
+      } catch (err: any) {
+        const message = err?.response?.data?.message || "Failed to cancel request.";
+        toast.error(message);
+      } finally {
+        setCancellingRequestId(null);
+      }
+    },
+    [fetchRequests]
+  );
 
   return (
     <motion.div
@@ -122,6 +149,8 @@ export function PastServiceRequestsSection({
             <div className="space-y-3">
               {filteredRequests.map((request) => {
                 const requestId = request._id || request.id;
+                const canCancel = CANCELLABLE_STATUSES.includes(request.status);
+                const isCancelling = cancellingRequestId === requestId;
 
                 return (
                   <div
@@ -152,7 +181,7 @@ export function PastServiceRequestsSection({
                       </p>
 
                       {request.orderId && (
-                        <div className="flex items-center gap-2 justify-between -ml-2">
+                        <div className="flex items-center gap-2 justify-between -ml-6 sm:-ml-7">
                           <p className="flex items-center gap-2">
                             <Wrench className="h-4 w-4 text-zinc-500" />
                             Order ID: {request.orderId}
@@ -199,6 +228,21 @@ export function PastServiceRequestsSection({
                       <div className="mt-3 rounded-md border border-emerald-600/30 bg-emerald-600/10 p-3">
                         <p className="text-xs font-medium uppercase tracking-wide text-emerald-300">Admin Notes</p>
                         <p className="mt-1 text-sm text-emerald-100">{request.adminNotes}</p>
+                      </div>
+                    )}
+
+                    {canCancel && (
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCancelRequest(requestId)}
+                          disabled={isCancelling}
+                          className="border-red-500/40 text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                        >
+                          {isCancelling ? "Cancelling..." : "Cancel Request"}
+                        </Button>
                       </div>
                     )}
                   </div>

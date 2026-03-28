@@ -220,6 +220,14 @@ export const servicesApi = {
     return res.data;
   },
 
+  // Customer: Cancel own service request
+  cancelMyRequest: async (id: string) => {
+    const res = await apiClient.patch<ApiResponse<{ serviceRequest: ServiceRequest }>>(
+      `/services/${id}/cancel`
+    );
+    return res.data;
+  },
+
   // Customer: Submit on-site visit request
   createOnSiteVisit: async (data: {
     date: string;

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
@@ -114,6 +119,32 @@ export class ServicesService {
       throw new NotFoundException(`Service request ${id} not found`);
     }
     return updated;
+  }
+
+  // ── Customer: Cancel own request (soft cancel via status) ──
+  async cancelByCustomer(
+    requestId: string,
+    customerId: string,
+  ): Promise<ServiceRequestDocument> {
+    const request = await this.serviceRequestModel.findById(requestId).exec();
+
+    if (!request) {
+      throw new NotFoundException(`Service request ${requestId} not found`);
+    }
+
+    if (request.customerId.toString() !== customerId) {
+      throw new ForbiddenException('You can only cancel your own service requests');
+    }
+
+    const cancellableStatuses = ['Request Sent', 'Pending', 'Approved'];
+    if (!cancellableStatuses.includes(request.status)) {
+      throw new BadRequestException(
+        `Request cannot be cancelled when status is "${request.status}"`,
+      );
+    }
+
+    request.status = 'Cancelled by Customer';
+    return request.save();
   }
 
   // ── Admin: Delete request ──

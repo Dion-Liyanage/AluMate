@@ -52,7 +52,14 @@ export interface ServiceRequest {
   customerId: string;
   customerName: string;
   serviceType: 'on-site-visit' | 'repair';
-  status: 'Request Sent' | 'Pending' | 'Approved' | 'In Progress' | 'Completed' | 'Rejected';
+  status:
+    | 'Request Sent'
+    | 'Pending'
+    | 'Approved'
+    | 'In Progress'
+    | 'Completed'
+    | 'Rejected'
+    | 'Cancelled by Customer';
   date: string;
   // On-site visit fields
   timeSlot?: string;

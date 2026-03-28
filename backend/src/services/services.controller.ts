@@ -124,6 +124,22 @@ export class ServicesController {
     };
   }
 
+  /**
+   * PATCH /api/v1/services/:id/cancel
+   * Customer cancels their own request (soft cancel)
+   */
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard)
+  async cancelMyRequest(@Request() req: any, @Param('id') id: string) {
+    const updated = await this.servicesService.cancelByCustomer(id, req.user.id);
+
+    return {
+      success: true,
+      message: 'Service request cancelled successfully',
+      data: { serviceRequest: updated },
+    };
+  }
+
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // ADMIN ENDPOINTS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
