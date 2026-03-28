@@ -47,6 +47,38 @@ const MOCK_ORDERS: OrderDetails[] = [
     installationDate: "2025-11-22",
     imageUrl: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=200&auto=format&fit=crop",
   },
+  {
+    id: "ORD-1003",
+    orderNumber: "ORD-1003",
+    productType: "Picture Window",
+    designType: "Fixed Frame Glass",
+    installationDate: "2025-09-15",
+    imageUrl: "https://images.unsplash.com/photo-1470252649378-9c29740ff023?q=80&w=200&auto=format&fit=crop",
+  },
+  {
+    id: "ORD-1004",
+    orderNumber: "ORD-1004",
+    productType: "Sliding Door",
+    designType: "Aluminum Frame",
+    installationDate: "2025-08-20",
+    imageUrl: "https://images.unsplash.com/photo-1501183007986-e0202ffa2078?q=80&w=200&auto=format&fit=crop",
+  },
+  {
+    id: "ORD-1005",
+    orderNumber: "ORD-1005",
+    productType: "Awning Window",
+    designType: "Custom Dimensions",
+    installationDate: "2025-07-10",
+    imageUrl: "https://images.unsplash.com/photo-1503387762519-52582191ee5f?q=80&w=200&auto=format&fit=crop",
+  },
+  {
+    id: "ORD-1006",
+    orderNumber: "ORD-1006",
+    productType: "Hinged Door",
+    designType: "Premium Entry Door",
+    installationDate: "2025-06-05",
+    imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=200&auto=format&fit=crop",
+  },
 ];
 
 export function RepairForm() {
@@ -56,6 +88,7 @@ export function RepairForm() {
   const [status, setStatus] = useState<string>("Draft"); // "Draft" -> "Request Sent"
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
+  const [clearFormSignal, setClearFormSignal] = useState(0);
 
   const selectedOrder = MOCK_ORDERS.find((o) => o.id === selectedOrderId) || null;
 
@@ -74,9 +107,14 @@ export function RepairForm() {
         image: imageFile || undefined,
       });
 
-      setStatus("Request Sent");
-      setHistoryRefreshToken((prev) => prev + 1);
       toast.success("Repair request submitted successfully.");
+      // Clear form for next submission
+      setSelectedOrderId("");
+      setIssueDescription("");
+      setImageFile(null);
+      setClearFormSignal((prev) => prev + 1);
+      setStatus("Draft");
+      setHistoryRefreshToken((prev) => prev + 1);
     } catch (error: any) {
       const message = error?.response?.data?.message || "Failed to submit repair request. Please try again.";
       toast.error(message);
@@ -175,6 +213,7 @@ export function RepairForm() {
               <ImageUpload 
                 onImageChange={setImageFile}
                 disabled={isSubmitted}
+               clearSignal={clearFormSignal}
               />
             </div>
 
