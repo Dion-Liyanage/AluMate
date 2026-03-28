@@ -4,7 +4,15 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Search, Filter, X } from "lucide-react";
 import { ServiceTable } from "./ServiceTable";
 
 // Unified Service Request Interface
@@ -70,32 +78,69 @@ const MOCK_SERVICES: ServiceRequest[] = [
 export function ServiceManagement() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const filteredServices = MOCK_SERVICES.filter((service) => {
     const matchesTab = activeTab === "all" || service.serviceType === activeTab;
     const matchesSearch = 
       service.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       service.id.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
+    const matchesStatus = statusFilter === "all" || service.status === statusFilter;
+    return matchesTab && matchesSearch && matchesStatus;
   });
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+  };
+
+  const hasFilters = searchQuery !== "" || statusFilter !== "all";
 
   return (
     <div className="space-y-6">
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 backdrop-blur-sm">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-          <Input 
-            placeholder="Search by customer or Request ID..." 
-            className="pl-10 bg-zinc-950/50 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 focus:ring-fuchsia-500/20"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+            <Input 
+              placeholder="Search by customer or Request ID..." 
+              className="pl-10 bg-zinc-950/50 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 focus:ring-fuchsia-500/20"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Filter className="h-4 w-4 text-zinc-500 shrink-0" />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px] bg-zinc-950/50 border-zinc-800 text-zinc-300">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Approved">Approved</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Request Sent">Request Sent</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-zinc-500 mr-1" />
-          <span className="text-sm text-zinc-400">Filter options coming soon</span>
-        </div>
+
+        {hasFilters && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={clearFilters}
+            className="text-zinc-500 hover:text-zinc-300 h-9 px-3"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {/* Tabs and Table */}
@@ -105,10 +150,10 @@ export function ServiceManagement() {
             <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
               All Requests
             </TabsTrigger>
-            <TabsTrigger value="on-site-visit" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-blue-400">
+            <TabsTrigger value="on-site-visit" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
               On-Site Visits
             </TabsTrigger>
-            <TabsTrigger value="repair" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-orange-400">
+            <TabsTrigger value="repair" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-cyan-400">
               Repair Requests
             </TabsTrigger>
           </TabsList>

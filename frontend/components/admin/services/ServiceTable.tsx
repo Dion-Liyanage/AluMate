@@ -34,12 +34,12 @@ export function ServiceTable({ services }: ServiceTableProps) {
         <Table>
           <TableHeader className="bg-zinc-900/50">
             <TableRow className="border-zinc-800">
-              <TableHead className="text-zinc-400 font-semibold w-[120px]">ID</TableHead>
-              <TableHead className="text-zinc-400 font-semibold">Service Type</TableHead>
-              <TableHead className="text-zinc-400 font-semibold">Customer</TableHead>
-              <TableHead className="text-zinc-400 font-semibold">Scheduled Date</TableHead>
-              <TableHead className="text-zinc-400 font-semibold">Status</TableHead>
-              <TableHead className="text-zinc-400 font-semibold text-right">Action</TableHead>
+              <TableHead className="text-zinc-400 font-semibold w-[120px] text-center">ID</TableHead>
+              <TableHead className="text-zinc-400 font-semibold text-center">Service Type</TableHead>
+              <TableHead className="text-zinc-400 font-semibold text-center">Customer</TableHead>
+              <TableHead className="text-zinc-400 font-semibold text-center">Scheduled Date</TableHead>
+              <TableHead className="text-zinc-400 font-semibold text-center">Status</TableHead>
+              <TableHead className="text-zinc-400 font-semibold text-center">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -55,25 +55,29 @@ export function ServiceTable({ services }: ServiceTableProps) {
                   key={request.id} 
                   className="border-zinc-800/50 hover:bg-zinc-900/40 transition-colors group"
                 >
-                  <TableCell className="font-medium text-zinc-300">
+                  <TableCell className="font-medium text-zinc-300 text-center">
                     {request.id}
                   </TableCell>
-                  <TableCell>
-                    <ServiceTypeBadge type={request.serviceType} />
+                  <TableCell className="text-center">
+                    <div className="flex justify-center">
+                      <ServiceTypeBadge type={request.serviceType} />
+                    </div>
                   </TableCell>
-                  <TableCell className="text-zinc-300">
+                  <TableCell className="text-zinc-300 text-center">
                     {request.customerName}
                   </TableCell>
-                  <TableCell className="text-zinc-400">
-                    <div className="flex items-center gap-2">
+                  <TableCell className="text-zinc-400 text-center">
+                    <div className="flex items-center gap-2 justify-center">
                       <Calendar className="h-3.5 w-3.5 text-zinc-500" />
                       {request.date}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <ServiceStatusBadge status={request.status} />
+                  <TableCell className="text-center">
+                    <div className="flex justify-center">
+                      <ServiceStatusBadge status={request.status} />
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-center">
                     <Button
                       variant="ghost"
                       size="sm"
