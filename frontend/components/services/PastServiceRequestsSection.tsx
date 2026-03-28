@@ -141,9 +141,6 @@ export function PastServiceRequestsSection({
                         >
                           {request.serviceType === "repair" ? "Repair" : "On-site Visit"}
                         </Badge>
-                        <Badge variant="outline" className={cn("font-medium", getStatusClasses(request.status))}>
-                          {request.status}
-                        </Badge>
                       </div>
                       <span className="text-xs text-zinc-500">Request ID: {requestId}</span>
                     </div>
@@ -154,17 +151,25 @@ export function PastServiceRequestsSection({
                         Requested Date: {request.date}
                       </p>
 
+                      {request.orderId && (
+                        <div className="flex items-center gap-2 justify-between -ml-2">
+                          <p className="flex items-center gap-2">
+                            <Wrench className="h-4 w-4 text-zinc-500" />
+                            Order ID: {request.orderId}
+                          </p>
+                          <Badge
+                            variant="outline"
+                            className={cn("font-medium", getStatusClasses(request.status))}
+                          >
+                            {request.status}
+                          </Badge>
+                        </div>
+                      )}
+
                       {request.timeSlot && (
                         <p className="flex items-center gap-2">
                           <Clock3 className="h-4 w-4 text-zinc-500" />
                           Time Slot: {request.timeSlot}
-                        </p>
-                      )}
-
-                      {request.orderId && (
-                        <p className="flex items-center gap-2">
-                          <Wrench className="h-4 w-4 text-zinc-500" />
-                          Order ID: {request.orderId}
                         </p>
                       )}
 
