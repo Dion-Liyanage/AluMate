@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ServiceManagement } from "@/components/admin/services/ServiceManagement";
 import { ServiceOverviewCard } from "@/components/admin/services/ServiceOverviewCard";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -19,6 +22,25 @@ const itemVariants = {
 };
 
 export default function AdminServicesPage() {
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== "admin")) {
+      router.replace(user ? "/dashboard" : "/login");
+    }
+  }, [isLoading, router, user]);
+
+  if (isLoading || !user || user.role !== "admin") {
+    return (
+      <DashboardLayout title="Service Management">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <p className="text-sm text-zinc-400">Loading service management...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title="Service Management">
       <motion.div

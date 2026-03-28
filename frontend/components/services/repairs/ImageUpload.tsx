@@ -1,17 +1,28 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, X } from "lucide-react";
 
 interface ImageUploadProps {
   onImageChange: (file: File | null) => void;
   disabled?: boolean;
+  clearSignal?: number;
 }
 
-export function ImageUpload({ onImageChange, disabled }: ImageUploadProps) {
+export function ImageUpload({ onImageChange, disabled, clearSignal }: ImageUploadProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset preview when clearSignal changes
+  useEffect(() => {
+    if (clearSignal !== undefined && clearSignal > 0) {
+      setPreviewUrl(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }, [clearSignal]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;

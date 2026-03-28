@@ -8,10 +8,11 @@ import { ProductImageCard } from "./ProductImageCard";
 import { IssueInput } from "./IssueInput";
 import { ImageUpload } from "./ImageUpload";
 import { RepairStatusBadge } from "./RepairStatusBadge";
+import { PastServiceRequestsSection } from "@/components/services/PastServiceRequestsSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { PenTool, Wrench } from "lucide-react";
+import { ChevronDown, ChevronUp, PenTool, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -46,6 +47,38 @@ const MOCK_ORDERS: OrderDetails[] = [
     installationDate: "2025-11-22",
     imageUrl: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=200&auto=format&fit=crop",
   },
+  {
+    id: "ORD-1003",
+    orderNumber: "ORD-1003",
+    productType: "Picture Window",
+    designType: "Fixed Frame Glass",
+    installationDate: "2025-09-15",
+    imageUrl: "https://images.unsplash.com/photo-1470252649378-9c29740ff023?q=80&w=200&auto=format&fit=crop",
+  },
+  {
+    id: "ORD-1004",
+    orderNumber: "ORD-1004",
+    productType: "Sliding Door",
+    designType: "Aluminum Frame",
+    installationDate: "2025-08-20",
+    imageUrl: "https://images.unsplash.com/photo-1501183007986-e0202ffa2078?q=80&w=200&auto=format&fit=crop",
+  },
+  {
+    id: "ORD-1005",
+    orderNumber: "ORD-1005",
+    productType: "Awning Window",
+    designType: "Custom Dimensions",
+    installationDate: "2025-07-10",
+    imageUrl: "https://images.unsplash.com/photo-1503387762519-52582191ee5f?q=80&w=200&auto=format&fit=crop",
+  },
+  {
+    id: "ORD-1006",
+    orderNumber: "ORD-1006",
+    productType: "Hinged Door",
+    designType: "Premium Entry Door",
+    installationDate: "2025-06-05",
+    imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=200&auto=format&fit=crop",
+  },
 ];
 
 export function RepairForm() {
@@ -54,6 +87,9 @@ export function RepairForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string>("Draft"); // "Draft" -> "Request Sent"
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
+  const [clearFormSignal, setClearFormSignal] = useState(0);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
 
   const selectedOrder = MOCK_ORDERS.find((o) => o.id === selectedOrderId) || null;
 
@@ -72,8 +108,14 @@ export function RepairForm() {
         image: imageFile || undefined,
       });
 
-      setStatus("Request Sent");
       toast.success("Repair request submitted successfully.");
+      // Clear form for next submission
+      setSelectedOrderId("");
+      setIssueDescription("");
+      setImageFile(null);
+      setClearFormSignal((prev) => prev + 1);
+      setStatus("Draft");
+      setHistoryRefreshToken((prev) => prev + 1);
     } catch (error: any) {
       const message = error?.response?.data?.message || "Failed to submit repair request. Please try again.";
       toast.error(message);
@@ -172,6 +214,7 @@ export function RepairForm() {
               <ImageUpload 
                 onImageChange={setImageFile}
                 disabled={isSubmitted}
+               clearSignal={clearFormSignal}
               />
             </div>
 
@@ -186,6 +229,44 @@ export function RepairForm() {
             </Button>
           </CardFooter>
         </Card>
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="space-y-3">
+        <div className="flex items-center justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsHistoryExpanded((prev) => !prev)}
+            className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
+          >
+            {isHistoryExpanded ? (
+              <ChevronUp className="mr-2 h-4 w-4" />
+            ) : (
+              <ChevronDown className="mr-2 h-4 w-4" />
+            )}
+            {isHistoryExpanded ? "Hide Past Requests" : "Show Past Requests"}
+          </Button>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {isHistoryExpanded && (
+            <motion.div
+              variants={itemVariants}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PastServiceRequestsSection
+                serviceType="repair"
+                title="Past Repair Requests"
+                description="See all previous repair requests, status updates, and technician notes."
+                refreshToken={historyRefreshToken}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.form>
   );

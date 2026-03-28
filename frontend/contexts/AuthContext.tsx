@@ -33,6 +33,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const clearAuthStorage = useCallback(() => {
+    localStorage.removeItem("alumate_token");
+    localStorage.removeItem("alumate_user");
+    setUser(null);
+    setToken(null);
+  }, []);
+
+  const parseJwtPayload = useCallback((jwtToken: string) => {
+    try {
+      const base64Payload = jwtToken.split(".")[1];
+      if (!base64Payload) return null;
+
+      const normalizedBase64 = base64Payload.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = normalizedBase64.padEnd(
+        normalizedBase64.length + ((4 - (normalizedBase64.length % 4)) % 4),
+        "="
+      );
+
+      const decoded = atob(padded);
+      return JSON.parse(decoded) as { sub?: string; role?: string };
+    } catch {
+      return null;
+    }
+  }, []);
+
   // Check for existing token on mount
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,8 +66,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedUser = localStorage.getItem("alumate_user");
 
         if (storedToken && storedUser) {
+          const parsedUser = JSON.parse(storedUser) as User;
+          const tokenPayload = parseJwtPayload(storedToken);
+
+          const tokenUserId = tokenPayload?.sub;
+          const tokenRole = tokenPayload?.role;
+          const isSameUser = !tokenUserId || parsedUser.id === tokenUserId;
+          const isSameRole = !tokenRole || parsedUser.role === tokenRole;
+
+          if (!isSameUser || !isSameRole) {
+            clearAuthStorage();
+            return;
+          }
+
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          setUser(parsedUser);
 
           // Verify token is still valid with the backend
           try {
@@ -54,22 +92,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 JSON.stringify(response.data.user)
               );
             }
-          } catch {
+          } catch (error: any) {
+            // If backend explicitly rejects auth, clear stale auth state.
+            if (error?.response?.status === 401 || error?.response?.status === 403) {
+              clearAuthStorage();
+            }
             // Backend might not be running yet — keep stored data
             // Token will be validated when backend is available
           }
         }
       } catch {
         // Error reading from localStorage
-        localStorage.removeItem("alumate_token");
-        localStorage.removeItem("alumate_user");
+        clearAuthStorage();
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [clearAuthStorage, parseJwtPayload]);
 
   const login = useCallback(
     async (email: string, password: string) => {

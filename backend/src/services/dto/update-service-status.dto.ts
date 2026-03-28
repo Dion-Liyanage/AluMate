@@ -4,7 +4,13 @@ export class UpdateServiceStatusDto {
   @IsString()
   @IsNotEmpty({ message: 'Status is required' })
   @IsIn(
-    ['Request Sent', 'Pending', 'Approved', 'In Progress', 'Completed', 'Rejected'],
+    [
+      'Pending',
+      'Approved',
+      'In Progress',
+      'Completed',
+      'Rejected',
+    ],
     { message: 'Invalid status value' },
   )
   status: string;

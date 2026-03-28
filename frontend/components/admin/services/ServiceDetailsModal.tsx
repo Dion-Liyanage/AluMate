@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -12,6 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   MapPin, 
   Wrench, 
@@ -40,6 +47,14 @@ interface ServiceDetailsModalProps {
 
 export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }: ServiceDetailsModalProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>("Request Sent");
+  const isCustomerCancelled = request?.status === "Cancelled by Customer";
+
+  useEffect(() => {
+    if (request) {
+      setSelectedStatus(request.status);
+    }
+  }, [request]);
 
   if (!request) return null;
 
@@ -47,11 +62,13 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
     setIsUpdating(true);
     try {
       await servicesApi.updateStatus(request.id, { status: newStatus });
-      toast.success(`Request ${newStatus.toLowerCase()} successfully`);
-      onOpenChange(false);
+      toast.success(`Request status changed to ${newStatus}`);
       onRefresh?.();
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Failed to update status.";
+      const isForbidden = error?.response?.status === 403;
+      const message = isForbidden
+        ? "You are not authorized as admin in this session. Please log in again with an admin account."
+        : error?.response?.data?.message || "Failed to update status.";
       toast.error(message);
     } finally {
       setIsUpdating(false);
@@ -62,15 +79,17 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-zinc-950 border-zinc-800 text-zinc-100">
+      <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto bg-zinc-950 border-zinc-800 text-zinc-100">
         <DialogHeader>
           <div className="flex justify-between items-start pr-8">
             <div className="space-y-1">
-              <DialogTitle className="text-xl flex items-center gap-2">
-                Service Request Details
+              <DialogTitle className="text-xl">
+                <div className="inline-flex items-center gap-2">
+                  <span className="whitespace-nowrap">Service Request Details</span>
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider border-zinc-700 bg-zinc-900 text-zinc-400">
                   {request.id.substring(0, 8)}...
                 </Badge>
+                </div>
               </DialogTitle>
               <DialogDescription className="text-zinc-500">
                 Created on {new Date(request.createdAt).toLocaleDateString()}
@@ -195,32 +214,60 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
               <p className="text-sm text-zinc-300">{request.adminNotes}</p>
             </div>
           )}
+
+          <div className="bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/30 space-y-2">
+            <p className="text-xs text-zinc-500">Update Status</p>
+            <Select
+              value={selectedStatus}
+              onValueChange={setSelectedStatus}
+              disabled={isCustomerCancelled}
+            >
+              <SelectTrigger className="w-full bg-zinc-950/60 border-zinc-800 text-zinc-200">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                <SelectItem
+                  value="Request Sent"
+                  disabled
+                  className="text-zinc-500 data-[disabled]:opacity-70"
+                >
+                  Request Sent
+                </SelectItem>
+                <SelectItem value="Approved">Approved</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+            {isCustomerCancelled && (
+              <p className="text-xs text-zinc-500">
+                This request was cancelled by the customer and can no longer be changed.
+              </p>
+            )}
+          </div>
         </div>
 
         <DialogFooter className="border-t border-zinc-800 pt-4 mt-2">
-          <div className="flex gap-2 w-full justify-between">
-            <Button 
-              variant="outline" 
-              className="border-zinc-700 text-zinc-400 hover:text-red-400 hover:bg-red-400/10"
-              onClick={() => handleStatusUpdate("Rejected")}
-              disabled={isUpdating || request.status === "Rejected" || request.status === "Completed"}
+          <div className="flex gap-2 w-full justify-end">
+            <Button
+              variant="secondary"
+              className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+              onClick={() => onOpenChange(false)}
             >
-              {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Reject Request
+              Close
             </Button>
-            <div className="flex gap-2">
-              <Button variant="secondary" className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700" onClick={() => onOpenChange(false)}>
-                Close
-              </Button>
-              <Button 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                onClick={() => handleStatusUpdate("Approved")}
-                disabled={isUpdating || request.status === "Approved" || request.status === "Completed"}
-              >
-                {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-                Approve Request
-              </Button>
-            </div>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={() => handleStatusUpdate(selectedStatus)}
+              disabled={
+                isUpdating ||
+                selectedStatus === request.status ||
+                isCustomerCancelled
+              }
+            >
+              {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+              Update Status
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>
