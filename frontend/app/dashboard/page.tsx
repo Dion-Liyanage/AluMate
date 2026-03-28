@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ClipboardList,
   FileText,
@@ -92,7 +94,24 @@ const recentOrders: {
 }[] = [];
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user?.role === "admin") {
+      router.replace("/admin");
+    }
+  }, [isLoading, router, user?.role]);
+
+  if (isLoading || user?.role === "admin") {
+    return (
+      <DashboardLayout title="Dashboard">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <p className="text-sm text-zinc-400">Loading dashboard...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Dashboard">

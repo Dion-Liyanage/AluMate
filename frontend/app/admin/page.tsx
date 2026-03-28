@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ClipboardList,
@@ -14,6 +15,7 @@ import {
   Activity,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminOperationCards } from "@/components/admin/AdminOperationCards";
@@ -101,7 +103,24 @@ const recentActivity: {
 }[] = [];
 
 export default function AdminPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user && user.role !== "admin") {
+      router.replace("/dashboard");
+    }
+  }, [isLoading, router, user]);
+
+  if (isLoading || (user && user.role !== "admin")) {
+    return (
+      <DashboardLayout title="Admin Dashboard">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <p className="text-sm text-zinc-400">Loading admin dashboard...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Admin Dashboard">
