@@ -88,7 +88,7 @@ export function ServiceOverviewCard() {
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] opacity-50" />
 
         {/* Decorative background icon (Fuchsia) */}
-        <div className="absolute top-8 right-8 opacity-[0.2] pointer-events-none group-hover:opacity-[0.25] transition-opacity">
+        <div className="absolute top-8 right-8 opacity-[0.15] pointer-events-none group-hover:opacity-[0.2] transition-opacity">
           <Wrench className="w-48 h-48 text-fuchsia-300" />
         </div>
 
