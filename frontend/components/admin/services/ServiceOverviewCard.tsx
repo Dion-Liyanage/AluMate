@@ -61,9 +61,9 @@ export function ServiceOverviewCard() {
       icon: CheckCircle2,
       label: "Completed",
       value: stats.completedRequests,
-      color: "from-sky-500/30 to-sky-600/20",
-      iconColor: "text-sky-300",
-      borderColor: "border-sky-500/40",
+      color: "from-indigo-500/30 to-indigo-600/20",
+      iconColor: "text-indigo-300",
+      borderColor: "border-indigo-500/40",
     },
     {
       icon: Map,
