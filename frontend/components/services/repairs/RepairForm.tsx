@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { servicesApi } from "@/lib/api";
 import { OrderSelector } from "./OrderSelector";
 import { OrderPreviewCard, OrderDetails } from "./OrderPreviewCard";
 import { ProductImageCard } from "./ProductImageCard";
@@ -52,29 +53,33 @@ export function RepairForm() {
   const [issueDescription, setIssueDescription] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string>("Draft"); // "Draft" -> "Request Sent"
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedOrder = MOCK_ORDERS.find((o) => o.id === selectedOrderId) || null;
 
   const isFormValid = selectedOrderId !== "" && issueDescription.trim() !== "" && imageFile !== null;
   const isSubmitted = status !== "Draft";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid || isSubmitted) return;
+    if (!isFormValid || isSubmitted || isSubmitting) return;
 
-    // Simulate backend submission logic
-    const submissionData = {
-      userId: "USER001",
-      orderId: selectedOrderId,
-      issueDescription,
-      imageUrl: imageFile ? "Uploaded mock URL" : "None",
-      status: "Request Sent",
-      createdAt: new Date().toISOString(),
-    };
+    setIsSubmitting(true);
+    try {
+      await servicesApi.createRepair({
+        orderId: selectedOrderId,
+        issueDescription,
+        image: imageFile || undefined,
+      });
 
-    console.log("Submitting Repair Request:", submissionData);
-    setStatus("Request Sent");
-    toast.success("Repair request submitted successfully.");
+      setStatus("Request Sent");
+      toast.success("Repair request submitted successfully.");
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to submit repair request. Please try again.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -175,9 +180,9 @@ export function RepairForm() {
             <Button 
               type="submit" 
               className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white border-0 transition-all font-medium min-w-[150px]" 
-              disabled={!isFormValid || isSubmitted}
+              disabled={!isFormValid || isSubmitting || isSubmitted}
             >
-              {isSubmitted ? "Request Submitted" : "Submit Request"}
+              {isSubmitting ? "Submitting..." : isSubmitted ? "Request Submitted" : "Submit Request"}
             </Button>
           </CardFooter>
         </Card>

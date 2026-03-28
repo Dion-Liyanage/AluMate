@@ -17,9 +17,10 @@ import { ServiceDetailsModal } from "./ServiceDetailsModal";
 
 interface ServiceTableProps {
   services: ServiceRequest[];
+  onRefresh?: () => void;
 }
 
-export function ServiceTable({ services }: ServiceTableProps) {
+export function ServiceTable({ services, onRefresh }: ServiceTableProps) {
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -99,6 +100,7 @@ export function ServiceTable({ services }: ServiceTableProps) {
         request={selectedRequest}
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
+        onRefresh={onRefresh}
       />
     </div>
   );

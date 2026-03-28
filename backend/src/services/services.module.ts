@@ -5,6 +5,7 @@ import {
   ServiceRequestSchema,
 } from './schemas/service-request.schema';
 import { ServicesService } from './services.service';
+import { ServicesController } from './services.controller';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ServicesService } from './services.service';
       { name: ServiceRequest.name, schema: ServiceRequestSchema },
     ]),
   ],
+  controllers: [ServicesController],
   providers: [ServicesService],
   exports: [ServicesService],
 })

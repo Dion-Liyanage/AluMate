@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { 
   Dialog, 
   DialogContent, 
@@ -19,19 +20,45 @@ import {
   ClipboardList, 
   Image as ImageIcon,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Loader2,
+  Clock,
+  Phone,
+  Home
 } from "lucide-react";
 import { ServiceRequest } from "./ServiceManagement";
 import { ServiceStatusBadge, ServiceTypeBadge } from "./ServiceStatusBadge";
+import { servicesApi } from "@/lib/api";
+import { toast } from "sonner";
 
 interface ServiceDetailsModalProps {
   request: ServiceRequest | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onRefresh?: () => void;
 }
 
-export function ServiceDetailsModal({ request, isOpen, onOpenChange }: ServiceDetailsModalProps) {
+export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }: ServiceDetailsModalProps) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
   if (!request) return null;
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    setIsUpdating(true);
+    try {
+      await servicesApi.updateStatus(request.id, { status: newStatus });
+      toast.success(`Request ${newStatus.toLowerCase()} successfully`);
+      onOpenChange(false);
+      onRefresh?.();
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to update status.";
+      toast.error(message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:4000';
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -42,7 +69,7 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange }: ServiceDe
               <DialogTitle className="text-xl flex items-center gap-2">
                 Service Request Details
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider border-zinc-700 bg-zinc-900 text-zinc-400">
-                  {request.id}
+                  {request.id.substring(0, 8)}...
                 </Badge>
               </DialogTitle>
               <DialogDescription className="text-zinc-500">
@@ -88,24 +115,48 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange }: ServiceDe
               </div>
 
               {request.serviceType === "on-site-visit" ? (
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 mt-1 text-blue-400" />
-                  <div className="space-y-1">
-                    <p className="text-xs text-zinc-500">Location Details</p>
-                    <p className="text-sm text-zinc-200">{request.location?.toString() || "No location specified"}</p>
-                  </div>
-                </div>
+                <>
+                  {request.nearestTown && (
+                    <div className="flex items-start gap-3">
+                      <Home className="h-4 w-4 mt-1 text-fuchsia-400" />
+                      <div className="space-y-1">
+                        <p className="text-xs text-zinc-500">Nearest Town</p>
+                        <p className="text-sm text-zinc-200">{request.nearestTown}</p>
+                      </div>
+                    </div>
+                  )}
+                  {request.manualAddress && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-4 w-4 mt-1 text-fuchsia-400" />
+                      <div className="space-y-1">
+                        <p className="text-xs text-zinc-500">Address</p>
+                        <p className="text-sm text-zinc-200">{request.manualAddress}</p>
+                      </div>
+                    </div>
+                  )}
+                  {request.location && typeof request.location === "object" && "lat" in request.location && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-4 w-4 mt-1 text-blue-400" />
+                      <div className="space-y-1">
+                        <p className="text-xs text-zinc-500">GPS Location</p>
+                        <p className="text-sm text-zinc-200 font-mono">
+                          {request.location.lat.toFixed(6)}, {request.location.lng.toFixed(6)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : (
                 <>
                   <div className="flex items-start gap-3">
-                    <Wrench className="h-4 w-4 mt-1 text-orange-400" />
+                    <Wrench className="h-4 w-4 mt-1 text-cyan-400" />
                     <div className="space-y-1">
                       <p className="text-xs text-zinc-500">Related Order ID</p>
                       <p className="text-sm text-zinc-200 font-mono">{request.orderId || "N/A"}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-4 w-4 mt-1 text-orange-400" />
+                    <AlertCircle className="h-4 w-4 mt-1 text-cyan-400" />
                     <div className="space-y-1">
                       <p className="text-xs text-zinc-500">Issue Description</p>
                       <p className="text-sm text-zinc-200 italic">"{request.issueDescription || "No description provided"}"</p>
@@ -116,29 +167,57 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange }: ServiceDe
             </div>
           </div>
 
-          {/* Visual Evidence (Placeholder if needed) */}
+          {/* Visual Evidence */}
           <div className="space-y-2">
              <h4 className="text-sm font-semibold text-zinc-400 flex items-center gap-2">
               <ImageIcon className="h-4 w-4" />
               Photos / Documents
             </h4>
-            <div className="h-24 rounded-lg bg-zinc-900 border-2 border-dashed border-zinc-800 flex items-center justify-center text-zinc-600 text-xs">
-               No attachments provided
-            </div>
+            {request.imageUrl ? (
+              <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2 overflow-hidden">
+                <img 
+                  src={`${API_BASE}${request.imageUrl}`} 
+                  alt="Repair evidence" 
+                  className="max-h-48 rounded-md object-cover"
+                />
+              </div>
+            ) : (
+              <div className="h-24 rounded-lg bg-zinc-900 border-2 border-dashed border-zinc-800 flex items-center justify-center text-zinc-600 text-xs">
+                 No attachments provided
+              </div>
+            )}
           </div>
+
+          {/* Admin Notes */}
+          {request.adminNotes && (
+            <div className="bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/30">
+              <p className="text-xs text-zinc-500 mb-1">Admin Notes</p>
+              <p className="text-sm text-zinc-300">{request.adminNotes}</p>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="border-t border-zinc-800 pt-4 mt-2">
           <div className="flex gap-2 w-full justify-between">
-            <Button variant="outline" className="border-zinc-700 text-zinc-400 hover:text-red-400 hover:bg-red-400/10">
+            <Button 
+              variant="outline" 
+              className="border-zinc-700 text-zinc-400 hover:text-red-400 hover:bg-red-400/10"
+              onClick={() => handleStatusUpdate("Rejected")}
+              disabled={isUpdating || request.status === "Rejected" || request.status === "Completed"}
+            >
+              {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Reject Request
             </Button>
             <div className="flex gap-2">
               <Button variant="secondary" className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700" onClick={() => onOpenChange(false)}>
                 Close
               </Button>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+              <Button 
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => handleStatusUpdate("Approved")}
+                disabled={isUpdating || request.status === "Approved" || request.status === "Completed"}
+              >
+                {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
                 Approve Request
               </Button>
             </div>

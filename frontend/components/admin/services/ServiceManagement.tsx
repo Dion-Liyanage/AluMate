@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,75 +12,70 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter, X, Loader2 } from "lucide-react";
 import { ServiceTable } from "./ServiceTable";
+import { servicesApi } from "@/lib/api";
 
 // Unified Service Request Interface
 export interface ServiceRequest {
   id: string;
+  _id?: string;
   userId: string;
   customerName: string;
   serviceType: "on-site-visit" | "repair";
   status: string;
   date: string;
+  // On-site visit fields
+  timeSlot?: string;
+  contactNumber?: string;
+  nearestTown?: string;
   location?: { lat: number; lng: number } | string;
+  manualAddress?: string;
+  // Repair fields
   issueDescription?: string;
   orderId?: string;
+  imageUrl?: string;
+  // Admin fields
+  adminNotes?: string;
   createdAt: string;
 }
-
-// Mock Data as per admin-service.md
-const MOCK_SERVICES: ServiceRequest[] = [
-  {
-    id: "SRV-1001",
-    userId: "U001",
-    customerName: "Dion Perera",
-    serviceType: "on-site-visit",
-    status: "Pending",
-    date: "2026-04-05",
-    location: "Kandy, Central Province",
-    createdAt: "2026-03-25T10:00:00Z",
-  },
-  {
-    id: "SRV-1002",
-    userId: "U002",
-    customerName: "Nimal Silva",
-    serviceType: "repair",
-    status: "Approved",
-    date: "2026-03-28",
-    orderId: "ORD-5021",
-    issueDescription: "Sliding door track is jammed and making noise.",
-    createdAt: "2026-03-26T08:30:00Z",
-  },
-  {
-    id: "SRV-1003",
-    userId: "U003",
-    customerName: "Kamal Gunawardena",
-    serviceType: "on-site-visit",
-    status: "In Progress",
-    date: "2026-04-02",
-    location: "Colombo 07",
-    createdAt: "2026-03-24T15:45:00Z",
-  },
-  {
-    id: "SRV-1004",
-    userId: "U004",
-    customerName: "Samanthi Fernando",
-    serviceType: "repair",
-    status: "Request Sent",
-    date: "2026-04-10",
-    orderId: "ORD-3044",
-    issueDescription: "Window handle is broken and needs replacement.",
-    createdAt: "2026-03-27T12:00:00Z",
-  },
-];
 
 export function ServiceManagement() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [services, setServices] = useState<ServiceRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredServices = MOCK_SERVICES.filter((service) => {
+  // Fetch service requests from the API
+  const fetchServices = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await servicesApi.getAll();
+      if (response.success && response.data) {
+        // Map backend _id to id for frontend compatibility
+        const mapped = response.data.serviceRequests.map((s: any) => ({
+          ...s,
+          id: s._id || s.id,
+          userId: s.customerId,
+        }));
+        setServices(mapped);
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch services:", err);
+      setError("Failed to load service requests. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
+
+  const filteredServices = services.filter((service) => {
     const matchesTab = activeTab === "all" || service.serviceType === activeTab;
     const matchesSearch = 
       service.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -130,49 +125,79 @@ export function ServiceManagement() {
           </div>
         </div>
 
-        {hasFilters && (
+        <div className="flex items-center gap-2">
+          {hasFilters && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearFilters}
+              className="text-zinc-500 hover:text-zinc-300 h-9 px-3"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Clear Filters
+            </Button>
+          )}
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={clearFilters}
+            onClick={fetchServices}
             className="text-zinc-500 hover:text-zinc-300 h-9 px-3"
+            disabled={isLoading}
           >
-            <X className="h-4 w-4 mr-2" />
-            Clear Filters
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
           </Button>
-        )}
+        </div>
       </div>
 
-      {/* Tabs and Table */}
-      <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-        <div className="flex justify-between items-center mb-4">
-          <TabsList className="bg-zinc-950 border border-zinc-800">
-            <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
-              All Requests
-            </TabsTrigger>
-            <TabsTrigger value="on-site-visit" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
-              On-Site Visits
-            </TabsTrigger>
-            <TabsTrigger value="repair" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-cyan-400">
-              Repair Requests
-            </TabsTrigger>
-          </TabsList>
-          
-          <div className="hidden sm:block text-xs text-zinc-500">
-            Showing {filteredServices.length} requests
-          </div>
+      {/* Error state */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
+          <p className="text-red-400 text-sm">{error}</p>
+          <Button variant="ghost" size="sm" onClick={fetchServices} className="mt-2 text-red-300 hover:text-red-200">
+            Try Again
+          </Button>
         </div>
+      )}
 
-        <TabsContent value="all" className="mt-0">
-          <ServiceTable services={filteredServices} />
-        </TabsContent>
-        <TabsContent value="on-site-visit" className="mt-0">
-          <ServiceTable services={filteredServices} />
-        </TabsContent>
-        <TabsContent value="repair" className="mt-0">
-          <ServiceTable services={filteredServices} />
-        </TabsContent>
-      </Tabs>
+      {/* Loading state */}
+      {isLoading && !error && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+        </div>
+      )}
+
+      {/* Tabs and Table */}
+      {!isLoading && !error && (
+        <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+          <div className="flex justify-between items-center mb-4">
+            <TabsList className="bg-zinc-950 border border-zinc-800">
+              <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
+                All Requests
+              </TabsTrigger>
+              <TabsTrigger value="on-site-visit" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
+                On-Site Visits
+              </TabsTrigger>
+              <TabsTrigger value="repair" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-cyan-400">
+                Repair Requests
+              </TabsTrigger>
+            </TabsList>
+            
+            <div className="hidden sm:block text-xs text-zinc-500">
+              Showing {filteredServices.length} requests
+            </div>
+          </div>
+
+          <TabsContent value="all" className="mt-0">
+            <ServiceTable services={filteredServices} onRefresh={fetchServices} />
+          </TabsContent>
+          <TabsContent value="on-site-visit" className="mt-0">
+            <ServiceTable services={filteredServices} onRefresh={fetchServices} />
+          </TabsContent>
+          <TabsContent value="repair" className="mt-0">
+            <ServiceTable services={filteredServices} onRefresh={fetchServices} />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }

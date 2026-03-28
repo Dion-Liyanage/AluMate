@@ -212,13 +212,59 @@ export const quotationsApi = {
 // ---------- Services API ----------
 
 export const servicesApi = {
-  getAll: async (params?: { status?: string; page?: number; limit?: number }) => {
+  // Customer: Get own requests
+  getMyRequests: async () => {
+    const res = await apiClient.get<
+      ApiResponse<{ serviceRequests: ServiceRequest[]; total: number }>
+    >("/services/my-requests");
+    return res.data;
+  },
+
+  // Customer: Submit on-site visit request
+  createOnSiteVisit: async (data: {
+    date: string;
+    timeSlot: string;
+    fullName: string;
+    contactNumber: string;
+    nearestTown: string;
+    location?: { lat: number; lng: number };
+    manualAddress?: string;
+  }) => {
+    const res = await apiClient.post<ApiResponse<{ serviceRequest: ServiceRequest }>>(
+      "/services/on-site-visit",
+      data
+    );
+    return res.data;
+  },
+
+  // Customer: Submit repair request (with image upload)
+  createRepair: async (data: {
+    orderId: string;
+    issueDescription: string;
+    image?: File;
+  }) => {
+    const formData = new FormData();
+    formData.append("orderId", data.orderId);
+    formData.append("issueDescription", data.issueDescription);
+    if (data.image) {
+      formData.append("image", data.image);
+    }
+    const res = await apiClient.post<ApiResponse<{ serviceRequest: ServiceRequest }>>(
+      "/services/repair",
+      formData
+    );
+    return res.data;
+  },
+
+  // Admin: Get all service requests (with filtering)
+  getAll: async (params?: { serviceType?: string; status?: string }) => {
     const res = await apiClient.get<
       ApiResponse<{ serviceRequests: ServiceRequest[]; total: number }>
     >("/services", { params });
     return res.data;
   },
 
+  // Get a single request by ID
   getById: async (id: string) => {
     const res = await apiClient.get<ApiResponse<{ serviceRequest: ServiceRequest }>>(
       `/services/${id}`
@@ -226,13 +272,10 @@ export const servicesApi = {
     return res.data;
   },
 
-  create: async (data: {
-    type: "maintenance" | "repair" | "installation";
-    description: string;
-    scheduledDate?: string;
-  }) => {
-    const res = await apiClient.post<ApiResponse<{ serviceRequest: ServiceRequest }>>(
-      "/services",
+  // Admin: Update status
+  updateStatus: async (id: string, data: { status: string; adminNotes?: string }) => {
+    const res = await apiClient.patch<ApiResponse<{ serviceRequest: ServiceRequest }>>(
+      `/services/${id}/status`,
       data
     );
     return res.data;
