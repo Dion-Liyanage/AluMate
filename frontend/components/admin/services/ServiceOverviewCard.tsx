@@ -134,7 +134,8 @@ export function ServiceOverviewCard() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                  <div className={`rounded-lg border ${stat.borderColor} bg-gradient-to-br ${stat.color} p-4 backdrop-blur-sm transition-all hover:shadow-lg hover:shadow-fuchsia-500/10`}>
+                  <div className={`relative overflow-hidden rounded-lg border ${stat.borderColor} bg-gradient-to-br ${stat.color} p-4 backdrop-blur-sm transition-all hover:shadow-lg hover:shadow-fuchsia-500/10`}>
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_4s_linear_infinite] pointer-events-none" />
                     <div className="flex items-start justify-between mb-3">
                       <div className={`h-10 w-10 rounded-lg bg-black/40 flex items-center justify-center border ${stat.borderColor}`}>
                         <Icon className={`h-5 w-5 ${stat.iconColor}`} />
