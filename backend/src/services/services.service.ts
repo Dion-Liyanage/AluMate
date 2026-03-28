@@ -106,6 +106,20 @@ export class ServicesService {
     id: string,
     dto: UpdateServiceStatusDto,
   ): Promise<ServiceRequestDocument> {
+    const existing = await this.serviceRequestModel.findById(id).exec();
+    if (!existing) {
+      throw new NotFoundException(`Service request ${id} not found`);
+    }
+
+    if (
+      existing.status === 'Cancelled by Customer' &&
+      dto.status !== 'Cancelled by Customer'
+    ) {
+      throw new BadRequestException(
+        'Cancelled requests cannot be updated by admin',
+      );
+    }
+
     const updateData: Record<string, any> = { status: dto.status };
     if (dto.adminNotes !== undefined) {
       updateData.adminNotes = dto.adminNotes;

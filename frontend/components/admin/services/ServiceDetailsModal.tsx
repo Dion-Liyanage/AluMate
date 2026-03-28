@@ -48,6 +48,7 @@ interface ServiceDetailsModalProps {
 export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }: ServiceDetailsModalProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("Request Sent");
+  const isCustomerCancelled = request?.status === "Cancelled by Customer";
 
   useEffect(() => {
     if (request) {
@@ -214,19 +215,26 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
 
           <div className="bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/30 space-y-2">
             <p className="text-xs text-zinc-500">Update Status</p>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <Select
+              value={selectedStatus}
+              onValueChange={setSelectedStatus}
+              disabled={isCustomerCancelled}
+            >
               <SelectTrigger className="w-full bg-zinc-950/60 border-zinc-800 text-zinc-200">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
-                <SelectItem value="Request Sent">Request Sent</SelectItem>
                 <SelectItem value="Approved">Approved</SelectItem>
                 <SelectItem value="In Progress">In Progress</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
                 <SelectItem value="Rejected">Rejected</SelectItem>
-                <SelectItem value="Cancelled by Customer">Cancelled by Customer</SelectItem>
               </SelectContent>
             </Select>
+            {isCustomerCancelled && (
+              <p className="text-xs text-zinc-500">
+                This request was cancelled by the customer and can no longer be changed.
+              </p>
+            )}
           </div>
         </div>
 
@@ -242,7 +250,11 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
             <Button
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
               onClick={() => handleStatusUpdate(selectedStatus)}
-              disabled={isUpdating || selectedStatus === request.status}
+              disabled={
+                isUpdating ||
+                selectedStatus === request.status ||
+                isCustomerCancelled
+              }
             >
               {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
               Update Status
