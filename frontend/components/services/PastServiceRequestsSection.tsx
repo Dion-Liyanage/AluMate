@@ -29,7 +29,7 @@ function getStatusClasses(status: string) {
     case "In Progress":
       return "bg-cyan-500/20 text-cyan-300 border-cyan-500/40";
     case "Completed":
-      return "bg-zinc-500/20 text-zinc-300 border-zinc-500/40";
+      return "bg-violet-500/20 text-violet-300 border-violet-500/40";
     case "Rejected":
       return "bg-red-500/20 text-red-300 border-red-500/40";
     case "Cancelled by Customer":

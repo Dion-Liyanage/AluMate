@@ -9,7 +9,7 @@ import { servicesApi } from "@/lib/api";
 export function ServiceOverviewCard() {
   const [stats, setStats] = useState({
     totalRequests: 0,
-    pendingRequests: 0,
+    approvedRequests: 0,
     completedRequests: 0,
     onSiteVisits: 0,
     repairRequests: 0,
@@ -24,7 +24,7 @@ export function ServiceOverviewCard() {
           const requests = response.data.serviceRequests || [];
           setStats({
             totalRequests: requests.length,
-            pendingRequests: requests.filter((r: any) => r.status === "Pending" || r.status === "Request Sent").length,
+            approvedRequests: requests.filter((r: any) => r.status === "Approved").length,
             completedRequests: requests.filter((r: any) => r.status === "Completed").length,
             onSiteVisits: requests.filter((r: any) => r.serviceType === "on-site-visit").length,
             repairRequests: requests.filter((r: any) => r.serviceType === "repair").length,
@@ -51,8 +51,8 @@ export function ServiceOverviewCard() {
     },
     {
       icon: Clock,
-      label: "Pending",
-      value: stats.pendingRequests,
+      label: "Approved",
+      value: stats.approvedRequests,
       color: "from-amber-500/30 to-amber-600/20",
       iconColor: "text-amber-300",
       borderColor: "border-amber-500/40",

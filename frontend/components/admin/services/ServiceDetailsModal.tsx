@@ -83,11 +83,13 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
         <DialogHeader>
           <div className="flex justify-between items-start pr-8">
             <div className="space-y-1">
-              <DialogTitle className="text-xl flex items-center gap-2">
-                Service Request Details
+              <DialogTitle className="text-xl">
+                <div className="inline-flex items-center gap-2">
+                  <span className="whitespace-nowrap">Service Request Details</span>
                 <Badge variant="outline" className="text-[10px] uppercase tracking-wider border-zinc-700 bg-zinc-900 text-zinc-400">
                   {request.id.substring(0, 8)}...
                 </Badge>
+                </div>
               </DialogTitle>
               <DialogDescription className="text-zinc-500">
                 Created on {new Date(request.createdAt).toLocaleDateString()}
@@ -224,6 +226,13 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                <SelectItem
+                  value="Request Sent"
+                  disabled
+                  className="text-zinc-500 data-[disabled]:opacity-70"
+                >
+                  Request Sent
+                </SelectItem>
                 <SelectItem value="Approved">Approved</SelectItem>
                 <SelectItem value="In Progress">In Progress</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
