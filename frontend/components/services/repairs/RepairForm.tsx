@@ -8,6 +8,7 @@ import { ProductImageCard } from "./ProductImageCard";
 import { IssueInput } from "./IssueInput";
 import { ImageUpload } from "./ImageUpload";
 import { RepairStatusBadge } from "./RepairStatusBadge";
+import { PastServiceRequestsSection } from "@/components/services/PastServiceRequestsSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -54,6 +55,7 @@ export function RepairForm() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string>("Draft"); // "Draft" -> "Request Sent"
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
 
   const selectedOrder = MOCK_ORDERS.find((o) => o.id === selectedOrderId) || null;
 
@@ -73,6 +75,7 @@ export function RepairForm() {
       });
 
       setStatus("Request Sent");
+      setHistoryRefreshToken((prev) => prev + 1);
       toast.success("Repair request submitted successfully.");
     } catch (error: any) {
       const message = error?.response?.data?.message || "Failed to submit repair request. Please try again.";
@@ -186,6 +189,15 @@ export function RepairForm() {
             </Button>
           </CardFooter>
         </Card>
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <PastServiceRequestsSection
+          serviceType="repair"
+          title="Past Repair Requests"
+          description="See all previous repair requests, status updates, and technician notes."
+          refreshToken={historyRefreshToken}
+        />
       </motion.div>
     </motion.form>
   );
