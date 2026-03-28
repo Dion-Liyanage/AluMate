@@ -22,14 +22,14 @@ export function ServiceStatusBadge({ status }: { status: string }) {
 export function ServiceTypeBadge({ type }: { type: "on-site-visit" | "repair" }) {
   if (type === "on-site-visit") {
     return (
-      <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-400/30">
+      <Badge variant="outline" className="bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20">
         On-Site Visit
       </Badge>
     );
   }
   
   return (
-    <Badge variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-400/30">
+    <Badge variant="outline" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20">
       Repair Request
     </Badge>
   );

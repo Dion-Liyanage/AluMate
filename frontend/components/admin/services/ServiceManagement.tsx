@@ -150,10 +150,10 @@ export function ServiceManagement() {
             <TabsTrigger value="all" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
               All Requests
             </TabsTrigger>
-            <TabsTrigger value="on-site-visit" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-blue-400">
+            <TabsTrigger value="on-site-visit" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-fuchsia-400">
               On-Site Visits
             </TabsTrigger>
-            <TabsTrigger value="repair" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-orange-400">
+            <TabsTrigger value="repair" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-cyan-400">
               Repair Requests
             </TabsTrigger>
           </TabsList>
