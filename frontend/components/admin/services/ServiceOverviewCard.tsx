@@ -89,13 +89,20 @@ export function ServiceOverviewCard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-fuchsia-950/40 border-zinc-800 shadow-xl overflow-hidden relative group">
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_5s_linear_infinite] pointer-events-none" />
+      <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border-zinc-800 shadow-xl overflow-hidden relative group">
+        {/* Main palette tint (Fuchsia + Pink + Rose) while keeping dark base */}
+        <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/8 via-pink-500/8 to-rose-500/8 pointer-events-none" />
 
-        {/* Decorative background glow (Fuchsia) */}
+        {/* Dark depth layer to match previous darker look */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/35 pointer-events-none" />
+
+        {/* Wave shimmer effect */}
+        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.04)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_4s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+        {/* Decorative background glow (localized accents) */}
         <div className="absolute -top-24 -right-24 w-80 h-80 bg-fuchsia-500/30 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] opacity-50" />
+        <div className="absolute bottom-6 right-24 h-56 w-56 bg-pink-500/12 rounded-full blur-[75px] opacity-35" />
+        <div className="absolute top-24 right-1/3 h-48 w-48 bg-rose-500/10 rounded-full blur-[70px] opacity-30" />
 
         {/* Decorative background icon (Fuchsia) */}
         <div className="absolute top-8 right-8 opacity-[0.15] pointer-events-none group-hover:opacity-[0.2] transition-opacity">
