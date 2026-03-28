@@ -112,6 +112,7 @@ export function PastServiceRequestsSection({
             <div>
               <CardTitle className="text-xl text-zinc-100">{title}</CardTitle>
               <CardDescription className="mt-1 text-zinc-400">{description}</CardDescription>
+              <div className="mt-3 h-[2px] w-28 rounded-full bg-gradient-to-r from-cyan-400/70 via-fuchsia-400/70 to-transparent" />
             </div>
             <Button
               type="button"
@@ -146,8 +147,8 @@ export function PastServiceRequestsSection({
               No past requests found yet.
             </div>
           ) : (
-            <div className="space-y-3">
-              {filteredRequests.map((request) => {
+            <div className="space-y-4">
+              {filteredRequests.map((request, index) => {
                 const requestId = request._id || request.id;
                 const canCancel = CANCELLABLE_STATUSES.includes(request.status);
                 const isCancelling = cancellingRequestId === requestId;
@@ -155,8 +156,24 @@ export function PastServiceRequestsSection({
                 return (
                   <div
                     key={requestId}
-                    className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4"
+                    className={cn(
+                      "relative overflow-hidden rounded-xl border p-4",
+                      "shadow-[0_8px_30px_rgba(0,0,0,0.25)]",
+                      "ring-1 ring-inset ring-zinc-800/50",
+                      index % 2 === 0
+                        ? "border-zinc-800/90 bg-zinc-900/60"
+                        : "border-zinc-700/80 bg-zinc-900/45"
+                    )}
                   >
+                    <div
+                      className={cn(
+                        "pointer-events-none absolute inset-0 opacity-70",
+                        request.serviceType === "repair"
+                          ? "bg-gradient-to-r from-cyan-500/6 via-transparent to-transparent"
+                          : "bg-gradient-to-r from-fuchsia-500/6 via-transparent to-transparent"
+                      )}
+                    />
+
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge

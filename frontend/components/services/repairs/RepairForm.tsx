@@ -12,7 +12,7 @@ import { PastServiceRequestsSection } from "@/components/services/PastServiceReq
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { PenTool, Wrench } from "lucide-react";
+import { ChevronDown, ChevronUp, PenTool, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -89,6 +89,7 @@ export function RepairForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
   const [clearFormSignal, setClearFormSignal] = useState(0);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
 
   const selectedOrder = MOCK_ORDERS.find((o) => o.id === selectedOrderId) || null;
 
@@ -230,13 +231,42 @@ export function RepairForm() {
         </Card>
       </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <PastServiceRequestsSection
-          serviceType="repair"
-          title="Past Repair Requests"
-          description="See all previous repair requests, status updates, and technician notes."
-          refreshToken={historyRefreshToken}
-        />
+      <motion.div variants={itemVariants} className="space-y-3">
+        <div className="flex items-center justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsHistoryExpanded((prev) => !prev)}
+            className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
+          >
+            {isHistoryExpanded ? (
+              <ChevronUp className="mr-2 h-4 w-4" />
+            ) : (
+              <ChevronDown className="mr-2 h-4 w-4" />
+            )}
+            {isHistoryExpanded ? "Hide Past Requests" : "Show Past Requests"}
+          </Button>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {isHistoryExpanded && (
+            <motion.div
+              variants={itemVariants}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PastServiceRequestsSection
+                serviceType="repair"
+                title="Past Repair Requests"
+                description="See all previous repair requests, status updates, and technician notes."
+                refreshToken={historyRefreshToken}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.form>
   );
