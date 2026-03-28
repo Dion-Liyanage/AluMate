@@ -26,12 +26,12 @@ export default function AdminServicesPage() {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && user && user.role !== "admin") {
-      router.replace("/dashboard");
+    if (!isLoading && (!user || user.role !== "admin")) {
+      router.replace(user ? "/dashboard" : "/login");
     }
   }, [isLoading, router, user]);
 
-  if (isLoading || (user && user.role !== "admin")) {
+  if (isLoading || !user || user.role !== "admin") {
     return (
       <DashboardLayout title="Service Management">
         <div className="flex min-h-[60vh] items-center justify-center">

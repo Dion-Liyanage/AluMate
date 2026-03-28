@@ -39,11 +39,7 @@ function getStatusClasses(status: string) {
   }
 }
 
-const CANCELLABLE_STATUSES: ServiceRequest["status"][] = [
-  "Request Sent",
-  "Pending",
-  "Approved",
-];
+const CANCELLABLE_STATUSES: ServiceRequest["status"][] = ["Request Sent"];
 
 export function PastServiceRequestsSection({
   serviceType,
@@ -91,7 +87,11 @@ export function PastServiceRequestsSection({
         toast.success("Service request cancelled successfully.");
         await fetchRequests();
       } catch (err: any) {
-        const message = err?.response?.data?.message || "Failed to cancel request.";
+        const rawMessage = err?.response?.data?.message as string | undefined;
+        const message =
+          rawMessage?.includes("Cannot PATCH")
+            ? "Cancel action is temporarily unavailable. Please refresh or restart the backend service."
+            : rawMessage || "Failed to cancel request.";
         toast.error(message);
       } finally {
         setCancellingRequestId(null);
@@ -231,20 +231,22 @@ export function PastServiceRequestsSection({
                       </div>
                     )}
 
-                    {canCancel && (
-                      <div className="mt-3 flex justify-end">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleCancelRequest(requestId)}
-                          disabled={isCancelling}
-                          className="border-red-500/40 text-red-300 hover:bg-red-500/10 hover:text-red-200"
-                        >
-                          {isCancelling ? "Cancelling..." : "Cancel Request"}
-                        </Button>
-                      </div>
-                    )}
+                    <div className="mt-3 flex justify-end">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleCancelRequest(requestId)}
+                        disabled={isCancelling || !canCancel}
+                        className={cn(
+                          canCancel
+                            ? "border-red-500/40 text-red-300 hover:bg-red-500/10 hover:text-red-200"
+                            : "border-zinc-700 text-zinc-500 hover:bg-transparent hover:text-zinc-500"
+                        )}
+                      >
+                        {isCancelling ? "Cancelling..." : "Cancel Request"}
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
