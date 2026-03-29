@@ -19,6 +19,8 @@ import { ServicesService } from './services.service';
 import { CreateOnSiteVisitDto } from './dto/create-onsite-visit.dto';
 import { CreateRepairDto } from './dto/create-repair.dto';
 import { UpdateServiceStatusDto } from './dto/update-service-status.dto';
+import { UpdateVisitScheduleDto } from './dto/update-visit-schedule.dto';
+import { UpsertServiceAvailabilityDto } from './dto/upsert-service-availability.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -166,6 +168,66 @@ export class ServicesController {
   }
 
   /**
+   * GET /api/v1/services/availability?date=YYYY-MM-DD
+   * Get available (not-booked) time slots for a date
+   */
+  @Get('availability')
+  @UseGuards(JwtAuthGuard)
+  async getAvailability(@Query('date') date: string) {
+    const slots = await this.servicesService.getAvailabilityByDate(date);
+    return {
+      success: true,
+      data: { date, slots },
+    };
+  }
+
+  /**
+   * GET /api/v1/services/availability/config?date=YYYY-MM-DD
+   * Admin gets configured slots (including booked ones)
+   */
+  @Get('availability/config')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async getConfiguredAvailability(@Query('date') date: string) {
+    const slots = await this.servicesService.getConfiguredAvailabilityByDate(date);
+    return {
+      success: true,
+      data: { date, slots },
+    };
+  }
+
+  /**
+   * GET /api/v1/services/availability/all
+   * Admin gets all configured availability records
+   */
+  @Get('availability/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async getAllAvailability() {
+    const records = await this.servicesService.getAllAvailability();
+    return {
+      success: true,
+      data: { availability: records, total: records.length },
+    };
+  }
+
+  /**
+   * POST /api/v1/services/availability
+   * Admin creates or updates available slots for a date
+   */
+  @Post('availability')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async upsertAvailability(@Body() dto: UpsertServiceAvailabilityDto) {
+    const record = await this.servicesService.upsertAvailability(dto);
+    return {
+      success: true,
+      message: 'Service availability saved successfully',
+      data: { availability: record },
+    };
+  }
+
+  /**
    * GET /api/v1/services/:id
    * Admin fetches a single service request by ID
    */
@@ -194,6 +256,25 @@ export class ServicesController {
     return {
       success: true,
       message: `Service request status updated to "${dto.status}"`,
+      data: { serviceRequest: updated },
+    };
+  }
+
+  /**
+   * PATCH /api/v1/services/:id/schedule
+   * Admin updates date and time slot of an on-site visit request
+   */
+  @Patch(':id/schedule')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async updateVisitSchedule(
+    @Param('id') id: string,
+    @Body() dto: UpdateVisitScheduleDto,
+  ) {
+    const updated = await this.servicesService.updateVisitSchedule(id, dto);
+    return {
+      success: true,
+      message: 'Visit schedule updated successfully',
       data: { serviceRequest: updated },
     };
   }

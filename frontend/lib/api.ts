@@ -245,6 +245,41 @@ export const servicesApi = {
     return res.data;
   },
 
+  // Authenticated users: get currently available (not booked) slots for a date
+  getAvailability: async (date: string) => {
+    const res = await apiClient.get<ApiResponse<{ date: string; slots: string[] }>>(
+      "/services/availability",
+      { params: { date } }
+    );
+    return res.data;
+  },
+
+  // Admin: get configured slots for a date (before booking subtraction)
+  getAvailabilityConfig: async (date: string) => {
+    const res = await apiClient.get<ApiResponse<{ date: string; slots: string[] }>>(
+      "/services/availability/config",
+      { params: { date } }
+    );
+    return res.data;
+  },
+
+  // Admin: list all configured availability records
+  getAllAvailability: async () => {
+    const res = await apiClient.get<
+      ApiResponse<{ availability: { date: string; slots: string[] }[]; total: number }>
+    >("/services/availability/all");
+    return res.data;
+  },
+
+  // Admin: create/update configured availability for a date
+  upsertAvailability: async (data: { date: string; slots: string[] }) => {
+    const res = await apiClient.post<ApiResponse<{ availability: { date: string; slots: string[] } }>>(
+      "/services/availability",
+      data
+    );
+    return res.data;
+  },
+
   // Customer: Submit repair request (with image upload)
   createRepair: async (data: {
     orderId: string;
@@ -284,6 +319,18 @@ export const servicesApi = {
   updateStatus: async (id: string, data: { status: string; adminNotes?: string }) => {
     const res = await apiClient.patch<ApiResponse<{ serviceRequest: ServiceRequest }>>(
       `/services/${id}/status`,
+      data
+    );
+    return res.data;
+  },
+
+  // Admin: Update on-site visit schedule
+  updateSchedule: async (
+    id: string,
+    data: { date: string; timeSlot: string; adminNotes?: string }
+  ) => {
+    const res = await apiClient.patch<ApiResponse<{ serviceRequest: ServiceRequest }>>(
+      `/services/${id}/schedule`,
       data
     );
     return res.data;

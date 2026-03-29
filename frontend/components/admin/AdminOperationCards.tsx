@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { ClipboardList, LayoutGrid, ArrowRight, Wrench } from "lucide-react";
+import { ClipboardList, LayoutGrid, ArrowRight, Wrench, CalendarDays } from "lucide-react";
 
 const cards = [
   {
@@ -36,6 +36,17 @@ const cards = [
     borderColor: "border-fuchsia-500/30 hover:border-fuchsia-400/50",
     iconColor: "text-fuchsia-400",
     glowColor: "shadow-[0_0_30px_rgba(217,70,239,0.15)]",
+    featured: false,
+  },
+  {
+    title: "Service Availability",
+    description: "Configure date-wise time slots for on-site visit scheduling",
+    icon: CalendarDays,
+    href: "/admin/services/availability",
+    gradient: "from-emerald-600/20 via-teal-600/10 to-cyan-600/10",
+    borderColor: "border-emerald-500/30 hover:border-emerald-400/50",
+    iconColor: "text-emerald-400",
+    glowColor: "shadow-[0_0_30px_rgba(16,185,129,0.15)]",
     featured: false,
   },
 ];

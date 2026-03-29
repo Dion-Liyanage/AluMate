@@ -77,6 +77,13 @@ export interface ServiceRequest {
   updatedAt?: string;
 }
 
+export interface ServiceAvailability {
+  date: string;
+  slots: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface InventoryItem {
   id: string;
   name: string;
