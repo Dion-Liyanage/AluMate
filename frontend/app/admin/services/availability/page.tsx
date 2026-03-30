@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -33,6 +34,7 @@ import {
   Pencil,
   Check,
   X,
+  ArrowLeft,
 } from "lucide-react";
 
 type AvailabilityRecord = {
@@ -379,11 +381,19 @@ export default function AdminServiceAvailabilityPage() {
   return (
     <DashboardLayout title="Service Availability">
       <div className="space-y-6">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-zinc-100">Service Availability</h2>
-          <p className="text-zinc-400">
-            Configure available dates and time slots for on-site visits.
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-bold text-zinc-100">Service Availability</h2>
+            <p className="text-zinc-400">
+              Configure available dates and time slots for on-site visits.
+            </p>
+          </div>
+          <Link href="/admin/services">
+            <Button variant="outline" className="border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Services
+            </Button>
+          </Link>
         </div>
 
         <Card className="bg-zinc-950 border-zinc-800 text-zinc-100">
