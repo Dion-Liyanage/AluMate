@@ -35,6 +35,7 @@ import {
   Check,
   X,
   ArrowLeft,
+  Clock3,
 } from "lucide-react";
 
 type AvailabilityRecord = {
@@ -422,18 +423,21 @@ export default function AdminServiceAvailabilityPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="w-full max-w-sm">
                 <div className="grid grid-cols-[1fr_110px] gap-2">
-                  <Input
-                    value={slotTimeInput}
-                    onChange={(e) => setSlotTimeInput(e.target.value)}
-                    placeholder="e.g. 5:00"
-                    className="w-full bg-zinc-900 border-zinc-700 text-zinc-100"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addSlot();
-                      }
-                    }}
-                  />
+                  <div className="relative">
+                    <Clock3 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                      value={slotTimeInput}
+                      onChange={(e) => setSlotTimeInput(e.target.value)}
+                      placeholder="Add a time (e.g. 9.00)"
+                      className="w-full bg-zinc-900 border-zinc-700 pl-10 text-zinc-100"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addSlot();
+                        }
+                      }}
+                    />
+                  </div>
                   <Select value={slotPeriod} onValueChange={(value: "AM" | "PM") => setSlotPeriod(value)}>
                     <SelectTrigger className="w-full bg-zinc-900 border-zinc-700 text-zinc-100">
                       <SelectValue placeholder="AM/PM" />
