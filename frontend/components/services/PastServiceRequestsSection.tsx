@@ -198,34 +198,49 @@ export function PastServiceRequestsSection({
 
                     <div className="mt-4 flex flex-col gap-2.5 text-sm text-zinc-300">
                       <p className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-zinc-500 shrink-0" />
+                        <CalendarDays className={cn(
+                          "h-4 w-4 shrink-0",
+                          request.serviceType === "repair" ? "text-cyan-400" : "text-fuchsia-400"
+                        )} />
                         <span className="font-medium text-zinc-400">Requested Date:</span> {request.date}
                       </p>
 
                       {request.orderId && (
                         <p className="flex items-center gap-2">
-                          <Wrench className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <Wrench className={cn(
+                            "h-4 w-4 shrink-0",
+                            request.serviceType === "repair" ? "text-cyan-400" : "text-fuchsia-400"
+                          )} />
                           <span className="font-medium text-zinc-400">Order ID:</span> {request.orderId}
                         </p>
                       )}
 
                       {request.timeSlot && (
                         <p className="flex items-center gap-2">
-                          <Clock3 className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <Clock3 className={cn(
+                            "h-4 w-4 shrink-0",
+                            request.serviceType === "repair" ? "text-cyan-400" : "text-fuchsia-400"
+                          )} />
                           <span className="font-medium text-zinc-400">Time Slot:</span> {request.timeSlot}
                         </p>
                       )}
 
                       {request.nearestTown && (
                         <p className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <MapPin className={cn(
+                            "h-4 w-4 shrink-0",
+                            request.serviceType === "repair" ? "text-cyan-400" : "text-fuchsia-400"
+                          )} />
                           <span className="font-medium text-zinc-400">Nearest Town:</span> {request.nearestTown}
                         </p>
                       )}
 
                       {request.location && (
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <MapPin className={cn(
+                            "h-4 w-4 shrink-0",
+                            request.serviceType === "repair" ? "text-cyan-400" : "text-fuchsia-400"
+                          )} />
                           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                             <span className="font-medium text-zinc-400">Fetched Location:</span>
                             <span className="font-mono text-[11px] text-zinc-400 bg-zinc-800/50 px-1.5 py-0.5 rounded border border-zinc-700/50">
