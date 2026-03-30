@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ServiceManagement } from "@/components/admin/services/ServiceManagement";
 import { ServiceOverviewCard } from "@/components/admin/services/ServiceOverviewCard";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,11 +52,18 @@ export default function AdminServicesPage() {
         className="space-y-6"
       >
         <motion.div variants={itemVariants}>
-          <div className="flex flex-col gap-1">
-            <h2 className="text-2xl font-bold text-zinc-100">Service Requests</h2>
-            <p className="text-zinc-400">
-              Manage on-site measurements and repair requests from your customers.
-            </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-2xl font-bold text-zinc-100">Service Requests</h2>
+              <p className="text-zinc-400">
+                Manage on-site measurements and repair requests from your customers.
+              </p>
+            </div>
+            <Link href="/admin/services/availability">
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white">
+                Manage Availability
+              </Button>
+            </Link>
           </div>
         </motion.div>
 

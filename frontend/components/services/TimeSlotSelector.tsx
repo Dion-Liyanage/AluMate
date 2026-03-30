@@ -1,15 +1,6 @@
 import { Button } from "@/components/ui/button";
-
-export const availableSlots = [
-  {
-    date: "2026-03-20",
-    slots: ["09:00 AM", "11:00 AM", "02:00 PM"]
-  },
-  {
-    date: "2026-03-21",
-    slots: ["10:00 AM", "01:00 PM", "04:00 PM"]
-  }
-];
+import { useEffect, useState } from "react";
+import { servicesApi } from "@/lib/api";
 
 interface TimeSlotSelectorProps {
   selectedDate: string;
@@ -18,11 +9,36 @@ interface TimeSlotSelectorProps {
 }
 
 export function TimeSlotSelector({ selectedDate, selectedSlot, onSelect }: TimeSlotSelectorProps) {
-  const dateSlots = availableSlots.find(s => s.date === selectedDate);
-  const slots = dateSlots ? dateSlots.slots : [];
+  const [slots, setSlots] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadSlots = async () => {
+      if (!selectedDate) {
+        setSlots([]);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await servicesApi.getAvailability(selectedDate);
+        setSlots(response.data?.slots || []);
+      } catch (error) {
+        setSlots([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSlots();
+  }, [selectedDate]);
 
   if (!selectedDate) {
     return <p className="text-sm text-zinc-500 mt-2">Please select a date first.</p>;
+  }
+
+  if (isLoading) {
+    return <p className="text-sm text-zinc-500 mt-2">Loading available slots...</p>;
   }
 
   if (slots.length === 0) {

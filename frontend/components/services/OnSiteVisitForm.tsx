@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { servicesApi } from "@/lib/api";
 import { DateSelector } from "./DateSelector";
 import { TimeSlotSelector } from "./TimeSlotSelector";
@@ -33,6 +33,7 @@ const itemVariants = {
 export function OnSiteVisitForm() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     fullName: "",
     contactNumber: "",
@@ -44,6 +45,27 @@ export function OnSiteVisitForm() {
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [status, setStatus] = useState("Draft"); // Draft -> Request Sent
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loadAvailabilityDates = async () => {
+      try {
+        const response = await servicesApi.getAvailabilityDates();
+        const dates = response.data?.dates || [];
+        setAvailableDates(dates);
+      } catch (error) {
+        setAvailableDates([]);
+      }
+    };
+
+    loadAvailabilityDates();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate && !availableDates.includes(selectedDate)) {
+      setSelectedDate("");
+      setSelectedSlot("");
+    }
+  }, [availableDates, selectedDate]);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -124,10 +146,14 @@ export function OnSiteVisitForm() {
           <CardContent className="relative space-y-6 focus-within:z-10">
             {/* Scheduling Section */}
             <div className="grid gap-6 md:grid-cols-2">
-              <DateSelector value={selectedDate} onChange={(val) => {
-                setSelectedDate(val);
-                setSelectedSlot(""); // Reset slot when date changes
-              }} />
+              <DateSelector
+                value={selectedDate}
+                allowedDates={availableDates}
+                onChange={(val) => {
+                  setSelectedDate(val);
+                  setSelectedSlot(""); // Reset slot when date changes
+                }}
+              />
               <div className="space-y-2">
                 <label className="text-sm font-medium text-zinc-300">
                   Available Time Slots

@@ -4,6 +4,10 @@ import {
   ServiceRequest,
   ServiceRequestSchema,
 } from './schemas/service-request.schema';
+import {
+  ServiceAvailability,
+  ServiceAvailabilitySchema,
+} from './schemas/service-availability.schema';
 import { ServicesService } from './services.service';
 import { ServicesController } from './services.controller';
 
@@ -11,6 +15,7 @@ import { ServicesController } from './services.controller';
   imports: [
     MongooseModule.forFeature([
       { name: ServiceRequest.name, schema: ServiceRequestSchema },
+      { name: ServiceAvailability.name, schema: ServiceAvailabilitySchema },
     ]),
   ],
   controllers: [ServicesController],

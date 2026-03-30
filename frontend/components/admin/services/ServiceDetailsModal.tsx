@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -30,7 +31,6 @@ import {
   AlertCircle,
   Loader2,
   Clock,
-  Phone,
   Home
 } from "lucide-react";
 import { ServiceRequest } from "./ServiceManagement";
@@ -47,14 +47,47 @@ interface ServiceDetailsModalProps {
 
 export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }: ServiceDetailsModalProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdatingSchedule, setIsUpdatingSchedule] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("Request Sent");
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedSlot, setSelectedSlot] = useState<string>("");
+  const [availableSlotsForDate, setAvailableSlotsForDate] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const isCustomerCancelled = request?.status === "Cancelled by Customer";
 
   useEffect(() => {
     if (request) {
       setSelectedStatus(request.status);
+      setSelectedDate(request.date || "");
+      setSelectedSlot(request.timeSlot || "");
     }
   }, [request]);
+
+  useEffect(() => {
+    const loadSlots = async () => {
+      if (!selectedDate || request?.serviceType !== "on-site-visit") {
+        setAvailableSlotsForDate([]);
+        return;
+      }
+
+      setIsLoadingSlots(true);
+      try {
+        const response = await servicesApi.getAvailabilityConfig(selectedDate);
+        const slots = response.data?.slots || [];
+        setAvailableSlotsForDate(slots);
+
+        if (selectedSlot && !slots.includes(selectedSlot)) {
+          setSelectedSlot("");
+        }
+      } catch (error) {
+        setAvailableSlotsForDate([]);
+      } finally {
+        setIsLoadingSlots(false);
+      }
+    };
+
+    loadSlots();
+  }, [request?.serviceType, selectedDate]);
 
   if (!request) return null;
 
@@ -74,6 +107,35 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
       setIsUpdating(false);
     }
   };
+
+  const handleScheduleUpdate = async () => {
+    if (!selectedDate || !selectedSlot) {
+      toast.error("Please select both date and time slot.");
+      return;
+    }
+
+    setIsUpdatingSchedule(true);
+    try {
+      await servicesApi.updateSchedule(request.id, {
+        date: selectedDate,
+        timeSlot: selectedSlot,
+      });
+      toast.success("Visit schedule updated successfully");
+      onRefresh?.();
+    } catch (error: any) {
+      const isForbidden = error?.response?.status === 403;
+      const message = isForbidden
+        ? "You are not authorized as admin in this session. Please log in again with an admin account."
+        : error?.response?.data?.message || "Failed to update schedule.";
+      toast.error(message);
+    } finally {
+      setIsUpdatingSchedule(false);
+    }
+  };
+
+  const hasScheduleChanges =
+    selectedDate !== (request.date || "") ||
+    selectedSlot !== (request.timeSlot || "");
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:4000';
 
@@ -245,6 +307,77 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
               </p>
             )}
           </div>
+
+          {request.serviceType === "on-site-visit" && (
+            <div className="bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/30 space-y-3">
+              <p className="text-xs text-zinc-500">Update Visit Schedule</p>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-500">Date</p>
+                  <div className="[&>button]:bg-zinc-950/60 [&>button]:border-zinc-800 [&>button]:text-zinc-200 [&>button]:hover:bg-zinc-900">
+                    <DatePicker
+                      value={selectedDate}
+                      onChange={(value) => {
+                        setSelectedDate(value);
+                        setSelectedSlot("");
+                      }}
+                      placeholder="Pick visit date"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-500">Time Slot</p>
+                  <Select
+                    value={selectedSlot}
+                    onValueChange={setSelectedSlot}
+                    disabled={isCustomerCancelled || isLoadingSlots || availableSlotsForDate.length === 0}
+                  >
+                    <SelectTrigger className="w-full bg-zinc-950/60 border-zinc-800 text-zinc-200">
+                      <SelectValue placeholder="Select a time slot" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                      {availableSlotsForDate.map((slot) => (
+                        <SelectItem key={slot} value={slot}>
+                          {slot}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedDate && isLoadingSlots && (
+                    <p className="text-xs text-zinc-500">
+                      Loading configured slots...
+                    </p>
+                  )}
+                  {selectedDate && availableSlotsForDate.length === 0 && (
+                    <p className="text-xs text-zinc-500">
+                      No configured slots for this date yet.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Button
+                className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white"
+                onClick={handleScheduleUpdate}
+                disabled={
+                  isUpdatingSchedule ||
+                  !hasScheduleChanges ||
+                  isCustomerCancelled ||
+                  !selectedDate ||
+                  !selectedSlot
+                }
+              >
+                {isUpdatingSchedule ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Clock className="h-4 w-4 mr-2" />
+                )}
+                Save Schedule
+              </Button>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="border-t border-zinc-800 pt-4 mt-2">
