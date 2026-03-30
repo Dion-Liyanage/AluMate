@@ -179,50 +179,47 @@ export function PastServiceRequestsSection({
                         <Badge
                           variant="outline"
                           className={cn(
-                            "border-zinc-700 bg-zinc-900 text-zinc-200",
+                            "border-zinc-700 bg-zinc-900 text-zinc-200 uppercase tracking-wide text-[10px] font-bold px-2 py-0.5",
                             request.serviceType === "repair"
-                              ? "text-cyan-300"
-                              : "text-fuchsia-300"
+                              ? "border-cyan-500/30 text-cyan-300"
+                              : "border-fuchsia-500/30 text-fuchsia-300"
                           )}
                         >
                           {request.serviceType === "repair" ? "Repair" : "On-site Visit"}
                         </Badge>
                       </div>
-                      <span className="text-xs text-zinc-500">Request ID: {requestId}</span>
+                      <Badge
+                        variant="outline"
+                        className={cn("font-medium", getStatusClasses(request.status))}
+                      >
+                        {request.status}
+                      </Badge>
                     </div>
 
-                    <div className="mt-3 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
+                    <div className="mt-4 flex flex-col gap-2.5 text-sm text-zinc-300">
                       <p className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-zinc-500" />
-                        Requested Date: {request.date}
+                        <CalendarDays className="h-4 w-4 text-zinc-500 shrink-0" />
+                        <span className="font-medium text-zinc-400">Requested Date:</span> {request.date}
                       </p>
 
                       {request.orderId && (
-                        <div className="flex items-center gap-2 justify-between -ml-6 sm:-ml-7">
-                          <p className="flex items-center gap-2">
-                            <Wrench className="h-4 w-4 text-zinc-500" />
-                            Order ID: {request.orderId}
-                          </p>
-                          <Badge
-                            variant="outline"
-                            className={cn("font-medium", getStatusClasses(request.status))}
-                          >
-                            {request.status}
-                          </Badge>
-                        </div>
-                      )}
-
-                      {request.timeSlot && (
                         <p className="flex items-center gap-2">
-                          <Clock3 className="h-4 w-4 text-zinc-500" />
-                          Time Slot: {request.timeSlot}
+                          <Wrench className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <span className="font-medium text-zinc-400">Order ID:</span> {request.orderId}
                         </p>
                       )}
 
                       {request.nearestTown && (
                         <p className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-zinc-500" />
-                          Nearest Town: {request.nearestTown}
+                          <MapPin className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <span className="font-medium text-zinc-400">Nearest Town:</span> {request.nearestTown}
+                        </p>
+                      )}
+
+                      {request.timeSlot && (
+                        <p className="flex items-center gap-2">
+                          <Clock3 className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <span className="font-medium text-zinc-400">Time Slot:</span> {request.timeSlot}
                         </p>
                       )}
                     </div>
