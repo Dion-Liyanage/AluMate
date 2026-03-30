@@ -174,11 +174,33 @@ export class ServicesController {
    */
   @Get('availability')
   @UseGuards(JwtAuthGuard)
-  async getAvailability(@Query('date') date: string) {
+  async getAvailability(@Query('date') date?: string) {
+    if (!date) {
+      const dates = await this.servicesService.getAvailabilityDates();
+      return {
+        success: true,
+        data: { dates },
+      };
+    }
+
     const slots = await this.servicesService.getAvailabilityByDate(date);
     return {
       success: true,
       data: { date, slots },
+    };
+  }
+
+  /**
+   * GET /api/v1/services/availability/dates
+   * Get dates that currently have at least one available slot
+   */
+  @Get('availability/dates')
+  @UseGuards(JwtAuthGuard)
+  async getAvailabilityDates() {
+    const dates = await this.servicesService.getAvailabilityDates();
+    return {
+      success: true,
+      data: { dates },
     };
   }
 
@@ -236,6 +258,21 @@ export class ServicesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   async deleteAvailability(@Param('date') date: string) {
+    await this.servicesService.deleteAvailability(date);
+    return {
+      success: true,
+      message: 'Service availability deleted successfully',
+    };
+  }
+
+  /**
+   * POST /api/v1/services/availability/delete
+   * Admin deletes configured slots for a date (fallback for clients where DELETE may be blocked)
+   */
+  @Post('availability/delete')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async deleteAvailabilityViaPost(@Body('date') date: string) {
     await this.servicesService.deleteAvailability(date);
     return {
       success: true,

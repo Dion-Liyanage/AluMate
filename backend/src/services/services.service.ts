@@ -57,6 +57,25 @@ export class ServicesService {
     return configuredSlots.filter((slot) => !bookedSlots.includes(slot));
   }
 
+  async getAvailabilityDates(): Promise<string[]> {
+    const today = new Date().toISOString().split('T')[0];
+    const records = await this.serviceAvailabilityModel.find().sort({ date: 1 }).exec();
+
+    const dates: string[] = [];
+    for (const record of records) {
+      if (record.date < today) {
+        continue;
+      }
+
+      const slots = await this.getAvailabilityByDate(record.date);
+      if (slots.length > 0) {
+        dates.push(record.date);
+      }
+    }
+
+    return dates;
+  }
+
   async getAllAvailability(): Promise<ServiceAvailabilityDocument[]> {
     return this.serviceAvailabilityModel.find().sort({ date: 1 }).exec();
   }

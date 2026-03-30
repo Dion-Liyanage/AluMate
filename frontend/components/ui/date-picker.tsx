@@ -20,6 +20,7 @@ interface DatePickerProps {
   className?: string;
   id?: string;
   disablePastDates?: boolean;
+  allowedDates?: string[];
 }
 
 export function DatePicker({
@@ -29,11 +30,28 @@ export function DatePicker({
   className,
   id,
   disablePastDates = false,
+  allowedDates,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
   const date = value ? parse(value, "yyyy-MM-dd", new Date()) : undefined;
   const today = startOfDay(new Date());
+  const allowedDateSet = React.useMemo(
+    () => new Set(allowedDates ?? []),
+    [allowedDates]
+  );
+
+  const isDayDisabled = (day: Date) => {
+    if (disablePastDates && day < today) {
+      return true;
+    }
+
+    if (allowedDates) {
+      return !allowedDateSet.has(format(day, "yyyy-MM-dd"));
+    }
+
+    return false;
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -66,7 +84,7 @@ export function DatePicker({
           }}
           defaultMonth={date}
           fromDate={disablePastDates ? today : undefined}
-          disabled={disablePastDates ? { before: today } : undefined}
+          disabled={isDayDisabled}
           fromYear={2000}
           toYear={2030}
           initialFocus

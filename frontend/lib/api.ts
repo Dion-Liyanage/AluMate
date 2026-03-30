@@ -254,6 +254,24 @@ export const servicesApi = {
     return res.data;
   },
 
+  // Authenticated users: get dates that have at least one available slot
+  getAvailabilityDates: async () => {
+    try {
+      const res = await apiClient.get<ApiResponse<{ dates: string[] }>>(
+        "/services/availability/dates"
+      );
+      return res.data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        const fallbackRes = await apiClient.get<ApiResponse<{ dates: string[] }>>(
+          "/services/availability"
+        );
+        return fallbackRes.data;
+      }
+      throw error;
+    }
+  },
+
   // Admin: get configured slots for a date (before booking subtraction)
   getAvailabilityConfig: async (date: string) => {
     const res = await apiClient.get<ApiResponse<{ date: string; slots: string[] }>>(
@@ -282,8 +300,19 @@ export const servicesApi = {
 
   // Admin: delete configured availability for a date
   deleteAvailability: async (date: string) => {
-    const res = await apiClient.delete<ApiResponse>(`/services/availability/${date}`);
-    return res.data;
+    try {
+      const res = await apiClient.delete<ApiResponse>(`/services/availability/${date}`);
+      return res.data;
+    } catch (error: any) {
+      if (error?.response?.status === 404 || error?.response?.status === 405) {
+        const fallbackRes = await apiClient.post<ApiResponse>(
+          "/services/availability/delete",
+          { date }
+        );
+        return fallbackRes.data;
+      }
+      throw error;
+    }
   },
 
   // Customer: Submit repair request (with image upload)
