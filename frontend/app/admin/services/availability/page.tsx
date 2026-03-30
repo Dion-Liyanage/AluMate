@@ -390,7 +390,7 @@ export default function AdminServiceAvailabilityPage() {
             </p>
           </div>
           <Link href="/admin/services">
-            <Button variant="outline" className="border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800">
+            <Button variant="outline" className="bg-zinc-500/20 text-zinc-200 border border-zinc-500/40 hover:text-zinc-100 hover:bg-zinc-500/30 hover:border-zinc-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(255,255,255,0.02)]">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Services
             </Button>

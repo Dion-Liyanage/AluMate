@@ -134,7 +134,7 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
                   request.serviceType === "repair" ? "text-cyan-400" : "text-fuchsia-400"
                 )} />
                 <div className="space-y-1">
-                  <p className="text-xs text-zinc-500">Scheduled Date</p>
+                  <p className="text-xs text-zinc-500">Submitted Date</p>
                   <p className="text-sm text-zinc-200">{request.date}</p>
                 </div>
               </div>
