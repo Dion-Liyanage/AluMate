@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { format, parse } from "date-fns";
+import { format, parse, startOfDay } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ interface DatePickerProps {
   placeholder?: string;
   className?: string;
   id?: string;
+  disablePastDates?: boolean;
 }
 
 export function DatePicker({
@@ -27,10 +28,12 @@ export function DatePicker({
   placeholder = "Pick a date",
   className,
   id,
+  disablePastDates = false,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
   const date = value ? parse(value, "yyyy-MM-dd", new Date()) : undefined;
+  const today = startOfDay(new Date());
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -62,6 +65,8 @@ export function DatePicker({
             setOpen(false);
           }}
           defaultMonth={date}
+          fromDate={disablePastDates ? today : undefined}
+          disabled={disablePastDates ? { before: today } : undefined}
           fromYear={2000}
           toYear={2030}
           initialFocus

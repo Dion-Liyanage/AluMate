@@ -410,7 +410,12 @@ export default function AdminServiceAvailabilityPage() {
             <div className="space-y-2">
               <p className="text-sm text-zinc-400">Select Date</p>
               <div className="max-w-sm [&>button]:bg-zinc-900 [&>button]:border-zinc-700 [&>button]:text-zinc-100">
-                <DatePicker value={selectedDate} onChange={setSelectedDate} placeholder="Pick a date" />
+                <DatePicker
+                  value={selectedDate}
+                  onChange={setSelectedDate}
+                  placeholder="Pick a date"
+                  disablePastDates
+                />
               </div>
             </div>
 
