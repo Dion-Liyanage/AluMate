@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { servicesApi } from "@/lib/api";
 import { DateSelector } from "./DateSelector";
 import { TimeSlotSelector } from "./TimeSlotSelector";
@@ -11,11 +11,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Ruler } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, Ruler } from "lucide-react";
 import { LocationPickerModal } from "@/components/location/LocationPickerModal";
 import { LocationPreview } from "@/components/location/LocationPreview";
+import { PastServiceRequestsSection } from "@/components/services/PastServiceRequestsSection";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -33,6 +34,7 @@ const itemVariants = {
 export function OnSiteVisitForm() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     fullName: "",
     contactNumber: "",
@@ -44,6 +46,29 @@ export function OnSiteVisitForm() {
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [status, setStatus] = useState("Draft"); // Draft -> Request Sent
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
+
+  useEffect(() => {
+    const loadAvailabilityDates = async () => {
+      try {
+        const response = await servicesApi.getAvailabilityDates();
+        const dates = response.data?.dates || [];
+        setAvailableDates(dates);
+      } catch (error) {
+        setAvailableDates([]);
+      }
+    };
+
+    loadAvailabilityDates();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate && !availableDates.includes(selectedDate)) {
+      setSelectedDate("");
+      setSelectedSlot("");
+    }
+  }, [availableDates, selectedDate]);
 
   const handleFormChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -75,6 +100,7 @@ export function OnSiteVisitForm() {
 
       setStatus("Request Sent");
       toast.success("Visit request submitted successfully");
+      setHistoryRefreshToken((prev) => prev + 1);
     } catch (error: any) {
       const message = error?.response?.data?.message || "Failed to submit request. Please try again.";
       toast.error(message);
@@ -124,10 +150,14 @@ export function OnSiteVisitForm() {
           <CardContent className="relative space-y-6 focus-within:z-10">
             {/* Scheduling Section */}
             <div className="grid gap-6 md:grid-cols-2">
-              <DateSelector value={selectedDate} onChange={(val) => {
-                setSelectedDate(val);
-                setSelectedSlot(""); // Reset slot when date changes
-              }} />
+              <DateSelector
+                value={selectedDate}
+                allowedDates={availableDates}
+                onChange={(val) => {
+                  setSelectedDate(val);
+                  setSelectedSlot(""); // Reset slot when date changes
+                }}
+              />
               <div className="space-y-2">
                 <label className="text-sm font-medium text-zinc-300">
                   Available Time Slots
@@ -251,6 +281,44 @@ export function OnSiteVisitForm() {
             </Button>
           </CardFooter>
         </Card>
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="space-y-3">
+        <div className="flex items-center justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsHistoryExpanded((prev) => !prev)}
+            className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
+          >
+            {isHistoryExpanded ? (
+              <ChevronUp className="mr-2 h-4 w-4" />
+            ) : (
+              <ChevronDown className="mr-2 h-4 w-4" />
+            )}
+            {isHistoryExpanded ? "Hide Past Requests" : "Show Past Requests"}
+          </Button>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {isHistoryExpanded && (
+            <motion.div
+              variants={itemVariants}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PastServiceRequestsSection
+                serviceType="on-site-visit"
+                title="Past On-Site Requests"
+                description="See all previous measurement requests, consultation status, and notes."
+                refreshToken={historyRefreshToken}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.form>
   );
