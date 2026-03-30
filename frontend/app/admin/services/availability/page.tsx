@@ -36,6 +36,7 @@ import {
   X,
   ArrowLeft,
   Clock3,
+  History,
 } from "lucide-react";
 
 type AvailabilityRecord = {
@@ -397,8 +398,22 @@ export default function AdminServiceAvailabilityPage() {
           </Link>
         </div>
 
-        <Card className="bg-zinc-950 border-zinc-800 text-zinc-100">
-          <CardHeader>
+        <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border-zinc-800 shadow-xl overflow-hidden relative group">
+          {/* Main palette tint (Fuchsia + Pink + Rose) while keeping dark base */}
+          <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/8 via-pink-500/8 to-rose-500/8 pointer-events-none" />
+
+          {/* Dark depth layer to match previous darker look */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/35 pointer-events-none" />
+
+          {/* Wave shimmer effect */}
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
+
+          {/* Decorative background icon */}
+          <div className="absolute top-[30%] -translate-y-1/2 right-12 opacity-[0.15] pointer-events-none group-hover:opacity-[0.2] transition-opacity">
+            <CalendarDays className="w-40 h-40 text-fuchsia-300" />
+          </div>
+
+          <CardHeader className="relative">
             <CardTitle className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-fuchsia-400" />
               Configure Slots
@@ -407,7 +422,7 @@ export default function AdminServiceAvailabilityPage() {
               Pick a date, add slots, then save.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="relative space-y-4">
             <div className="space-y-2">
               <p className="text-sm text-zinc-400">Select Date</p>
               <div className="max-w-sm [&>button]:bg-zinc-900 [&>button]:border-zinc-700 [&>button]:text-zinc-100">
@@ -508,7 +523,10 @@ export default function AdminServiceAvailabilityPage() {
 
         <Card className="bg-zinc-950 border-zinc-800 text-zinc-100">
           <CardHeader>
-            <CardTitle>Configured Dates</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-fuchsia-400" />
+              Configured Dates and Times
+            </CardTitle>
             <CardDescription className="text-zinc-400">
               Overview of all dates with configured slots.
             </CardDescription>
