@@ -20,7 +20,6 @@ import {
   Hammer,
   FolderOpen,
   MessageSquare,
-  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -93,7 +92,6 @@ const adminMenuGroups: MenuGroup[] = [
       { href: "/admin/orders", icon: ClipboardList, label: "Orders" },
       { href: "/admin/quotations", icon: FileText, label: "Quotations" },
       { href: "/admin/services", icon: Wrench, label: "Services" },
-      { href: "/admin/services/availability", icon: CalendarDays, label: "Service Availability" },
     ],
   },
   {

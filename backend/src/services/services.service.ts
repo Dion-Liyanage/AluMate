@@ -86,6 +86,14 @@ export class ServicesService {
     return updated;
   }
 
+  async deleteAvailability(date: string): Promise<void> {
+    if (!date) {
+      throw new BadRequestException('Date parameter is required');
+    }
+
+    await this.serviceAvailabilityModel.findOneAndDelete({ date }).exec();
+  }
+
   // ── Customer: Create On-Site Visit ──
   async createOnSiteVisit(
     userId: string,

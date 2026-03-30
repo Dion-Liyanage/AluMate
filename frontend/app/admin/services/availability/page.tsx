@@ -6,13 +6,34 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { servicesApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { CalendarDays, Plus, Trash2, Loader2 } from "lucide-react";
+import {
+  CalendarDays,
+  Plus,
+  Trash2,
+  Loader2,
+  Pencil,
+  Check,
+  X,
+} from "lucide-react";
 
 type AvailabilityRecord = {
   date: string;
@@ -24,12 +45,27 @@ export default function AdminServiceAvailabilityPage() {
   const { user, isLoading } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState("");
-  const [slotInput, setSlotInput] = useState("");
+  const [slotTimeInput, setSlotTimeInput] = useState("");
+  const [slotPeriod, setSlotPeriod] = useState<"AM" | "PM">("AM");
   const [slots, setSlots] = useState<string[]>([]);
+
   const [records, setRecords] = useState<AvailabilityRecord[]>([]);
+  const [draftSlotsByDate, setDraftSlotsByDate] = useState<Record<string, string[]>>({});
+  const [editingRecordSlot, setEditingRecordSlot] = useState<{
+    date: string;
+    index: number;
+    timeInput: string;
+    period: "AM" | "PM";
+  } | null>(null);
+  const [addingSlotDate, setAddingSlotDate] = useState<string | null>(null);
+  const [newRecordTimeInput, setNewRecordTimeInput] = useState("");
+  const [newRecordPeriod, setNewRecordPeriod] = useState<"AM" | "PM">("AM");
+
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
+  const [updatingDate, setUpdatingDate] = useState<string | null>(null);
+  const [deletingRecordDate, setDeletingRecordDate] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && (!user || user.role !== "admin")) {
@@ -37,13 +73,42 @@ export default function AdminServiceAvailabilityPage() {
     }
   }, [isLoading, router, user]);
 
+  const formatSlot = (rawTime: string, period: "AM" | "PM"): string | null => {
+    const normalized = rawTime.trim().replace(".", ":");
+    const match = normalized.match(/^(\d{1,2})(?::(\d{2}))?$/);
+
+    if (!match) {
+      return null;
+    }
+
+    const hour = Number(match[1]);
+    const minute = Number(match[2] ?? "00");
+
+    if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+      return null;
+    }
+
+    return `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")} ${period}`;
+  };
+
+  const splitSlot = (slot: string): { time: string; period: "AM" | "PM" } => {
+    const match = slot.match(/^(\d{2}:\d{2})\s(AM|PM)$/);
+    if (!match) {
+      return { time: "", period: "AM" };
+    }
+    return { time: match[1], period: match[2] as "AM" | "PM" };
+  };
+
   const loadAllRecords = async () => {
     setIsLoadingRecords(true);
     try {
       const response = await servicesApi.getAllAvailability();
       setRecords(response.data?.availability || []);
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Failed to load availability records.";
+      const message =
+        error?.response?.data?.message || "Failed to load availability records.";
       toast.error(message);
     } finally {
       setIsLoadingRecords(false);
@@ -68,7 +133,8 @@ export default function AdminServiceAvailabilityPage() {
         const response = await servicesApi.getAvailabilityConfig(selectedDate);
         setSlots(response.data?.slots || []);
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Failed to load slots for selected date.";
+        const message =
+          error?.response?.data?.message || "Failed to load slots for selected date.";
         toast.error(message);
         setSlots([]);
       } finally {
@@ -80,18 +146,19 @@ export default function AdminServiceAvailabilityPage() {
   }, [selectedDate]);
 
   const addSlot = () => {
-    const normalized = slotInput.trim();
-    if (!normalized) {
+    const formattedSlot = formatSlot(slotTimeInput, slotPeriod);
+    if (!formattedSlot) {
+      toast.error("Enter time as HH:MM (or HH) and choose AM/PM.");
       return;
     }
 
-    if (slots.includes(normalized)) {
+    if (slots.includes(formattedSlot)) {
       toast.error("This slot is already added.");
       return;
     }
 
-    setSlots((prev) => [...prev, normalized]);
-    setSlotInput("");
+    setSlots((prev) => [...prev, formattedSlot]);
+    setSlotTimeInput("");
   };
 
   const removeSlot = (slotToRemove: string) => {
@@ -122,6 +189,178 @@ export default function AdminServiceAvailabilityPage() {
       toast.error(message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const getSlotsForRecord = (record: AvailabilityRecord): string[] => {
+    return draftSlotsByDate[record.date] ?? record.slots;
+  };
+
+  const setRecordDraftSlots = (
+    date: string,
+    updater: (prev: string[]) => string[],
+  ) => {
+    setDraftSlotsByDate((prev) => {
+      const base = prev[date] ?? records.find((item) => item.date === date)?.slots ?? [];
+      return {
+        ...prev,
+        [date]: updater(base),
+      };
+    });
+  };
+
+  const hasRecordChanges = (record: AvailabilityRecord): boolean => {
+    return JSON.stringify(getSlotsForRecord(record)) !== JSON.stringify(record.slots);
+  };
+
+  const startEditingRecordSlot = (date: string, index: number, slot: string) => {
+    const parsed = splitSlot(slot);
+    setEditingRecordSlot({
+      date,
+      index,
+      timeInput: parsed.time,
+      period: parsed.period,
+    });
+  };
+
+  const cancelEditingRecordSlot = () => {
+    setEditingRecordSlot(null);
+  };
+
+  const saveEditedRecordSlot = () => {
+    if (!editingRecordSlot) {
+      return;
+    }
+
+    const formattedSlot = formatSlot(
+      editingRecordSlot.timeInput,
+      editingRecordSlot.period,
+    );
+    if (!formattedSlot) {
+      toast.error("Enter time as HH:MM (or HH) and choose AM/PM.");
+      return;
+    }
+
+    const record = records.find((item) => item.date === editingRecordSlot.date);
+    if (!record) {
+      return;
+    }
+
+    const current = getSlotsForRecord(record);
+    const duplicate = current.some(
+      (slot, index) => slot === formattedSlot && index !== editingRecordSlot.index,
+    );
+    if (duplicate) {
+      toast.error("This slot is already added.");
+      return;
+    }
+
+    setRecordDraftSlots(editingRecordSlot.date, (prev) =>
+      prev.map((slot, index) =>
+        index === editingRecordSlot.index ? formattedSlot : slot,
+      ),
+    );
+    cancelEditingRecordSlot();
+  };
+
+  const removeRecordSlot = (date: string, index: number) => {
+    setRecordDraftSlots(date, (prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const startAddingRecordSlot = (date: string) => {
+    setAddingSlotDate(date);
+    setNewRecordTimeInput("");
+    setNewRecordPeriod("AM");
+  };
+
+  const cancelAddingRecordSlot = () => {
+    setAddingSlotDate(null);
+    setNewRecordTimeInput("");
+    setNewRecordPeriod("AM");
+  };
+
+  const addRecordSlot = (date: string) => {
+    const formattedSlot = formatSlot(newRecordTimeInput, newRecordPeriod);
+    if (!formattedSlot) {
+      toast.error("Enter time as HH:MM (or HH) and choose AM/PM.");
+      return;
+    }
+
+    const record = records.find((item) => item.date === date);
+    if (!record) {
+      return;
+    }
+
+    const current = getSlotsForRecord(record);
+    if (current.includes(formattedSlot)) {
+      toast.error("This slot is already added.");
+      return;
+    }
+
+    setRecordDraftSlots(date, (prev) => [...prev, formattedSlot]);
+    cancelAddingRecordSlot();
+  };
+
+  const updateRecordSlots = async (record: AvailabilityRecord) => {
+    const updatedSlots = getSlotsForRecord(record);
+
+    if (updatedSlots.length === 0) {
+      toast.error("At least one slot is required. Use Delete to remove this date.");
+      return;
+    }
+
+    setUpdatingDate(record.date);
+    try {
+      await servicesApi.upsertAvailability({
+        date: record.date,
+        slots: updatedSlots,
+      });
+      toast.success("Availability updated successfully.");
+      await loadAllRecords();
+      setDraftSlotsByDate((prev) => {
+        const next = { ...prev };
+        delete next[record.date];
+        return next;
+      });
+      if (addingSlotDate === record.date) {
+        cancelAddingRecordSlot();
+      }
+      if (editingRecordSlot?.date === record.date) {
+        cancelEditingRecordSlot();
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to update availability.";
+      toast.error(message);
+    } finally {
+      setUpdatingDate(null);
+    }
+  };
+
+  const deleteRecord = async (date: string) => {
+    setDeletingRecordDate(date);
+    try {
+      await servicesApi.deleteAvailability(date);
+      toast.success("Availability deleted successfully.");
+      await loadAllRecords();
+      setDraftSlotsByDate((prev) => {
+        const next = { ...prev };
+        delete next[date];
+        return next;
+      });
+      if (selectedDate === date) {
+        setSlots([]);
+      }
+      if (addingSlotDate === date) {
+        cancelAddingRecordSlot();
+      }
+      if (editingRecordSlot?.date === date) {
+        cancelEditingRecordSlot();
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to delete availability.";
+      toast.error(message);
+    } finally {
+      setDeletingRecordDate(null);
     }
   };
 
@@ -165,19 +404,32 @@ export default function AdminServiceAvailabilityPage() {
               </div>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-              <Input
-                value={slotInput}
-                onChange={(e) => setSlotInput(e.target.value)}
-                placeholder="Add time slot (e.g. 09:00 AM)"
-                className="bg-zinc-900 border-zinc-700 text-zinc-100"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addSlot();
-                  }
-                }}
-              />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="w-full max-w-sm">
+                <div className="grid grid-cols-[1fr_110px] gap-2">
+                  <Input
+                    value={slotTimeInput}
+                    onChange={(e) => setSlotTimeInput(e.target.value)}
+                    placeholder="e.g. 5:00"
+                    className="w-full bg-zinc-900 border-zinc-700 text-zinc-100"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addSlot();
+                      }
+                    }}
+                  />
+                  <Select value={slotPeriod} onValueChange={(value: "AM" | "PM") => setSlotPeriod(value)}>
+                    <SelectTrigger className="w-full bg-zinc-900 border-zinc-700 text-zinc-100">
+                      <SelectValue placeholder="AM/PM" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                      <SelectItem value="AM">AM</SelectItem>
+                      <SelectItem value="PM">PM</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <Button
                 type="button"
                 onClick={addSlot}
@@ -252,19 +504,183 @@ export default function AdminServiceAvailabilityPage() {
               <p className="text-sm text-zinc-500">No availability records found.</p>
             ) : (
               <div className="space-y-3">
-                {records.map((record) => (
-                  <div key={record.date} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
-                    <p className="text-sm font-medium text-zinc-200">{record.date}</p>
-                    <p className="text-xs text-zinc-500 mt-1">{record.slots.length} slot(s)</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {record.slots.map((slot) => (
-                        <Badge key={`${record.date}-${slot}`} variant="outline" className="border-zinc-700 bg-zinc-900 text-zinc-300">
-                          {slot}
-                        </Badge>
-                      ))}
+                {records.map((record) => {
+                  const currentSlots = getSlotsForRecord(record);
+                  const isDirty = hasRecordChanges(record);
+
+                  return (
+                    <div key={record.date} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium text-zinc-200">{record.date}</p>
+                          <p className="text-xs text-zinc-500 mt-1">{currentSlots.length} slot(s)</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="h-8 w-8 rounded-full p-0 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            onClick={() => updateRecordSlots(record)}
+                            disabled={!isDirty || updatingDate === record.date || deletingRecordDate === record.date}
+                            aria-label={`Update ${record.date}`}
+                          >
+                            {updatingDate === record.date ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Check className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 rounded-full p-0 border-zinc-700 bg-zinc-900 text-red-300 hover:bg-zinc-800"
+                            onClick={() => deleteRecord(record.date)}
+                            disabled={deletingRecordDate === record.date}
+                            aria-label={`Delete ${record.date}`}
+                          >
+                            {deletingRecordDate === record.date ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {currentSlots.map((slot, index) => {
+                          const isEditingThisSlot =
+                            editingRecordSlot?.date === record.date &&
+                            editingRecordSlot?.index === index;
+
+                          if (isEditingThisSlot && editingRecordSlot) {
+                            return (
+                              <div key={`${record.date}-edit-${index}`} className="flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1">
+                                <Input
+                                  value={editingRecordSlot.timeInput}
+                                  onChange={(e) =>
+                                    setEditingRecordSlot((prev) =>
+                                      prev ? { ...prev, timeInput: e.target.value } : prev,
+                                    )
+                                  }
+                                  className="h-8 w-24 bg-zinc-800 border-zinc-700 text-zinc-100"
+                                  placeholder="HH:MM"
+                                />
+                                <Select
+                                  value={editingRecordSlot.period}
+                                  onValueChange={(value: "AM" | "PM") =>
+                                    setEditingRecordSlot((prev) =>
+                                      prev ? { ...prev, period: value } : prev,
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger className="h-8 w-20 bg-zinc-800 border-zinc-700 text-zinc-100">
+                                    <SelectValue placeholder="AM/PM" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                                    <SelectItem value="AM">AM</SelectItem>
+                                    <SelectItem value="PM">PM</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <button
+                                  type="button"
+                                  onClick={saveEditedRecordSlot}
+                                  className="text-emerald-400 hover:text-emerald-300"
+                                  aria-label={`Save ${slot}`}
+                                >
+                                  <Check className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={cancelEditingRecordSlot}
+                                  className="text-zinc-500 hover:text-zinc-300"
+                                  aria-label={`Cancel editing ${slot}`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <Badge
+                              key={`${record.date}-${slot}-${index}`}
+                              variant="outline"
+                              className="border-zinc-700 bg-zinc-900 text-zinc-200 px-2.5 py-1 flex items-center gap-2"
+                            >
+                              {slot}
+                              <button
+                                type="button"
+                                onClick={() => startEditingRecordSlot(record.date, index, slot)}
+                                className="text-zinc-500 hover:text-zinc-300"
+                                aria-label={`Edit ${slot}`}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removeRecordSlot(record.date, index)}
+                                className="text-zinc-500 hover:text-red-400"
+                                aria-label={`Remove ${slot}`}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </Badge>
+                          );
+                        })}
+
+                        {addingSlotDate === record.date ? (
+                          <div className="flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1">
+                            <Input
+                              value={newRecordTimeInput}
+                              onChange={(e) => setNewRecordTimeInput(e.target.value)}
+                              className="h-8 w-24 bg-zinc-800 border-zinc-700 text-zinc-100"
+                              placeholder="HH:MM"
+                            />
+                            <Select
+                              value={newRecordPeriod}
+                              onValueChange={(value: "AM" | "PM") => setNewRecordPeriod(value)}
+                            >
+                              <SelectTrigger className="h-8 w-20 bg-zinc-800 border-zinc-700 text-zinc-100">
+                                <SelectValue placeholder="AM/PM" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                                <SelectItem value="AM">AM</SelectItem>
+                                <SelectItem value="PM">PM</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <button
+                              type="button"
+                              onClick={() => addRecordSlot(record.date)}
+                              className="text-emerald-400 hover:text-emerald-300"
+                              aria-label={`Add slot to ${record.date}`}
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelAddingRecordSlot}
+                              className="text-zinc-500 hover:text-zinc-300"
+                              aria-label={`Cancel adding slot to ${record.date}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
+                            onClick={() => startAddingRecordSlot(record.date)}
+                            aria-label={`Add slot to ${record.date}`}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

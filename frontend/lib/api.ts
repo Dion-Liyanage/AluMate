@@ -280,6 +280,12 @@ export const servicesApi = {
     return res.data;
   },
 
+  // Admin: delete configured availability for a date
+  deleteAvailability: async (date: string) => {
+    const res = await apiClient.delete<ApiResponse>(`/services/availability/${date}`);
+    return res.data;
+  },
+
   // Customer: Submit repair request (with image upload)
   createRepair: async (data: {
     orderId: string;

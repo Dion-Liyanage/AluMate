@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   Query,
@@ -224,6 +225,21 @@ export class ServicesController {
       success: true,
       message: 'Service availability saved successfully',
       data: { availability: record },
+    };
+  }
+
+  /**
+   * DELETE /api/v1/services/availability/:date
+   * Admin deletes configured slots for a date
+   */
+  @Delete('availability/:date')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async deleteAvailability(@Param('date') date: string) {
+    await this.servicesService.deleteAvailability(date);
+    return {
+      success: true,
+      message: 'Service availability deleted successfully',
     };
   }
 
