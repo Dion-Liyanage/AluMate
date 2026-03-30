@@ -101,6 +101,20 @@ export function OnSiteVisitForm() {
       setStatus("Request Sent");
       toast.success("Visit request submitted successfully");
       setHistoryRefreshToken((prev) => prev + 1);
+      
+      // Clear form fields
+      setSelectedDate("");
+      setSelectedSlot("");
+      setFormData({
+        fullName: "",
+        contactNumber: "",
+        nearestTown: "",
+      });
+      setLocation(null);
+      setManualAddress("");
+      
+      // Reset status back to Draft after a short delay to allow another submission
+      setTimeout(() => setStatus("Draft"), 3000);
     } catch (error: any) {
       const message = error?.response?.data?.message || "Failed to submit request. Please try again.";
       toast.error(message);

@@ -209,6 +209,13 @@ export function PastServiceRequestsSection({
                         </p>
                       )}
 
+                      {request.timeSlot && (
+                        <p className="flex items-center gap-2">
+                          <Clock3 className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <span className="font-medium text-zinc-400">Time Slot:</span> {request.timeSlot}
+                        </p>
+                      )}
+
                       {request.nearestTown && (
                         <p className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-zinc-500 shrink-0" />
@@ -216,11 +223,24 @@ export function PastServiceRequestsSection({
                         </p>
                       )}
 
-                      {request.timeSlot && (
-                        <p className="flex items-center gap-2">
-                          <Clock3 className="h-4 w-4 text-zinc-500 shrink-0" />
-                          <span className="font-medium text-zinc-400">Time Slot:</span> {request.timeSlot}
-                        </p>
+                      {request.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-zinc-500 shrink-0" />
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                            <span className="font-medium text-zinc-400">Fetched Location:</span>
+                            <span className="font-mono text-[11px] text-zinc-400 bg-zinc-800/50 px-1.5 py-0.5 rounded border border-zinc-700/50">
+                              {request.location.lat.toFixed(6)}, {request.location.lng.toFixed(6)}
+                            </span>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${request.location.lat},${request.location.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-fuchsia-400 hover:text-fuchsia-300 underline underline-offset-2 transition-colors font-medium ml-1"
+                            >
+                              View on G-Maps
+                            </a>
+                          </div>
+                        </div>
                       )}
                     </div>
 
