@@ -114,11 +114,10 @@ export function ServiceManagement() {
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
                 <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Request Sent">Request Sent</SelectItem>
                 <SelectItem value="Approved">Approved</SelectItem>
                 <SelectItem value="In Progress">In Progress</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="Request Sent">Request Sent</SelectItem>
                 <SelectItem value="Rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>

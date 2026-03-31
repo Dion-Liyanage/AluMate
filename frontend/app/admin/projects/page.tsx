@@ -119,7 +119,7 @@ export default function AdminProjectsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
-              <FolderOpen className="h-6 w-6 text-purple-400" />
+              <FolderOpen className="h-6 w-6 text-fuchsia-400" />
               Completed Projects
             </h2>
             <p className="mt-1 text-zinc-400">
@@ -132,7 +132,7 @@ export default function AdminProjectsPage() {
                 variant="outline"
                 onClick={importStaticProjects}
                 disabled={isImporting}
-                className="border-purple-500/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300"
+                className="bg-fuchsia-500/20 text-white/90 hover:text-white border border-fuchsia-500/40 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(217,70,239,0.1)]"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 {isImporting ? "Importing..." : "Import to Database"}
@@ -184,7 +184,7 @@ export default function AdminProjectsPage() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                     activeCategory === cat
-                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                      ? "bg-fuchsia-500/20 text-white/90 border border-fuchsia-500/40 shadow-[0_0_15px_rgba(217,70,239,0.1)]"
                       : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300"
                   }`}
                 >

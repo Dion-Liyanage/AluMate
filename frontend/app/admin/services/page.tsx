@@ -60,7 +60,7 @@ export default function AdminServicesPage() {
               </p>
             </div>
             <Link href="/admin/services/availability">
-              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white">
+              <Button className="bg-fuchsia-500/20 text-fuchsia-200 border border-fuchsia-500/40 hover:text-fuchsia-100 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(217,70,239,0.1)]">
                 Manage Availability
               </Button>
             </Link>

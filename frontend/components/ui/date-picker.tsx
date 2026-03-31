@@ -21,6 +21,7 @@ interface DatePickerProps {
   id?: string;
   disablePastDates?: boolean;
   allowedDates?: string[];
+  disabled?: boolean;
 }
 
 export function DatePicker({
@@ -31,6 +32,7 @@ export function DatePicker({
   id,
   disablePastDates = false,
   allowedDates,
+  disabled = false,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -54,14 +56,16 @@ export function DatePicker({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={disabled ? false : open} onOpenChange={disabled ? () => {} : setOpen}>
       <PopoverTrigger asChild>
         <Button
           id={id}
+          disabled={disabled}
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",
+            disabled && "opacity-60 cursor-not-allowed bg-zinc-900/50",
             className
           )}
         >

@@ -222,7 +222,7 @@ export function RepairForm() {
           <CardFooter className="relative pt-4 border-t border-zinc-800/50 flex justify-end">
             <Button 
               type="submit" 
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white border-0 transition-all font-medium min-w-[150px]" 
+              className="w-full sm:w-auto bg-emerald-500/40 text-white/90 hover:text-white border border-emerald-500/40 hover:bg-emerald-500/50 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)] min-w-[150px]" 
               disabled={!isFormValid || isSubmitting || isSubmitted}
             >
               {isSubmitting ? "Submitting..." : isSubmitted ? "Request Submitted" : "Submit Request"}

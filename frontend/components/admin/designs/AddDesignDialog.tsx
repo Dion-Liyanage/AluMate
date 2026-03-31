@@ -109,7 +109,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-sky-600 hover:bg-sky-500 text-white gap-2">
+        <Button className="bg-sky-500/20 text-white/90 hover:text-white border border-sky-500/40 hover:bg-sky-500/30 hover:border-sky-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(14,165,233,0.15)] gap-2">
           <Plus className="h-4 w-4" />
           Add New Design
         </Button>
@@ -215,7 +215,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-sky-600 hover:bg-sky-500 text-white"
+                className="bg-sky-500/20 text-white/90 hover:text-white border border-sky-500/40 hover:bg-sky-500/30 hover:border-sky-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(14,165,233,0.15)]"
               >
                 {isLoading ? "Adding..." : "Add Design"}
               </Button>

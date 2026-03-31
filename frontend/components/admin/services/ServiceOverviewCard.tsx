@@ -2,15 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wrench, Clock, Users, CheckCircle2, Map } from "lucide-react";
-import { motion } from "framer-motion";
+import { Wrench, Clock, Users, History, MapPin } from "lucide-react";
+import { motion, animate } from "framer-motion";
 import { servicesApi } from "@/lib/api";
+
+function AnimatedCounter({ value }: { value: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 1,
+      ease: "easeOut",
+      onUpdate(val) {
+        setCount(Math.round(val));
+      },
+    });
+    return () => controls.stop();
+  }, [value]);
+
+  return <>{count}</>;
+}
+
+const INACTIVE_STATUSES = ["Completed", "Rejected", "Cancelled by Customer"];
 
 export function ServiceOverviewCard() {
   const [stats, setStats] = useState({
     totalRequests: 0,
-    approvedRequests: 0,
-    completedRequests: 0,
+    activeRequests: 0,
+    inactiveRequests: 0,
     onSiteVisits: 0,
     repairRequests: 0,
   });
@@ -24,8 +43,8 @@ export function ServiceOverviewCard() {
           const requests = response.data.serviceRequests || [];
           setStats({
             totalRequests: requests.length,
-            approvedRequests: requests.filter((r: any) => r.status === "Approved").length,
-            completedRequests: requests.filter((r: any) => r.status === "Completed").length,
+            activeRequests: requests.filter((r: any) => !INACTIVE_STATUSES.includes(r.status)).length,
+            inactiveRequests: requests.filter((r: any) => INACTIVE_STATUSES.includes(r.status)).length,
             onSiteVisits: requests.filter((r: any) => r.serviceType === "on-site-visit").length,
             repairRequests: requests.filter((r: any) => r.serviceType === "repair").length,
           });
@@ -45,33 +64,33 @@ export function ServiceOverviewCard() {
       icon: Users,
       label: "Total Requests",
       value: stats.totalRequests,
-      color: "from-fuchsia-500/30 to-fuchsia-600/20",
-      iconColor: "text-fuchsia-300",
-      borderColor: "border-fuchsia-500/40",
-    },
-    {
-      icon: Clock,
-      label: "Approved",
-      value: stats.approvedRequests,
-      color: "from-amber-500/30 to-amber-600/20",
-      iconColor: "text-amber-300",
-      borderColor: "border-amber-500/40",
-    },
-    {
-      icon: CheckCircle2,
-      label: "Completed",
-      value: stats.completedRequests,
       color: "from-indigo-500/30 to-indigo-600/20",
       iconColor: "text-indigo-300",
       borderColor: "border-indigo-500/40",
     },
     {
-      icon: Map,
-      label: "On-Site Visits",
-      value: stats.onSiteVisits,
+      icon: Clock,
+      label: "Active",
+      value: stats.activeRequests,
+      color: "from-amber-500/30 to-amber-600/20",
+      iconColor: "text-amber-300",
+      borderColor: "border-amber-500/40",
+    },
+    {
+      icon: History,
+      label: "Inactive",
+      value: stats.inactiveRequests,
       color: "from-emerald-500/30 to-emerald-600/20",
       iconColor: "text-emerald-300",
       borderColor: "border-emerald-500/40",
+    },
+    {
+      icon: MapPin,
+      label: "On-Site Visits",
+      value: stats.onSiteVisits,
+      color: "from-fuchsia-500/30 to-fuchsia-600/20",
+      iconColor: "text-fuchsia-300",
+      borderColor: "border-fuchsia-500/40",
     },
     {
       icon: Wrench,
@@ -143,7 +162,7 @@ export function ServiceOverviewCard() {
                     </div>
                     <div className="space-y-1">
                       <p className="text-2xl font-bold text-zinc-100">
-                        {isLoading ? "-" : stat.value}
+                        {isLoading ? "-" : <AnimatedCounter value={stat.value} />}
                       </p>
                       <p className="text-xs text-zinc-400 font-medium">{stat.label}</p>
                     </div>

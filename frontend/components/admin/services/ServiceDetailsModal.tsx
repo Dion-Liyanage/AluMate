@@ -33,6 +33,7 @@ import {
   Clock,
   Home
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { ServiceRequest } from "./ServiceManagement";
 import { ServiceStatusBadge, ServiceTypeBadge } from "./ServiceStatusBadge";
 import { servicesApi } from "@/lib/api";
@@ -47,47 +48,15 @@ interface ServiceDetailsModalProps {
 
 export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }: ServiceDetailsModalProps) {
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isUpdatingSchedule, setIsUpdatingSchedule] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("Request Sent");
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedSlot, setSelectedSlot] = useState<string>("");
-  const [availableSlotsForDate, setAvailableSlotsForDate] = useState<string[]>([]);
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const isCustomerCancelled = request?.status === "Cancelled by Customer";
 
   useEffect(() => {
     if (request) {
       setSelectedStatus(request.status);
-      setSelectedDate(request.date || "");
-      setSelectedSlot(request.timeSlot || "");
     }
   }, [request]);
 
-  useEffect(() => {
-    const loadSlots = async () => {
-      if (!selectedDate || request?.serviceType !== "on-site-visit") {
-        setAvailableSlotsForDate([]);
-        return;
-      }
-
-      setIsLoadingSlots(true);
-      try {
-        const response = await servicesApi.getAvailabilityConfig(selectedDate);
-        const slots = response.data?.slots || [];
-        setAvailableSlotsForDate(slots);
-
-        if (selectedSlot && !slots.includes(selectedSlot)) {
-          setSelectedSlot("");
-        }
-      } catch (error) {
-        setAvailableSlotsForDate([]);
-      } finally {
-        setIsLoadingSlots(false);
-      }
-    };
-
-    loadSlots();
-  }, [request?.serviceType, selectedDate]);
 
   if (!request) return null;
 
@@ -108,34 +77,6 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
     }
   };
 
-  const handleScheduleUpdate = async () => {
-    if (!selectedDate || !selectedSlot) {
-      toast.error("Please select both date and time slot.");
-      return;
-    }
-
-    setIsUpdatingSchedule(true);
-    try {
-      await servicesApi.updateSchedule(request.id, {
-        date: selectedDate,
-        timeSlot: selectedSlot,
-      });
-      toast.success("Visit schedule updated successfully");
-      onRefresh?.();
-    } catch (error: any) {
-      const isForbidden = error?.response?.status === 403;
-      const message = isForbidden
-        ? "You are not authorized as admin in this session. Please log in again with an admin account."
-        : error?.response?.data?.message || "Failed to update schedule.";
-      toast.error(message);
-    } finally {
-      setIsUpdatingSchedule(false);
-    }
-  };
-
-  const hasScheduleChanges =
-    selectedDate !== (request.date || "") ||
-    selectedSlot !== (request.timeSlot || "");
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:4000';
 
@@ -188,9 +129,12 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
 
             <div className="grid gap-4 bg-zinc-900/30 p-4 rounded-xl border border-zinc-800/30">
               <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 mt-1 text-fuchsia-400" />
+                <Calendar className={cn(
+                  "h-4 w-4 mt-1",
+                  request.serviceType === "repair" ? "text-cyan-400" : "text-fuchsia-400"
+                )} />
                 <div className="space-y-1">
-                  <p className="text-xs text-zinc-500">Scheduled Date</p>
+                  <p className="text-xs text-zinc-500">Submitted Date</p>
                   <p className="text-sm text-zinc-200">{request.date}</p>
                 </div>
               </div>
@@ -217,12 +161,22 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
                   )}
                   {request.location && typeof request.location === "object" && "lat" in request.location && (
                     <div className="flex items-start gap-3">
-                      <MapPin className="h-4 w-4 mt-1 text-blue-400" />
+                      <MapPin className="h-4 w-4 mt-1 text-fuchsia-400" />
                       <div className="space-y-1">
                         <p className="text-xs text-zinc-500">GPS Location</p>
-                        <p className="text-sm text-zinc-200 font-mono">
-                          {request.location.lat.toFixed(6)}, {request.location.lng.toFixed(6)}
-                        </p>
+                        <div className="flex items-center gap-3">
+                          <p className="text-sm text-zinc-200 font-mono">
+                            {request.location.lat.toFixed(6)}, {request.location.lng.toFixed(6)}
+                          </p>
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${request.location.lat},${request.location.lng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-fuchsia-400 hover:text-fuchsia-300 underline underline-offset-2 transition-colors font-medium"
+                          >
+                            View on G-Maps
+                          </a>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -248,26 +202,28 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
             </div>
           </div>
 
-          {/* Visual Evidence */}
-          <div className="space-y-2">
-             <h4 className="text-sm font-semibold text-zinc-400 flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
-              Photos / Documents
-            </h4>
-            {request.imageUrl ? (
-              <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2 overflow-hidden">
-                <img 
-                  src={`${API_BASE}${request.imageUrl}`} 
-                  alt="Repair evidence" 
-                  className="max-h-48 rounded-md object-cover"
-                />
-              </div>
-            ) : (
-              <div className="h-24 rounded-lg bg-zinc-900 border-2 border-dashed border-zinc-800 flex items-center justify-center text-zinc-600 text-xs">
-                 No attachments provided
-              </div>
-            )}
-          </div>
+          {/* Visual Evidence - Only for Repairs */}
+          {request.serviceType === "repair" && (
+            <div className="space-y-2">
+               <h4 className="text-sm font-semibold text-zinc-400 flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Photos / Documents
+              </h4>
+              {request.imageUrl ? (
+                <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-2 overflow-hidden">
+                  <img 
+                    src={`${API_BASE}${request.imageUrl}`} 
+                    alt="Repair evidence" 
+                    className="max-h-48 rounded-md object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-24 rounded-lg bg-zinc-900 border-2 border-dashed border-zinc-800 flex items-center justify-center text-zinc-600 text-xs">
+                   No attachments provided
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Admin Notes */}
           {request.adminNotes && (
@@ -308,89 +264,19 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
             )}
           </div>
 
-          {request.serviceType === "on-site-visit" && (
-            <div className="bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/30 space-y-3">
-              <p className="text-xs text-zinc-500">Update Visit Schedule</p>
-
-              <div className="grid gap-3 md:grid-cols-2">
-                <div className="space-y-2">
-                  <p className="text-xs text-zinc-500">Date</p>
-                  <div className="[&>button]:bg-zinc-950/60 [&>button]:border-zinc-800 [&>button]:text-zinc-200 [&>button]:hover:bg-zinc-900">
-                    <DatePicker
-                      value={selectedDate}
-                      onChange={(value) => {
-                        setSelectedDate(value);
-                        setSelectedSlot("");
-                      }}
-                      placeholder="Pick visit date"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs text-zinc-500">Time Slot</p>
-                  <Select
-                    value={selectedSlot}
-                    onValueChange={setSelectedSlot}
-                    disabled={isCustomerCancelled || isLoadingSlots || availableSlotsForDate.length === 0}
-                  >
-                    <SelectTrigger className="w-full bg-zinc-950/60 border-zinc-800 text-zinc-200">
-                      <SelectValue placeholder="Select a time slot" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
-                      {availableSlotsForDate.map((slot) => (
-                        <SelectItem key={slot} value={slot}>
-                          {slot}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedDate && isLoadingSlots && (
-                    <p className="text-xs text-zinc-500">
-                      Loading configured slots...
-                    </p>
-                  )}
-                  {selectedDate && availableSlotsForDate.length === 0 && (
-                    <p className="text-xs text-zinc-500">
-                      No configured slots for this date yet.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <Button
-                className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white"
-                onClick={handleScheduleUpdate}
-                disabled={
-                  isUpdatingSchedule ||
-                  !hasScheduleChanges ||
-                  isCustomerCancelled ||
-                  !selectedDate ||
-                  !selectedSlot
-                }
-              >
-                {isUpdatingSchedule ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Clock className="h-4 w-4 mr-2" />
-                )}
-                Save Schedule
-              </Button>
-            </div>
-          )}
         </div>
 
         <DialogFooter className="border-t border-zinc-800 pt-4 mt-2">
           <div className="flex gap-2 w-full justify-end">
             <Button
-              variant="secondary"
-              className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+              variant="outline"
+              className="bg-zinc-800/40 text-zinc-300 border border-zinc-700/50 hover:bg-zinc-800/60 hover:text-white transition-all shadow-[0_0_15px_rgba(0,0,0,0.1)]"
               onClick={() => onOpenChange(false)}
             >
               Close
             </Button>
             <Button
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 hover:text-emerald-100 hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.1)]"
               onClick={() => handleStatusUpdate(selectedStatus)}
               disabled={
                 isUpdating ||

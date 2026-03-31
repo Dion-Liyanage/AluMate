@@ -9,9 +9,9 @@ interface DateSelectorProps {
 
 export function DateSelector({ value, onChange, allowedDates }: DateSelectorProps) {
   return (
-    <div className="space-y-2 flex flex-col justify-end h-full">
-      <Label className="text-zinc-300 mb-1 relative -top-2">Select Date</Label>
-      <div className="[&>button]:bg-zinc-900/50 [&>button]:border-zinc-800 [&>button]:text-zinc-100 [&>button]:hover:bg-zinc-800">
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-zinc-300">Select Date</label>
+      <div className="mt-2 [&>button]:bg-zinc-900/50 [&>button]:border-zinc-800 [&>button]:text-zinc-100 [&>button]:hover:bg-zinc-800">
         <DatePicker
           value={value}
           onChange={onChange}

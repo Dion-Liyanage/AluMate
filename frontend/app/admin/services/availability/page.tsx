@@ -36,6 +36,7 @@ import {
   X,
   ArrowLeft,
   Clock3,
+  History,
 } from "lucide-react";
 
 type AvailabilityRecord = {
@@ -69,6 +70,9 @@ export default function AdminServiceAvailabilityPage() {
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [updatingDate, setUpdatingDate] = useState<string | null>(null);
   const [deletingRecordDate, setDeletingRecordDate] = useState<string | null>(null);
+  const [editingDateLabel, setEditingDateLabel] = useState<string | null>(null);
+  const [tempDateValue, setTempDateValue] = useState<string | undefined>(undefined);
+  const [draftDatesByOriginalDate, setDraftDatesByOriginalDate] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!isLoading && (!user || user.role !== "admin")) {
@@ -104,11 +108,36 @@ export default function AdminServiceAvailabilityPage() {
     return { time: match[1], period: match[2] as "AM" | "PM" };
   };
 
+  const compareTimeSlots = (a: string, b: string) => {
+    const getMinutes = (slot: string) => {
+      const { time, period } = splitSlot(slot);
+      if (!time) return 0;
+      const [h, m] = time.split(":").map(Number);
+      const adjustedHour =
+        period === "PM" && h !== 12 ? h + 12 : period === "AM" && h === 12 ? 0 : h;
+      return adjustedHour * 60 + m;
+    };
+    return getMinutes(a) - getMinutes(b);
+  };
+
   const loadAllRecords = async () => {
     setIsLoadingRecords(true);
     try {
       const response = await servicesApi.getAllAvailability();
-      setRecords(response.data?.availability || []);
+      const fetchedRecords = response.data?.availability || [];
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString().split("T")[0];
+
+      // Ensure all incoming records have sorted slots and are not in the past
+      const sortedRecords = fetchedRecords
+        .filter((r: AvailabilityRecord) => r.date >= todayStr)
+        .map((r: AvailabilityRecord) => ({
+          ...r,
+          slots: [...r.slots].sort(compareTimeSlots),
+        }));
+      setRecords(sortedRecords);
     } catch (error: any) {
       const message =
         error?.response?.data?.message || "Failed to load availability records.";
@@ -199,21 +228,32 @@ export default function AdminServiceAvailabilityPage() {
     return draftSlotsByDate[record.date] ?? record.slots;
   };
 
+  const getDisplayDateForRecord = (record: AvailabilityRecord): string => {
+    return draftDatesByOriginalDate[record.date] ?? record.date;
+  };
+
+  const hasRecordDateChanges = (record: AvailabilityRecord): boolean => {
+    return !!draftDatesByOriginalDate[record.date];
+  };
+
+  const hasRecordChanges = (record: AvailabilityRecord): boolean => {
+    const slotsChanged = JSON.stringify(getSlotsForRecord(record)) !== JSON.stringify(record.slots);
+    const dateChanged = hasRecordDateChanges(record);
+    return slotsChanged || dateChanged;
+  };
+
   const setRecordDraftSlots = (
     date: string,
     updater: (prev: string[]) => string[],
   ) => {
     setDraftSlotsByDate((prev) => {
       const base = prev[date] ?? records.find((item) => item.date === date)?.slots ?? [];
+      const updated = updater(base);
       return {
         ...prev,
-        [date]: updater(base),
+        [date]: [...updated].sort(compareTimeSlots),
       };
     });
-  };
-
-  const hasRecordChanges = (record: AvailabilityRecord): boolean => {
-    return JSON.stringify(getSlotsForRecord(record)) !== JSON.stringify(record.slots);
   };
 
   const startEditingRecordSlot = (date: string, index: number, slot: string) => {
@@ -282,6 +322,48 @@ export default function AdminServiceAvailabilityPage() {
     setNewRecordPeriod("AM");
   };
 
+  const startEditingDateLabel = (date: string) => {
+    setEditingDateLabel(date);
+    // Initialize with the drafted date if it exists, otherwise the original date
+    const currentDisplayDate = draftDatesByOriginalDate[date] ?? date;
+    setTempDateValue(currentDisplayDate);
+  };
+
+  const cancelEditingDateLabel = () => {
+    setEditingDateLabel(null);
+    setTempDateValue(undefined);
+  };
+
+  const saveEditedDateLabel = async (oldDate: string) => {
+    if (!tempDateValue) {
+      toast.error("Please pick a date.");
+      return;
+    }
+
+    if (tempDateValue === oldDate) {
+      setDraftDatesByOriginalDate((prev) => {
+        const next = { ...prev };
+        delete next[oldDate];
+        return next;
+      });
+      cancelEditingDateLabel();
+      return;
+    }
+
+    // Check if target date already exists in records (unless it's the current date of ANOTHER record)
+    if (records.some((r) => r.date === tempDateValue && r.date !== oldDate)) {
+      toast.error(`A configuration for ${tempDateValue} already exists.`);
+      return;
+    }
+
+    // Store as draft instead of calling API immediately
+    setDraftDatesByOriginalDate((prev) => ({
+      ...prev,
+      [oldDate]: tempDateValue,
+    }));
+    cancelEditingDateLabel();
+  };
+
   const addRecordSlot = (date: string) => {
     const formattedSlot = formatSlot(newRecordTimeInput, newRecordPeriod);
     if (!formattedSlot) {
@@ -305,30 +387,54 @@ export default function AdminServiceAvailabilityPage() {
   };
 
   const updateRecordSlots = async (record: AvailabilityRecord) => {
-    const updatedSlots = getSlotsForRecord(record);
+    const slots = getSlotsForRecord(record);
+    const oldDate = record.date;
+    const newDraftDate = draftDatesByOriginalDate[oldDate];
+    const isDateChange = !!newDraftDate;
+    const finalDate = newDraftDate ?? oldDate;
 
-    if (updatedSlots.length === 0) {
+    if (slots.length === 0) {
       toast.error("At least one slot is required. Use Delete to remove this date.");
       return;
     }
 
-    setUpdatingDate(record.date);
+    setUpdatingDate(oldDate);
     try {
-      await servicesApi.upsertAvailability({
-        date: record.date,
-        slots: updatedSlots,
-      });
-      toast.success("Availability updated successfully.");
+      if (isDateChange) {
+        // Migration: Create on new date, then delete old date
+        await servicesApi.upsertAvailability({
+          date: finalDate,
+          slots,
+        });
+        await servicesApi.deleteAvailability(oldDate);
+        toast.success(`Availability moved from ${oldDate} to ${finalDate}`);
+      } else {
+        // Simple update for current date
+        await servicesApi.upsertAvailability({
+          date: oldDate,
+          slots,
+        });
+        toast.success(`Availability for ${oldDate} updated.`);
+      }
+
       await loadAllRecords();
+      
+      // Cleanup all drafts for this record
       setDraftSlotsByDate((prev) => {
         const next = { ...prev };
-        delete next[record.date];
+        delete next[oldDate];
         return next;
       });
-      if (addingSlotDate === record.date) {
+      setDraftDatesByOriginalDate((prev) => {
+        const next = { ...prev };
+        delete next[oldDate];
+        return next;
+      });
+
+      if (addingSlotDate === oldDate) {
         cancelAddingRecordSlot();
       }
-      if (editingRecordSlot?.date === record.date) {
+      if (editingRecordSlot?.date === oldDate) {
         cancelEditingRecordSlot();
       }
     } catch (error: any) {
@@ -367,7 +473,10 @@ export default function AdminServiceAvailabilityPage() {
     }
   };
 
-  const sortedSlots = useMemo(() => [...slots].sort(), [slots]);
+  const sortedSlots = useMemo(
+    () => [...slots].sort(compareTimeSlots),
+    [slots],
+  );
 
   if (isLoading || !user || user.role !== "admin") {
     return (
@@ -390,15 +499,31 @@ export default function AdminServiceAvailabilityPage() {
             </p>
           </div>
           <Link href="/admin/services">
-            <Button variant="outline" className="border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800">
+            <Button 
+              className="bg-fuchsia-500/20 text-fuchsia-200 border border-fuchsia-500/40 hover:text-fuchsia-100 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(217,70,239,0.1)]"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Services
             </Button>
           </Link>
         </div>
 
-        <Card className="bg-zinc-950 border-zinc-800 text-zinc-100">
-          <CardHeader>
+        <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border-zinc-800 shadow-xl overflow-hidden relative group">
+          {/* Main palette tint (Fuchsia + Pink + Rose) while keeping dark base */}
+          <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/8 via-pink-500/8 to-rose-500/8 pointer-events-none" />
+
+          {/* Dark depth layer to match previous darker look */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/35 pointer-events-none" />
+
+          {/* Wave shimmer effect */}
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
+
+          {/* Decorative background icon */}
+          <div className="absolute top-[30%] -translate-y-1/2 right-12 opacity-[0.15] pointer-events-none group-hover:opacity-[0.2] transition-opacity">
+            <CalendarDays className="w-40 h-40 text-fuchsia-300" />
+          </div>
+
+          <CardHeader className="relative">
             <CardTitle className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-fuchsia-400" />
               Configure Slots
@@ -407,9 +532,8 @@ export default function AdminServiceAvailabilityPage() {
               Pick a date, add slots, then save.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="relative space-y-4">
             <div className="space-y-2">
-              <p className="text-sm text-zinc-400">Select Date</p>
               <div className="max-w-sm [&>button]:bg-zinc-900 [&>button]:border-zinc-700 [&>button]:text-zinc-100">
                 <DatePicker
                   value={selectedDate}
@@ -452,7 +576,7 @@ export default function AdminServiceAvailabilityPage() {
               <Button
                 type="button"
                 onClick={addSlot}
-                className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white"
+                className="bg-fuchsia-500/20 text-fuchsia-200 border border-fuchsia-500/40 hover:text-fuchsia-100 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(217,70,239,0.1)]"
                 disabled={!selectedDate}
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -497,7 +621,7 @@ export default function AdminServiceAvailabilityPage() {
             <Button
               type="button"
               onClick={saveAvailability}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-emerald-500/40 text-white/90 hover:text-white border border-emerald-500/40 hover:bg-emerald-500/50 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)]"
               disabled={isSaving || !selectedDate || sortedSlots.length === 0}
             >
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
@@ -508,7 +632,10 @@ export default function AdminServiceAvailabilityPage() {
 
         <Card className="bg-zinc-950 border-zinc-800 text-zinc-100">
           <CardHeader>
-            <CardTitle>Configured Dates</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-fuchsia-400" />
+              Configured Dates and Times
+            </CardTitle>
             <CardDescription className="text-zinc-400">
               Overview of all dates with configured slots.
             </CardDescription>
@@ -530,38 +657,80 @@ export default function AdminServiceAvailabilityPage() {
                   return (
                     <div key={record.date} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-sm font-medium text-zinc-200">{record.date}</p>
+                        <div className="flex items-center gap-2 pl-1">
+                          {editingDateLabel === record.date ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-40 [&>button]:bg-zinc-800 [&>button]:border-zinc-700 [&>button]:text-zinc-100">
+                                <DatePicker
+                                  value={tempDateValue}
+                                  onChange={setTempDateValue}
+                                  placeholder="Pick a date"
+                                  disablePastDates
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => saveEditedDateLabel(record.date)}
+                                className="text-emerald-400 hover:text-emerald-300"
+                              >
+                                <Check className="h-4 w-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEditingDateLabel}
+                                className="text-zinc-500 hover:text-zinc-300"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 group/date">
+                              <p className="text-sm font-medium text-zinc-200">
+                                {getDisplayDateForRecord(record)}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => startEditingDateLabel(record.date)}
+                                className="text-zinc-500 hover:text-fuchsia-400 transition-colors"
+                                aria-label={`Edit date ${record.date}`}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          )}
                           <p className="text-xs text-zinc-500 mt-1">{currentSlots.length} slot(s)</p>
                         </div>
                         <div className="flex gap-2">
                           <Button
                             type="button"
                             size="sm"
-                            className="h-8 w-8 rounded-full p-0 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className="h-6 px-2.5 bg-emerald-500/40 text-white/90 border border-emerald-500/40 hover:text-white hover:bg-emerald-500/50 hover:border-emerald-500/60 transition-all text-[10px] font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                             onClick={() => updateRecordSlots(record)}
                             disabled={!isDirty || updatingDate === record.date || deletingRecordDate === record.date}
                             aria-label={`Update ${record.date}`}
                           >
                             {updatingDate === record.date ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <>
+                                <Loader2 className="h-2.5 w-2.5 animate-spin mr-1" />
+                                Updating...
+                              </>
                             ) : (
-                              <Check className="h-3.5 w-3.5" />
+                              "Update"
                             )}
                           </Button>
                           <Button
                             type="button"
                             size="sm"
                             variant="outline"
-                            className="h-8 w-8 rounded-full p-0 border-zinc-700 bg-zinc-900 text-red-300 hover:bg-zinc-800"
+                            className="h-6 w-6 rounded-full p-0 border-zinc-700 bg-zinc-900 text-red-300 hover:bg-zinc-800"
                             onClick={() => deleteRecord(record.date)}
                             disabled={deletingRecordDate === record.date}
                             aria-label={`Delete ${record.date}`}
                           >
                             {deletingRecordDate === record.date ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <Loader2 className="h-3 w-3 animate-spin" />
                             ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-3 w-3" />
                             )}
                           </Button>
                         </div>
