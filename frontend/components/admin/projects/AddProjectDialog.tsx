@@ -126,7 +126,7 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-purple-600 hover:bg-purple-500 text-white gap-2">
+        <Button className="bg-fuchsia-500/20 text-white/90 hover:text-white border border-fuchsia-500/40 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(217,70,239,0.1)] gap-2">
           <Plus className="h-4 w-4" />
           Add New Project
         </Button>
@@ -258,7 +258,7 @@ export function AddProjectDialog({ onSuccess }: AddProjectDialogProps) {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-purple-600 hover:bg-purple-500 text-white"
+                className="bg-fuchsia-500/20 text-white/90 hover:text-white border border-fuchsia-500/40 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(217,70,239,0.1)]"
               >
                 {isLoading ? "Adding..." : "Add Project"}
               </Button>

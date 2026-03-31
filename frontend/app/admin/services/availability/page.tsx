@@ -125,11 +125,18 @@ export default function AdminServiceAvailabilityPage() {
     try {
       const response = await servicesApi.getAllAvailability();
       const fetchedRecords = response.data?.availability || [];
-      // Ensure all incoming records have sorted slots
-      const sortedRecords = fetchedRecords.map((r: AvailabilityRecord) => ({
-        ...r,
-        slots: [...r.slots].sort(compareTimeSlots),
-      }));
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString().split("T")[0];
+
+      // Ensure all incoming records have sorted slots and are not in the past
+      const sortedRecords = fetchedRecords
+        .filter((r: AvailabilityRecord) => r.date >= todayStr)
+        .map((r: AvailabilityRecord) => ({
+          ...r,
+          slots: [...r.slots].sort(compareTimeSlots),
+        }));
       setRecords(sortedRecords);
     } catch (error: any) {
       const message =
@@ -614,7 +621,7 @@ export default function AdminServiceAvailabilityPage() {
             <Button
               type="button"
               onClick={saveAvailability}
-              className="bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 hover:text-emerald-100 hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+              className="bg-emerald-500/40 text-white/90 hover:text-white border border-emerald-500/40 hover:bg-emerald-500/50 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)]"
               disabled={isSaving || !selectedDate || sortedSlots.length === 0}
             >
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
@@ -697,7 +704,7 @@ export default function AdminServiceAvailabilityPage() {
                           <Button
                             type="button"
                             size="sm"
-                            className="h-6 px-2.5 bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 hover:text-emerald-100 hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-all text-[10px] font-bold shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                            className="h-6 px-2.5 bg-emerald-500/40 text-white/90 border border-emerald-500/40 hover:text-white hover:bg-emerald-500/50 hover:border-emerald-500/60 transition-all text-[10px] font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                             onClick={() => updateRecordSlots(record)}
                             disabled={!isDirty || updatingDate === record.date || deletingRecordDate === record.date}
                             aria-label={`Update ${record.date}`}

@@ -240,8 +240,7 @@ export function OnSiteVisitForm() {
                       <p className="text-sm text-zinc-500 mt-1">Click below to open the map and pin your location.</p>
                     </div>
                     <Button
-                      variant="outline"
-                      className="mt-3 border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-200 hover:bg-fuchsia-500/20 hover:text-fuchsia-100"
+                      className="mt-3 bg-fuchsia-500/20 text-white/90 hover:text-white border border-fuchsia-500/40 hover:bg-fuchsia-500/30 hover:border-fuchsia-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(217,70,239,0.1)]"
                       type="button"
                       onClick={() => setIsMapOpen(true)}
                     >
@@ -288,7 +287,7 @@ export function OnSiteVisitForm() {
           <CardFooter className="relative pt-4 border-t border-zinc-800/50">
             <Button 
               type="submit" 
-              className="w-full sm:w-auto ml-auto bg-emerald-600 hover:bg-emerald-700 text-white border-0" 
+              className="w-full sm:w-auto ml-auto bg-emerald-500/40 text-white/90 hover:text-white border border-emerald-500/40 hover:bg-emerald-500/50 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)]" 
               disabled={!isFormValid || isSubmitting || status === "Request Sent" || status === "Approved"}
             >
               {isSubmitting ? "Submitting..." : status === "Draft" ? "Submit Request" : "Request Already Submitted"}

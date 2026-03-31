@@ -93,7 +93,7 @@ export default function AdminDesignsPage() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                     activeCategory === cat
-                      ? "bg-sky-500/20 text-sky-300 border border-sky-500/40"
+                      ? "bg-sky-500/20 text-white/90 border border-sky-500/40 shadow-[0_0_15px_rgba(14,165,233,0.1)]"
                       : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300"
                   }`}
                 >

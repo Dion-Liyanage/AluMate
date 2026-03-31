@@ -269,14 +269,14 @@ export function ServiceDetailsModal({ request, isOpen, onOpenChange, onRefresh }
         <DialogFooter className="border-t border-zinc-800 pt-4 mt-2">
           <div className="flex gap-2 w-full justify-end">
             <Button
-              variant="secondary"
-              className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+              variant="outline"
+              className="bg-zinc-800/40 text-zinc-300 border border-zinc-700/50 hover:bg-zinc-800/60 hover:text-white transition-all shadow-[0_0_15px_rgba(0,0,0,0.1)]"
               onClick={() => onOpenChange(false)}
             >
               Close
             </Button>
             <Button
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 hover:text-emerald-100 hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.1)]"
               onClick={() => handleStatusUpdate(selectedStatus)}
               disabled={
                 isUpdating ||

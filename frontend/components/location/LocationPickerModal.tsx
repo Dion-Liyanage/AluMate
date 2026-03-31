@@ -181,7 +181,7 @@ export function LocationPickerModal({
           <Button
             onClick={handleConfirm}
             disabled={!selectedLocation}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+            className="bg-emerald-500/40 text-white/90 hover:text-white border border-emerald-500/40 hover:bg-emerald-500/50 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.2)]"
           >
             <Check className="h-4 w-4 mr-1.5" />
             Confirm Location
