@@ -42,4 +42,14 @@ export class UsersService {
       .select('-password')
       .exec();
   }
+
+  async findWithFilter(
+    filter: Record<string, any> = {},
+  ): Promise<UserDocument[]> {
+    return this.userModel
+      .find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
 }
