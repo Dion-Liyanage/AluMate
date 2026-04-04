@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { ClipboardList, LayoutGrid, ArrowRight, Wrench } from "lucide-react";
+import { ClipboardList, LayoutGrid, ArrowRight, Wrench, Users } from "lucide-react";
 
 const cards = [
   {
@@ -38,6 +38,17 @@ const cards = [
     glowColor: "shadow-[0_0_30px_rgba(217,70,239,0.15)]",
     featured: false,
   },
+  {
+    title: "Manage Customers",
+    description: "View customer profiles, track activity, and manage account statuses",
+    icon: Users,
+    href: "/admin/customers",
+    gradient: "from-violet-600/20 via-purple-600/10 to-indigo-600/10",
+    borderColor: "border-violet-500/30 hover:border-violet-400/50",
+    iconColor: "text-violet-400",
+    glowColor: "shadow-[0_0_20px_rgba(139,92,246,0.1)]",
+    featured: false,
+  },
 ];
 
 const cardVariants: Variants = {
@@ -51,7 +62,7 @@ const cardVariants: Variants = {
 
 export function AdminOperationCards() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card, i) => (
         <motion.div
           key={card.href}
