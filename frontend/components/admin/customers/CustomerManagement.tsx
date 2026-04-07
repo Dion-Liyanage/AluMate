@@ -32,11 +32,29 @@ import {
   UserX,
   UserCheck,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, animate } from "framer-motion";
 import { adminCustomersApi } from "@/lib/api";
 import { CustomerStatusBadge } from "./CustomerStatusBadge";
 import { CustomerDetailsModal } from "./CustomerDetailsModal";
 import type { User, Order } from "@/types";
+
+function AnimatedCounter({ value }: { value: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 1,
+      ease: "easeOut",
+      onUpdate(latest) {
+        setCount(Math.round(latest));
+      },
+    });
+
+    return () => controls.stop();
+  }, [value]);
+
+  return <>{count}</>;
+}
 
 // Extended customer interface with computed fields
 export interface CustomerWithStats extends User {
@@ -140,7 +158,7 @@ export function CustomerManagement() {
                 Total Customers
               </p>
               <p className="text-2xl font-bold text-zinc-100">
-                {isLoading ? "—" : customers.length}
+                {isLoading ? "—" : <AnimatedCounter value={customers.length} />}
               </p>
             </div>
           </div>
@@ -162,7 +180,7 @@ export function CustomerManagement() {
                 Active
               </p>
               <p className="text-2xl font-bold text-zinc-100">
-                {isLoading ? "—" : activeCount}
+                {isLoading ? "—" : <AnimatedCounter value={activeCount} />}
               </p>
             </div>
           </div>
@@ -184,7 +202,7 @@ export function CustomerManagement() {
                 Inactive
               </p>
               <p className="text-2xl font-bold text-zinc-100">
-                {isLoading ? "—" : inactiveCount}
+                {isLoading ? "—" : <AnimatedCounter value={inactiveCount} />}
               </p>
             </div>
           </div>
