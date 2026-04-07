@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CustomerManagement } from "@/components/admin/customers/CustomerManagement";
 import { motion } from "framer-motion";
+import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -50,7 +51,10 @@ export default function AdminCustomersPage() {
       >
         <motion.div variants={itemVariants}>
           <div className="flex flex-col gap-1">
-            <h2 className="text-2xl font-bold text-zinc-100">
+            <h2 className="flex items-center gap-3 text-2xl font-bold text-zinc-100">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/30 border border-violet-500/40 shadow-[0_0_15px_rgba(139,92,246,0.3)] backdrop-blur-sm">
+                <Users className="h-5 w-5 text-violet-100" />
+              </span>
               Customer Management
             </h2>
             <p className="text-zinc-400">

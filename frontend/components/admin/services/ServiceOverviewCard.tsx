@@ -129,16 +129,11 @@ export function ServiceOverviewCard() {
         </div>
 
         <CardHeader className="relative pb-4">
-          <div className="flex gap-4">
-            <div className="mt-1 h-12 w-12 rounded-xl bg-fuchsia-500/30 flex items-center justify-center border border-fuchsia-500/40 shadow-[0_0_15px_rgba(217,70,239,0.3)]">
-              <Wrench className="h-6 w-6 text-fuchsia-100" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl text-zinc-100">Service Overview</CardTitle>
-              <CardDescription className="text-zinc-400 mt-1">
-                Quick snapshot of all service requests and on-site visit bookings.
-              </CardDescription>
-            </div>
+          <div>
+            <CardTitle className="text-2xl text-zinc-100">Service Overview</CardTitle>
+            <CardDescription className="text-zinc-400 mt-1">
+              Quick snapshot of all service requests and on-site visit bookings.
+            </CardDescription>
           </div>
         </CardHeader>
 

@@ -118,8 +118,10 @@ export default function AdminProjectsPage() {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
-              <FolderOpen className="h-6 w-6 text-fuchsia-400" />
+            <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-3">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-fuchsia-500/30 border border-fuchsia-500/40 shadow-[0_0_15px_rgba(217,70,239,0.3)] backdrop-blur-sm">
+                <FolderOpen className="h-5 w-5 text-fuchsia-100" />
+              </span>
               Completed Projects
             </h2>
             <p className="mt-1 text-zinc-400">
