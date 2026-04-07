@@ -138,75 +138,65 @@ export function CustomerManagement() {
   const activeCount = customers.filter((c) => c.status === "Active").length;
   const inactiveCount = customers.filter((c) => c.status === "Inactive").length;
 
+  const statCards = [
+    {
+      label: "Total Customers",
+      value: customers.length,
+      icon: Users,
+      color: "from-indigo-500/30 to-indigo-600/20",
+      iconColor: "text-indigo-300",
+      borderColor: "border-indigo-500/40",
+    },
+    {
+      label: "Active",
+      value: activeCount,
+      icon: UserCheck,
+      color: "from-emerald-500/30 to-emerald-600/20",
+      iconColor: "text-emerald-300",
+      borderColor: "border-emerald-500/40",
+    },
+    {
+      label: "Inactive",
+      value: inactiveCount,
+      icon: UserX,
+      color: "from-zinc-500/30 to-zinc-600/20",
+      iconColor: "text-zinc-300",
+      borderColor: "border-zinc-500/40",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Overview Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-xl p-5"
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-          <div className="relative flex items-center gap-4">
-            <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-violet-500/20 to-violet-600/10 flex items-center justify-center border border-zinc-800">
-              <Users className="h-5 w-5 text-violet-400" />
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                Total Customers
-              </p>
-              <p className="text-2xl font-bold text-zinc-100">
-                {isLoading ? "—" : <AnimatedCounter value={customers.length} />}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-xl p-5"
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-          <div className="relative flex items-center gap-4">
-            <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center border border-zinc-800">
-              <UserCheck className="h-5 w-5 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                Active
-              </p>
-              <p className="text-2xl font-bold text-zinc-100">
-                {isLoading ? "—" : <AnimatedCounter value={activeCount} />}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 rounded-xl p-5"
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.02)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-          <div className="relative flex items-center gap-4">
-            <div className="h-11 w-11 rounded-lg bg-gradient-to-br from-zinc-500/20 to-zinc-600/10 flex items-center justify-center border border-zinc-800">
-              <UserX className="h-5 w-5 text-zinc-400" />
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                Inactive
-              </p>
-              <p className="text-2xl font-bold text-zinc-100">
-                {isLoading ? "—" : <AnimatedCounter value={inactiveCount} />}
-              </p>
-            </div>
-          </div>
-        </motion.div>
+        {statCards.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+            >
+              <div className={`relative overflow-hidden rounded-xl border ${stat.borderColor} bg-gradient-to-br ${stat.color} p-5 backdrop-blur-sm transition-all hover:shadow-lg hover:shadow-violet-500/10`}>
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
+                <div className="relative flex items-center gap-4">
+                  <div className={`h-11 w-11 rounded-lg bg-black/40 flex items-center justify-center border ${stat.borderColor}`}>
+                    <Icon className={`h-5 w-5 ${stat.iconColor}`} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                      {stat.label}
+                    </p>
+                    <p className="text-2xl font-bold text-zinc-100">
+                      {isLoading ? "—" : <AnimatedCounter value={stat.value} />}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Search and Filters */}
