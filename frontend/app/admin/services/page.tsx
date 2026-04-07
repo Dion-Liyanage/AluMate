@@ -7,6 +7,7 @@ import { ServiceManagement } from "@/components/admin/services/ServiceManagement
 import { ServiceOverviewCard } from "@/components/admin/services/ServiceOverviewCard";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Wrench } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -54,7 +55,12 @@ export default function AdminServicesPage() {
         <motion.div variants={itemVariants}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col gap-1">
-              <h2 className="text-2xl font-bold text-zinc-100">Service Requests</h2>
+              <h2 className="flex items-center gap-3 text-2xl font-bold text-zinc-100">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-fuchsia-500/30 border border-fuchsia-500/40 shadow-[0_0_15px_rgba(217,70,239,0.3)]">
+                  <Wrench className="h-5 w-5 text-fuchsia-100" />
+                </span>
+                Service Requests
+              </h2>
               <p className="text-zinc-400">
                 Manage on-site measurements and repair requests from your customers.
               </p>
