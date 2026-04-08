@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -146,6 +147,7 @@ export function CustomerManagement() {
       color: "from-indigo-500/30 to-indigo-600/20",
       iconColor: "text-indigo-300",
       borderColor: "border-indigo-500/40",
+      shadowColor: "hover:shadow-indigo-500/15",
     },
     {
       label: "Active",
@@ -154,6 +156,7 @@ export function CustomerManagement() {
       color: "from-emerald-500/30 to-emerald-600/20",
       iconColor: "text-emerald-300",
       borderColor: "border-emerald-500/40",
+      shadowColor: "hover:shadow-emerald-500/15",
     },
     {
       label: "Inactive",
@@ -162,42 +165,71 @@ export function CustomerManagement() {
       color: "from-zinc-500/30 to-zinc-600/20",
       iconColor: "text-zinc-300",
       borderColor: "border-zinc-500/40",
+      shadowColor: "hover:shadow-zinc-500/15",
     },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Overview Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {statCards.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-            >
-              <div className={`relative overflow-hidden rounded-xl border ${stat.borderColor} bg-gradient-to-br ${stat.color} p-5 backdrop-blur-sm transition-all hover:shadow-lg hover:shadow-violet-500/10`}>
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
-                <div className="relative flex items-center gap-4">
-                  <div className={`h-11 w-11 rounded-lg bg-black/40 flex items-center justify-center border ${stat.borderColor}`}>
-                    <Icon className={`h-5 w-5 ${stat.iconColor}`} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-                      {stat.label}
-                    </p>
-                    <p className="text-2xl font-bold text-zinc-100">
-                      {isLoading ? "—" : <AnimatedCounter value={stat.value} />}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+      {/* Customer Overview */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border-zinc-800 shadow-xl overflow-hidden relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/8 via-fuchsia-500/8 to-rose-500/8 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/35 pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
+
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-violet-500/25 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute bottom-6 right-24 h-56 w-56 bg-fuchsia-500/12 rounded-full blur-[75px] opacity-35" />
+
+          <div className="absolute top-8 right-8 opacity-[0.15] pointer-events-none group-hover:opacity-[0.2] transition-opacity">
+            <Users className="w-48 h-48 text-violet-300" />
+          </div>
+
+          <CardHeader className="relative pb-4">
+            <div>
+              <CardTitle className="text-2xl text-zinc-100">Customer Overview</CardTitle>
+              <CardDescription className="text-zinc-400 mt-1">
+                Quick snapshot of your registered customers and account status.
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {statCards.map((stat, index) => {
+                const Icon = stat.icon;
+                return (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                  >
+                    <div className={`relative overflow-hidden rounded-lg border ${stat.borderColor} bg-gradient-to-br ${stat.color} p-4 backdrop-blur-sm transition-all hover:shadow-lg ${stat.shadowColor}`}>
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
+                      <div className="relative space-y-3">
+                        <div className={`h-10 w-10 rounded-lg bg-black/40 flex items-center justify-center border ${stat.borderColor}`}>
+                          <Icon className={`h-5 w-5 ${stat.iconColor}`} />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-2xl font-bold text-zinc-100">
+                            {isLoading ? "-" : <AnimatedCounter value={stat.value} />}
+                          </p>
+                          <p className="text-xs text-zinc-400 font-medium">{stat.label}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Search and Filters */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 backdrop-blur-sm">
