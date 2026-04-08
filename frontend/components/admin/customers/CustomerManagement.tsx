@@ -368,8 +368,8 @@ export function CustomerManagement() {
                         className="border-zinc-800/50 hover:bg-zinc-900/40 transition-colors group cursor-pointer"
                         onClick={() => handleViewDetails(customer)}
                       >
-                        <TableCell className="text-center">
-                          <div className="flex items-center gap-3 justify-center">
+                        <TableCell>
+                          <div className="flex items-center gap-3">
                             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/20 flex items-center justify-center text-sm font-bold text-violet-300 shrink-0">
                               {customer.firstName?.[0]}
                               {customer.lastName?.[0]}
