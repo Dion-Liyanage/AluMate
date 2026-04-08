@@ -178,15 +178,15 @@ export function CustomerManagement() {
         transition={{ duration: 0.4 }}
       >
         <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border-zinc-800 shadow-xl overflow-hidden relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/8 via-fuchsia-500/8 to-rose-500/8 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-sky-400/8 to-teal-500/10 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/35 pointer-events-none" />
           <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
 
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-violet-500/25 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="absolute bottom-6 right-24 h-56 w-56 bg-fuchsia-500/12 rounded-full blur-[75px] opacity-35" />
+          <div className="absolute -top-24 -right-24 w-80 h-80 bg-cyan-500/25 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute bottom-6 right-24 h-56 w-56 bg-sky-300/12 rounded-full blur-[75px] opacity-35" />
 
           <div className="absolute top-8 right-8 opacity-[0.15] pointer-events-none group-hover:opacity-[0.2] transition-opacity">
-            <Users className="w-48 h-48 text-violet-300" />
+            <Users className="w-48 h-48 text-cyan-300" />
           </div>
 
           <CardHeader className="relative pb-4">
