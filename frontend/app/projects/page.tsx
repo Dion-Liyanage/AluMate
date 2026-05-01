@@ -65,7 +65,9 @@ function ProjectCard({ project }: { project: DisplayProject }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const allImages = project.imageUrls && project.imageUrls.length > 0 ? project.imageUrls : [project.imageUrl];
+  const allImages = Array.from(
+    new Set([project.imageUrl, ...(project.imageUrls || [])].filter(Boolean))
+  );
   const currentImage = allImages[selectedImageIndex] || project.imageUrl;
 
   const goToPrevious = (e: React.MouseEvent) => {
@@ -134,7 +136,7 @@ function ProjectCard({ project }: { project: DisplayProject }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl pointer-events-auto"
+            className="w-full max-w-2xl max-h-[90vh] bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl pointer-events-auto flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative h-64 w-full">
@@ -159,46 +161,8 @@ function ProjectCard({ project }: { project: DisplayProject }) {
                  </div>
               </div>
             </div>
-            <div className="p-8">
-              {/* Project Details */}
+            <div className="flex-1 overflow-y-auto p-8 pr-2 custom-scrollbar">
               <div className="mb-6">
-                              {/* Image Gallery */}
-                              {allImages.length > 0 && (
-                                <div className="mb-6">
-                                  <h3 className="text-lg font-semibold text-zinc-100 mb-3 border-b border-zinc-800 pb-2 flex items-center justify-between">
-                                    <span>Project Images</span>
-                                    {allImages.length > 1 && (
-                                      <span className="text-xs font-normal text-zinc-500">{selectedImageIndex + 1} / {allImages.length}</span>
-                                    )}
-                                  </h3>
-                  
-                                  {/* Thumbnail Gallery */}
-                                  {allImages.length > 1 && (
-                                    <div className="flex gap-2 overflow-x-auto pb-3 custom-scrollbar">
-                                      {allImages.map((img, idx) => (
-                                        <button
-                                          key={idx}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedImageIndex(idx);
-                                          }}
-                                          className={`flex-shrink-0 w-24 h-24 rounded-lg border-2 transition-all overflow-hidden ${
-                                            selectedImageIndex === idx
-                                              ? "border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-                                              : "border-zinc-700 hover:border-zinc-600"
-                                          }`}
-                                        >
-                                          <ImageFallback 
-                                            src={img} 
-                                            alt={`${project.title} thumbnail ${idx + 1}`}
-                                            className="object-cover w-full h-full"
-                                          />
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
                 <h3 className="text-lg font-semibold text-zinc-100 mb-3 border-b border-zinc-800 pb-2">About This Project</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">{project.description}</p>
                 <div className="flex flex-wrap items-center gap-4 mt-4">
@@ -239,6 +203,53 @@ function ProjectCard({ project }: { project: DisplayProject }) {
                   </div>
                 )}
               </div>
+
+              {/* Image Gallery */}
+              {allImages.length > 0 && (
+                <div className="mt-6 space-y-4 max-h-[28rem] overflow-y-auto pr-2 custom-scrollbar">
+                  <h3 className="text-lg font-semibold text-zinc-100 border-b border-zinc-800 pb-2 flex items-center justify-between">
+                    <span>Project Images</span>
+                    {allImages.length > 1 && (
+                      <span className="text-xs font-normal text-zinc-500">
+                        {selectedImageIndex + 1} / {allImages.length}
+                      </span>
+                    )}
+                  </h3>
+
+                  <div className="relative h-72 w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60">
+                    <ImageFallback
+                      src={currentImage}
+                      alt={`${project.title} image ${selectedImageIndex + 1}`}
+                      className="object-cover"
+                    />
+                  </div>
+
+                  {allImages.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                      {allImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedImageIndex(idx);
+                          }}
+                          className={`flex-shrink-0 w-24 h-24 rounded-lg border-2 transition-all overflow-hidden ${
+                            selectedImageIndex === idx
+                              ? "border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                              : "border-zinc-700 hover:border-zinc-600"
+                          }`}
+                        >
+                          <ImageFallback
+                            src={img}
+                            alt={`${project.title} thumbnail ${idx + 1}`}
+                            className="object-cover w-full h-full"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -255,7 +266,7 @@ function transformStaticProject(project: typeof PROJECTS[0]): DisplayProject {
     category: project.category,
     description: project.desc,
     imageUrl: project.img,
-      imageUrls: [project.img],
+    imageUrls: [project.img],
     rating: project.rating,
     reviewCount: project.reviewCount,
     feedbacks: project.feedbacks,
