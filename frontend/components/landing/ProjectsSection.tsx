@@ -24,7 +24,7 @@ interface DisplayProject {
   createdAt: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace('/api/v1', '');
 
 // Component to handle falling back to jpg if png doesn't exist
 const ImageFallback = ({ src, alt, className }: { src: string, alt: string, className?: string }) => {

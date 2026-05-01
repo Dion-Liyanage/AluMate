@@ -34,7 +34,9 @@ const ImageFallback = ({ src, alt, className }: { src: string, alt: string, clas
   const getImageSrc = () => {
     if (!src) return "/projects/project_1.png";
     if (src.startsWith("/uploads/")) {
-      return `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${src}`;
+      // Remove /api/v1 prefix from API URL to get base server URL for static files
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace('/api/v1', '');
+      return `${baseUrl}${src}`;
     }
     return hasError ? src.replace('.png', '.jpg') : imgSrc;
   };
