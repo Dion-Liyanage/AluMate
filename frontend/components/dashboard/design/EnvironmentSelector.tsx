@@ -20,6 +20,9 @@ export function EnvironmentSelector({ value, onChange }: EnvironmentSelectorProp
     <div className="space-y-4">
       <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
         Environment
+        <span className="ml-2 text-[10px] font-medium text-amber-400/80 normal-case tracking-normal">
+          Required
+        </span>
       </h4>
       <div className="grid grid-cols-2 gap-2">
         {environmentOptions.map((env) => {

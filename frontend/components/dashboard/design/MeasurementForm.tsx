@@ -17,6 +17,9 @@ export function MeasurementForm({ productType, values, onChange }: MeasurementFo
     <div className="space-y-4">
       <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
         Measurements
+        <span className="ml-2 text-[10px] font-medium text-amber-400/80 normal-case tracking-normal">
+          Required
+        </span>
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {fields.map((field: MeasurementField) => (

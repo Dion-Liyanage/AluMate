@@ -34,6 +34,9 @@ export function ColorSelector({
       <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
         <Paintbrush className="h-3.5 w-3.5" />
         Color & Finish
+        <span className="ml-2 text-[10px] font-medium text-amber-400/80 normal-case tracking-normal">
+          Required
+        </span>
       </h4>
       <div className="flex flex-wrap gap-3">
         {colorOptions.map((opt) => {

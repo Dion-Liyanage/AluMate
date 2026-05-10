@@ -21,13 +21,10 @@ export const productMeasurements: Record<string, MeasurementField[]> = {
     { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 1200", min: 300, max: 5000 },
     { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 1500", min: 300, max: 4000 },
     { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 2", min: 1, max: 8 },
-    { key: "openingType", label: "Opening Type", type: "select", options: ["Sliding", "Fixed", "Casement", "Louvre"] },
   ],
   door: [
     { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 900", min: 600, max: 3000 },
     { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 2100", min: 1800, max: 3500 },
-    { key: "openingDirection", label: "Opening Direction", type: "select", options: ["Left", "Right", "Sliding", "Bi-fold"] },
-    { key: "lockType", label: "Lock Type", type: "select", options: ["Standard", "Multi-point", "Smart Lock", "None"] },
   ],
   cupboard: [
     { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 1800", min: 300, max: 5000 },
