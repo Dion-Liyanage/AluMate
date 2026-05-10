@@ -194,6 +194,8 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
             onRedo={() => fabricRef.current?.redo()}
             onClear={() => fabricRef.current?.clearCanvas()}
             onToggleGrid={() => fabricRef.current?.toggleGrid()}
+            onBringToFront={() => fabricRef.current?.bringToFront()}
+            onSendToBack={() => fabricRef.current?.sendToBack()}
             onSave={handleSave}
             onOrder={handleOrder}
           />

@@ -9,6 +9,8 @@ import {
   Grid3X3,
   Save,
   ShoppingCart,
+  BringToFront,
+  SendToBack,
 } from "lucide-react";
 
 interface DesignToolbarProps {
@@ -19,6 +21,8 @@ interface DesignToolbarProps {
   onRedo: () => void;
   onClear: () => void;
   onToggleGrid: () => void;
+  onBringToFront: () => void;
+  onSendToBack: () => void;
   onSave: () => void;
   onOrder: () => void;
 }
@@ -31,6 +35,8 @@ export default function DesignToolbar({
   onRedo,
   onClear,
   onToggleGrid,
+  onBringToFront,
+  onSendToBack,
   onSave,
   onOrder,
 }: DesignToolbarProps) {
@@ -68,6 +74,25 @@ export default function DesignToolbar({
         title="Duplicate selected"
       >
         <Copy className="h-3.5 w-3.5" /> Duplicate
+      </button>
+
+      <div className="mx-1 h-5 w-px bg-stone-300" />
+
+      <button
+        onClick={onBringToFront}
+        disabled={!hasSelection}
+        className={`${btnBase} ${hasSelection ? btnDefault : btnDisabled}`}
+        title="Bring to Front"
+      >
+        <BringToFront className="h-3.5 w-3.5" /> Front
+      </button>
+      <button
+        onClick={onSendToBack}
+        disabled={!hasSelection}
+        className={`${btnBase} ${hasSelection ? btnDefault : btnDisabled}`}
+        title="Send to Back"
+      >
+        <SendToBack className="h-3.5 w-3.5" /> Back
       </button>
 
       <div className="mx-1 h-5 w-px bg-stone-300" />
