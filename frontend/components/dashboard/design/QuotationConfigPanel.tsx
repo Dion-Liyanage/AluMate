@@ -50,9 +50,9 @@ interface QuotationState {
 const initialState: QuotationState = {
   measurements: {},
   purpose: "",
-  environment: "indoor",
+  environment: "",
   strength: "",
-  color: "silver",
+  color: "",
   customColor: "",
   accessories: [],
   additionalNotes: "",
