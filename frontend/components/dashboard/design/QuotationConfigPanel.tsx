@@ -189,6 +189,11 @@ export function QuotationConfigPanel({
     const requiredFields = productMeasurements[productType] || productMeasurements.other;
     const measurementsValid = requiredFields.every((f) => {
       const val = config.measurements[f.key];
+      if (f.type === "dimension") {
+        // Dimension string like "5'2\"" - check if it has any feet or inches
+        const { getRoundedFeet } = require("./quotationConfig");
+        return !!val && getRoundedFeet(val) > 0;
+      }
       return val !== undefined && val !== "" && Number(val) > 0;
     });
 

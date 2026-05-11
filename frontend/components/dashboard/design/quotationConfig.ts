@@ -8,7 +8,7 @@
 export interface MeasurementField {
   key: string;
   label: string;
-  type: "number" | "select";
+  type: "number" | "dimension" | "select";
   unit?: string;
   options?: string[];
   placeholder?: string;
@@ -18,40 +18,40 @@ export interface MeasurementField {
 
 export const productMeasurements: Record<string, MeasurementField[]> = {
   window: [
-    { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 1200", min: 300, max: 5000 },
-    { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 1500", min: 300, max: 4000 },
+    { key: "width", label: "Width", type: "dimension", min: 1, max: 20 },
+    { key: "height", label: "Height", type: "dimension", min: 1, max: 15 },
     { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 2", min: 1, max: 8 },
   ],
   door: [
-    { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 900", min: 600, max: 3000 },
-    { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 2100", min: 1800, max: 3500 },
+    { key: "width", label: "Width", type: "dimension", min: 2, max: 10 },
+    { key: "height", label: "Height", type: "dimension", min: 6, max: 12 },
   ],
   cupboard: [
-    { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 1800", min: 300, max: 5000 },
-    { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 2400", min: 600, max: 3500 },
-    { key: "depth", label: "Depth", type: "number", unit: "mm", placeholder: "e.g. 600", min: 200, max: 1200 },
+    { key: "width", label: "Width", type: "dimension", min: 1, max: 20 },
+    { key: "height", label: "Height", type: "dimension", min: 2, max: 15 },
+    { key: "depth", label: "Depth", type: "dimension", min: 1, max: 5 },
     { key: "compartmentCount", label: "Compartment Count", type: "number", placeholder: "e.g. 4", min: 1, max: 12 },
   ],
   pantry: [
-    { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 2400", min: 600, max: 6000 },
-    { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 2400", min: 600, max: 3500 },
-    { key: "depth", label: "Depth", type: "number", unit: "mm", placeholder: "e.g. 600", min: 200, max: 1200 },
+    { key: "width", label: "Width", type: "dimension", min: 2, max: 30 },
+    { key: "height", label: "Height", type: "dimension", min: 2, max: 15 },
+    { key: "depth", label: "Depth", type: "dimension", min: 1, max: 5 },
     { key: "compartmentCount", label: "Compartment Count", type: "number", placeholder: "e.g. 6", min: 1, max: 20 },
   ],
   partition: [
-    { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 3000", min: 600, max: 10000 },
-    { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 2700", min: 1500, max: 4000 },
+    { key: "width", label: "Width", type: "dimension", min: 2, max: 50 },
+    { key: "height", label: "Height", type: "dimension", min: 5, max: 15 },
     { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 3", min: 1, max: 10 },
   ],
   railing: [
-    { key: "length", label: "Length", type: "number", unit: "mm", placeholder: "e.g. 5000", min: 500, max: 20000 },
-    { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 1000", min: 600, max: 1500 },
+    { key: "length", label: "Length", type: "dimension", min: 2, max: 100 },
+    { key: "height", label: "Height", type: "dimension", min: 2, max: 5 },
     { key: "postCount", label: "Post Count", type: "number", placeholder: "e.g. 6", min: 2, max: 40 },
   ],
   other: [
-    { key: "width", label: "Width", type: "number", unit: "mm", placeholder: "e.g. 1000", min: 100, max: 10000 },
-    { key: "height", label: "Height", type: "number", unit: "mm", placeholder: "e.g. 1000", min: 100, max: 10000 },
-    { key: "depth", label: "Depth (Optional)", type: "number", unit: "mm", placeholder: "e.g. 500", min: 0, max: 5000 },
+    { key: "width", label: "Width", type: "dimension", min: 1, max: 50 },
+    { key: "height", label: "Height", type: "dimension", min: 1, max: 50 },
+    { key: "depth", label: "Depth (Optional)", type: "dimension", min: 0, max: 20 },
   ],
 };
 
@@ -170,8 +170,29 @@ export interface EstimationResult {
 }
 
 /**
+ * Helper to extract feet and inches from a dimension value string (e.g. "5'2\"")
+ * and return the rounded up feet value for calculation.
+ */
+export function getRoundedFeet(value: string | number): number {
+  if (!value) return 0;
+  const str = String(value);
+  
+  // Pattern to match "5'2\"" or just "5'"
+  const match = str.match(/(\d+)'(?:(\d+)")?/);
+  if (match) {
+    const feet = parseInt(match[1]);
+    const inches = match[2] ? parseInt(match[2]) : 0;
+    
+    // If there are any inches, round up to next foot
+    return inches > 0 ? feet + 1 : feet;
+  }
+  
+  // If it's just a number, assume it's already feet and return as is
+  return Math.ceil(Number(value) || 0);
+}
+
+/**
  * Generate a rough estimation based on selected configuration.
- * This is an ESTIMATE only — final pricing is reviewed by admin.
  */
 export function calculateEstimate(config: {
   productType: string;
@@ -186,21 +207,24 @@ export function calculateEstimate(config: {
 
   // Base per-sqft rate by product type (LKR)
   const baseRates: Record<string, number> = {
-    window: 850,
-    door: 1200,
-    cupboard: 950,
-    pantry: 1100,
-    partition: 700,
-    railing: 600,
-    other: 800,
+    window: 80,
+    door: 110,
+    cupboard: 90,
+    pantry: 100,
+    partition: 65,
+    railing: 55,
+    other: 75,
   };
 
-  const baseRate = baseRates[productType] || 800;
+  const baseRate = baseRates[productType] || 75;
 
-  // Calculate area (rough m²)
-  const width = Number(measurements.width || measurements.length || 1000) / 1000;
-  const height = Number(measurements.height || 1000) / 1000;
-  const area = width * height;
+  // Calculate area (sqft) using rounded feet
+  // e.g. Width 3'2" -> 4ft, Height 5'1" -> 6ft. Area = 4 * 6 = 24 sqft.
+  const w = getRoundedFeet(measurements.width || measurements.length || 0);
+  const h = getRoundedFeet(measurements.height || 0);
+  
+  // Fallback for linear products like Railing if height is not relevant (though usually it is)
+  const area = (w || 1) * (h || 1);
 
   // Strength multiplier
   const strengthMultipliers: Record<string, number> = {
