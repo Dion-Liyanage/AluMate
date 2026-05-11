@@ -184,7 +184,7 @@ export default function DashboardPage() {
                     New Order
                   </Button>
                 </Link>
-                <Link href="/dashboard/quotations/request">
+                <Link href="/dashboard/design/new">
                   <Button className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">
                     <FileText className="h-4 w-4 mr-2" />
                     Request Quotation

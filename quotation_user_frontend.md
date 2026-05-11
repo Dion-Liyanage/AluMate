@@ -1,55 +1,69 @@
 AluMate – User Dashboard Frontend Development Plan
-Intelligent Quotation & Product Configuration System
+Intelligent Material Recommendation & Labor Cost Calculation System
 Project
 
 AluMate – Aluminium Fabrication and Service Management System
 
-This document defines the complete frontend implementation plan for the User Dashboard Quotation Input System.
+This document defines the frontend implementation plan for the User Dashboard Product Configuration, Material Recommendation, and Quotation Estimation System.
 
-The goal of this module is to allow residential customers to:
+The system is designed specifically for:
 
-create their own aluminium designs
-configure pre-designed catalogue products
+Residential aluminium fabrication customers
+
+The goal is to provide an intelligent workflow where users can:
+
+create custom aluminium designs
+use pre-designed catalogue products
 enter measurements and requirements
-generate smart quotation requests
-
-This document is detailed enough for a developer to implement the frontend system directly.
-
+receive smart material recommendations
+receive estimated quotations
+understand material and labor calculations
 1. MODULE OVERVIEW
 
-The quotation input system is divided into:
+The quotation input system contains two main sections:
 
 1. Create Your Own Design
-2. Design Catalogue Products
+2. Design Catalogue
 
-Both modules eventually connect to the same quotation generation workflow.
+Both modules connect to the same quotation generation system.
 
-2. USER FLOW OVERVIEW
-CREATE CUSTOM DESIGN FLOW
-Select Product Type
-        ↓
-Open Design Workspace
-        ↓
+2. OVERALL USER FLOW
+Select Design
+OR
 Create Custom Design
         ↓
-Add Measurements & Requirements
+Enter Measurements
         ↓
-Live Estimation
+Enter Product Requirements
         ↓
-Submit Quotation Request
-DESIGN CATALOGUE FLOW
-Open Catalogue
+Backend Rule Engine Analyzes Inputs
         ↓
-Select Pre-Designed Product
+Admin-Configured Rules Applied
         ↓
-View Design
+System Selects Materials Automatically
         ↓
-Add Measurements & Requirements
+System Calculates Material & Labor Costs
         ↓
-Live Estimation
+Frontend Displays Recommendations
         ↓
 Submit Quotation Request
-3. USER DASHBOARD NAVIGATION
+3. IMPORTANT SYSTEM PRINCIPLE
+
+Users SHOULD NOT manually select aluminium bars or technical materials.
+
+Instead:
+
+System automatically recommends suitable materials
+
+based on:
+
+measurements
+product type
+design type
+purpose
+environment
+strength requirements
+4. USER DASHBOARD NAVIGATION
 Sidebar Structure
 Dashboard
 
@@ -64,20 +78,21 @@ ORDERS
 SERVICES
 ├── On-Site Visit
 ├── Repairs
-4. CREATE YOUR OWN DESIGN PAGE
+5. CREATE YOUR OWN DESIGN PAGE
 Route
 /dashboard/design/new
-5. PAGE OBJECTIVE
+6. PAGE OBJECTIVE
 
-This page allows users to:
+Allow users to:
 
-select a product type
-create a fully custom design
-configure measurements and requirements
-generate quotation requests
-6. PAGE LAYOUT STRUCTURE
-Recommended Layout
+select product type
+create custom design
+configure measurements
+receive material recommendations
+receive estimated quotation
+7. PAGE LAYOUT STRUCTURE
 -------------------------------------------------
+
 Sidebar
 
 Top Navigation
@@ -88,7 +103,7 @@ Product Selection Section
 
 -------------------------------------------------
 
-Design Workspace
+2D / 3D Workspace
 
 -------------------------------------------------
 
@@ -96,16 +111,16 @@ Configuration Panel
 
 -------------------------------------------------
 
+Recommended Materials Panel
+
+-------------------------------------------------
+
 Live Estimation Panel
 
 -------------------------------------------------
 
-Submit Section
-7. PRODUCT TYPE SELECTION
-UI Type
-
-Use selectable product cards.
-
+Quotation Submission Section
+8. PRODUCT TYPE SELECTION
 Example Product Types
 Window
 Door
@@ -114,124 +129,71 @@ Cupboard
 Partition
 Railing
 Other
-Product Card Information
+Product Card Design
 
 Each card should contain:
 
-icon/image
+image/icon
 product name
 short description
 select button
-8. DESIGN WORKSPACE SECTION
-Main Purpose
-
-This section contains the:
-
-2D Design Canvas
-3D Preview Canvas
-
-using:
-
-Fabric.js
-Three.js
-9. WORKSPACE LAYOUT
-Recommended Layout
--------------------------------------------------
+9. DESIGN WORKSPACE
+Technologies
+Fabric.js → 2D Design
+Three.js → 3D Preview
+Workspace Layout
 Toolbar
 
 2D / 3D Toggle
 
--------------------------------------------------
-
 Canvas Area
 
--------------------------------------------------
-
 Properties Panel
-10. 2D / 3D TOGGLE
-Feature
+10. CONFIGURATION PANEL
+Main Purpose
 
-Allow users to switch between:
+Collect all required data for:
 
-2D Design View
-3D Visualization
-Important UX Recommendation
-
-When switching:
-
-canvas should expand to full width
-maximize workspace area
-hide unnecessary panels
-11. DESIGN TOOLBAR
-Initial Tools
-Move
-Select
-Delete
-Zoom
-Reset View
-Snap Alignment
-12. SHAPE / PROFILE PANEL
-
-Initially:
-
-placeholder cards
-
-Later:
-
-real aluminium profile components
-Important Recommendation
-
-DO NOT hardcode final industrial profiles initially.
-
-Use:
-
-modular profile cards
-
-so future aluminium models can replace them easily.
-
-13. CONFIGURATION PANEL
-IMPORTANT SECTION
-
-This section directly affects quotation generation.
-
-14. CONFIGURATION PANEL LAYOUT
+material recommendation
+quotation generation
+labor calculation
+11. CONFIGURATION PANEL SECTIONS
 Measurements
 Purpose
 Environment
-Strength
+Strength Category
 Colors & Finish
 Accessories
 Additional Notes
-15. MEASUREMENT INPUTS
-Dynamic Fields
+12. MEASUREMENT INPUTS
 
-Measurements should change depending on:
+Inputs should change dynamically depending on:
 
 selected product type
-Example Inputs
-Pantry
+Example – Pantry
 Width
 Height
 Depth
 Compartment Count
-Window
+Example – Window
 Width
 Height
 Panel Count
-Sliding/Fixed
-Door
+Sliding / Casement
+Example – Door
 Width
 Height
 Opening Direction
 Lock Type
-16. PURPOSE SELECTION
-VERY IMPORTANT FIELD
+13. PURPOSE SELECTION
+IMPORTANT FIELD
 
-This directly affects:
+Purpose affects:
 
-material selection
+selected materials
 profile thickness
 accessories
+labor cost
 quotation value
 Example Options
 Pantry
@@ -244,37 +206,27 @@ Bedroom Window
 Kitchen Window
 Large Hall Window
 Outdoor Exposure
-17. ENVIRONMENT SELECTION
+14. ENVIRONMENT SELECTION
 Options
 Indoor
 Outdoor
 Wet Area
 High Sun Exposure
-18. STRENGTH CATEGORY
+15. STRENGTH CATEGORY
 Options
 Light Duty
 Medium Duty
 Heavy Duty
-UX Recommendation
-
-Show:
-
-small explanation tooltips
-
-for each strength category.
-
-19. COLOR & FINISH SECTION
-Options
+16. COLOR & FINISH SECTION
+Example Options
 Black
 White
 Silver
 Champagne Gold
 Wood Finish
 Custom Color
-20. ACCESSORIES SECTION
+17. ACCESSORIES SECTION
 Dynamic Options
-
-Show options based on product type.
 
 Examples:
 
@@ -283,103 +235,227 @@ Locks
 Rails
 Glass Types
 Hinges
-21. LIVE ESTIMATION PANEL
+18. INTELLIGENT MATERIAL RECOMMENDATION SYSTEM
+IMPORTANT ARCHITECTURE
+
+Frontend does NOT decide materials directly.
+
+Instead:
+
+Frontend collects user inputs
+        ↓
+Backend rule engine processes rules
+        ↓
+Admin-configured logic applied
+        ↓
+Backend returns recommended materials
+        ↓
+Frontend displays recommendations
+19. ADMIN-CONTROLLED MATERIAL RULES
+
+The system should support rules such as:
+
+Example Rule 1
+IF:
+Product = Window
+Type = Sliding
+Width < 1500mm
+
+THEN:
+Use 70mm Sliding Profile
+Example Rule 2
+IF:
+Product = Window
+Type = Sliding
+Width > 1500mm
+
+THEN:
+Use 80mm Sliding Profile
+Example Rule 3
+IF:
+Product = Pantry
+Purpose = Heavy Usage
+
+THEN:
+Use Heavy Pantry Bar
+20. RECOMMENDED MATERIALS PANEL
 Main Goal
 
-Provide:
+Display all recommended materials selected by backend.
 
-estimated quotation preview
+Example UI
+-----------------------------------
 
-NOT final quotation.
+Recommended Materials
 
-Display Items
-Estimated Material Category
+Aluminium Profile:
+80mm Sliding Profile
+
+Thickness:
+1.4mm Heavy Duty
+
+Glass:
+Tempered Glass
+
+Accessories:
+Premium Sliding Rail
+Heavy Lock System
+
+Strength Category:
+Heavy Duty
+
+-----------------------------------
+21. MATERIAL PRICE DISPLAY
+
+Each material recommendation should display:
+
+profile name
+thickness
+estimated material quantity
+price per feet
+estimated material cost
+22. MOCK MATERIAL PRICES (INITIAL SETUP)
+Windows
+41mm Casement → Rs. 950 / ft
+
+70mm Sliding → Rs. 1200 / ft
+
+80mm Sliding → Rs. 1600 / ft
+
+60mm Casement → Rs. 1100 / ft
+Doors
+100mm Sliding Door → Rs. 2500 / ft
+
+100mm Swing Door → Rs. 1800 / ft
+Pantry
+Pantry Bar → Rs. 2200 / ft
+IMPORTANT NOTE
+
+These are:
+
+temporary mock prices
+
+Later:
+
+Admin can replace all prices dynamically
+from admin dashboard.
+23. EXPLANATION SECTION
+
+The system should explain WHY materials were selected.
+
+Example:
+
+Selected because:
+- Large width detected
+- Outdoor exposure
+- Heavy usage requirement
+24. LABOR COST CALCULATION SYSTEM
+IMPORTANT LOGIC
+
+Labor cost depends on:
+
+selected material/profile
+
+NOT directly on product type.
+
+25. LABOR CALCULATION FLOW
+Measurements
+        ↓
+Area Calculation
+        ↓
+Backend Selects Material/Profile
+        ↓
+Selected Profile Contains Labor Rate
+        ↓
+Labor Cost Calculation
+26. AREA CALCULATION
+Formula
+Area = Width × Height
+
+Convert into:
+
+square feet
+27. LABOR COST FORMULA
+Labor Cost =
+Area (sq.ft) × Labor Rate Per Sq.ft
+28. LABOR RATES
+Pantry
+Pantry Bar → Rs. 750 / sq.ft
+Windows
+41mm Casement → Rs. 250 / sq.ft
+
+70mm Sliding → Rs. 250 / sq.ft
+
+80mm Sliding → Rs. 350 / sq.ft
+
+60mm Casement → Rs. 300 / sq.ft
+Doors
+100mm Sliding Door → Rs. 750 / sq.ft
+
+100mm Swing Door → Rs. 450 / sq.ft
+29. EXAMPLE LABOR CALCULATION
+Example
+Width = 6ft
+Height = 4ft
+
+Area = 24 sq.ft
+Selected Material
+80mm Sliding
+Labor Rate
+Rs. 350 / sq.ft
+Final Labor Cost
+24 × 350 = Rs. 8,400
+30. LIVE ESTIMATION PANEL
+Display
 Estimated Material Cost
 Estimated Labor Cost
 Estimated Installation Cost
 Estimated Total
-Important Note
+IMPORTANT NOTE
 
-Display warning:
+Display:
 
 Final quotation will be reviewed by admin.
-22. SUBMIT QUOTATION SECTION
-Button
-Generate Quotation Request
-Submission Data
-
-Frontend should submit:
-
-design data
-measurements
-selected options
-quotation requirements
-23. DESIGN CATALOGUE PAGE
+31. DESIGN CATALOGUE PAGE
 Route
 /dashboard/design/catalogue
-24. PAGE OBJECTIVE
+32. PAGE OBJECTIVE
 
 Allow users to:
 
 browse pre-designed products
 configure measurements
-request quotations
+receive quotations
 
-WITHOUT editing the actual design structure.
+WITHOUT editing design layout.
 
-25. CATALOGUE PAGE LAYOUT
--------------------------------------------------
-Search / Filter
-
--------------------------------------------------
-
-Product Cards Grid
-
--------------------------------------------------
-26. PRODUCT CARD DESIGN
-
-Each card should contain:
-
-preview image
-product name
-category
-short description
-view details button
-27. PRODUCT DETAILS PAGE
+33. PRODUCT DETAILS PAGE
 Route
 /dashboard/design/catalogue/[id]
-28. IMPORTANT RULE
+34. IMPORTANT RULE
 
 Users CAN:
 
 change measurements
-change colors
 change requirements
+change colors
 
 Users CANNOT:
 
 edit design structure/layout
-29. PRODUCT DETAILS LAYOUT
+35. PRODUCT DETAILS LAYOUT
 Product Preview
 
 Measurements Panel
 
 Requirements Panel
 
+Recommended Materials
+
 Live Estimation
 
 Quotation Submission
-30. FRONTEND STATE MANAGEMENT
-Recommended States
-selectedProduct
-designData
-measurements
-purpose
-environment
-strength
-selectedAccessories
-estimatedCost
-31. RECOMMENDED COMPONENT STRUCTURE
+36. RECOMMENDED COMPONENT STRUCTURE
 components/dashboard/design/
 
 ProductTypeSelector.tsx
@@ -391,44 +467,44 @@ EnvironmentSelector.tsx
 StrengthSelector.tsx
 ColorSelector.tsx
 AccessoriesSelector.tsx
+RecommendedMaterialsPanel.tsx
 LiveEstimatePanel.tsx
 QuotationSummary.tsx
-32. RESPONSIVE DESIGN REQUIREMENTS
+37. RESPONSIVE DESIGN REQUIREMENTS
 Desktop
 split layout
-side panels
 large canvas area
+side panels
 Tablet
 collapsible panels
-stacked layout
+stacked sections
 Mobile
-simplified configuration flow
 step-by-step wizard layout
-33. UI/UX REQUIREMENTS
+simplified UI
+38. UI/UX REQUIREMENTS
 
-Follow existing AluMate design language:
+Follow existing AluMate design system:
 
-dark UI
+dark theme
 neon gradients
-rounded cards
-glassmorphism effects
-smooth animations
+glassmorphism cards
+rounded layouts
+smooth transitions
 sidebar consistency
-34. VALIDATION REQUIREMENTS
+39. VALIDATION REQUIREMENTS
 Required Inputs
 Product Type
 Measurements
 Purpose
 Strength Category
 Optional Inputs
-Additional Notes
 Accessories
+Additional Notes
 Custom Color
-35. RECOMMENDED DEVELOPMENT PHASES
+40. DEVELOPMENT PHASES
 PHASE 1
 Product selection UI
-Basic layout
-Static forms
+Static configuration forms
 PHASE 2
 Fabric.js integration
 2D workspace
@@ -436,34 +512,37 @@ PHASE 3
 Three.js integration
 3D preview
 PHASE 4
-Dynamic configuration panels
+Material recommendation UI
 PHASE 5
-Live estimation UI
+Labor & estimation calculations
 PHASE 6
-API integration
-Submission flow
-36. FINAL FRONTEND OBJECTIVE
+Backend API integration
+Submission workflow
+41. FINAL OBJECTIVE
 
-The frontend should behave as:
+This frontend module should behave as:
 
 an intelligent residential aluminium product configurator
 
 NOT:
 
 a complex industrial CAD system
-37. SUMMARY
+42. SUMMARY
 
 This frontend system allows users to:
 
-design custom aluminium products
-configure pre-designed catalogue items
-enter realistic fabrication requirements
-receive smart quotation estimations
-submit structured quotation requests
+create custom aluminium designs
+configure pre-designed catalogue products
+receive intelligent material recommendations
+understand selected materials
+view material prices
+understand labor calculations
+generate quotation requests
 
 while maintaining:
 
-clean UX
 scalable architecture
+admin-controlled business rules
+realistic residential workflows
 modern UI consistency
-realistic residential fabrication workflows
+intelligent user experience
