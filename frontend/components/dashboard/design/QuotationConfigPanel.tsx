@@ -20,6 +20,7 @@ import { EnvironmentSelector } from "./EnvironmentSelector";
 import { StrengthSelector } from "./StrengthSelector";
 import { ColorSelector } from "./ColorSelector";
 import { AccessoriesSelector } from "./AccessoriesSelector";
+import { RecommendedMaterialsPanel } from "./RecommendedMaterialsPanel";
 import { LiveEstimatePanel } from "./LiveEstimatePanel";
 import { calculateEstimate, productMeasurements } from "./quotationConfig";
 import { quotationsApi } from "@/lib/api";
@@ -412,6 +413,34 @@ export function QuotationConfigPanel({
             onChange={(v) => updateConfig("accessories", v)}
           />
         </ConfigSection>
+
+        {/* Recommended Materials (Appears when measurements and basic info are filled) */}
+        {(sectionValidations.measurements && sectionValidations.purpose) && (
+          <div className="px-5 py-6 bg-zinc-900/20 border-b border-zinc-800/50">
+            <RecommendedMaterialsPanel
+              profile={calculateEstimate({
+                productType,
+                measurements: config.measurements,
+                purpose: config.purpose,
+                environment: config.environment,
+                strength: config.strength,
+                color: config.color,
+                accessories: config.accessories,
+              }).recommendedProfile}
+              explanation={calculateEstimate({
+                productType,
+                measurements: config.measurements,
+                purpose: config.purpose,
+                environment: config.environment,
+                strength: config.strength,
+                color: config.color,
+                accessories: config.accessories,
+              }).explanation}
+              accessories={config.accessories}
+              strength={config.strength}
+            />
+          </div>
+        )}
 
         <ConfigSection 
           title="📝 Additional Notes" 

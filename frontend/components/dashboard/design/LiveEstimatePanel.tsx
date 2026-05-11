@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateEstimate, EstimationResult } from "./quotationConfig";
-import { Calculator, AlertTriangle, TrendingUp, Sparkles, RefreshCcw, History } from "lucide-react";
+import { Calculator, AlertTriangle, TrendingUp, Sparkles, RefreshCcw, History, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface LiveEstimatePanelProps {
@@ -37,10 +37,8 @@ export function LiveEstimatePanel({
   const [isCalculated, setIsCalculated] = useState(false);
   const [lastGeneratedEstimate, setLastGeneratedEstimate] = useState<EstimationResult | null>(null);
   
-  // Track if initial render has passed to avoid triggering reset on mount
   const isInitialMount = useRef(true);
 
-  // This is the "live" calculation based on current state (not yet shown to user)
   const currentEstimate: EstimationResult = useMemo(
     () =>
       calculateEstimate({
@@ -55,7 +53,6 @@ export function LiveEstimatePanel({
     [productType, measurements, purpose, environment, strength, color, accessories]
   );
 
-  // Mark current calculation as outdated if inputs change
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -65,7 +62,7 @@ export function LiveEstimatePanel({
   }, [productType, measurements, purpose, environment, strength, color, accessories]);
 
   const hasRequiredInput =
-    Object.values(measurements).some((v) => v && Number(v) > 0) &&
+    Object.values(measurements).some((v) => !!v) &&
     purpose &&
     strength &&
     color;
@@ -124,11 +121,14 @@ export function LiveEstimatePanel({
             )}
 
             <div className="space-y-4">
-              {/* Material category */}
+              {/* Profile info */}
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500">Material Category</span>
+                <span className="text-xs text-zinc-500 flex items-center gap-1.5">
+                  <Tag className="h-3 w-3" />
+                  Labor Rate
+                </span>
                 <span className="text-sm font-medium text-violet-300">
-                  {lastGeneratedEstimate?.materialCategory}
+                  {formatLKR(lastGeneratedEstimate?.recommendedProfile.laborRatePerSqFt || 0)} / sqft
                 </span>
               </div>
 
@@ -195,7 +195,7 @@ export function LiveEstimatePanel({
           <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
           <p className="text-[11px] leading-relaxed text-amber-400/80">
             This is a rough estimate only. The final quotation will be reviewed and
-            confirmed by our team.
+            confirmed by our team based on detailed measurements.
           </p>
         </div>
       </div>

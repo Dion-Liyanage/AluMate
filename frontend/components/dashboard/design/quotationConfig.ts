@@ -20,11 +20,13 @@ export const productMeasurements: Record<string, MeasurementField[]> = {
   window: [
     { key: "width", label: "Width", type: "dimension", min: 1, max: 20 },
     { key: "height", label: "Height", type: "dimension", min: 1, max: 15 },
+    { key: "type", label: "Window Type", type: "select", options: ["Sliding", "Casement", "Fixed"] },
     { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 2", min: 1, max: 8 },
   ],
   door: [
     { key: "width", label: "Width", type: "dimension", min: 2, max: 10 },
     { key: "height", label: "Height", type: "dimension", min: 6, max: 12 },
+    { key: "type", label: "Door Type", type: "select", options: ["Sliding Door", "Swing Door"] },
   ],
   cupboard: [
     { key: "width", label: "Width", type: "dimension", min: 1, max: 20 },
@@ -158,15 +160,78 @@ export const productAccessories: Record<string, AccessoryOption[]> = {
   ],
 };
 
+// ---------- Material & Labor Data ----------
+
+export interface AluminiumProfile {
+  name: string;
+  thickness: string;
+  pricePerFt: number;
+  laborRatePerSqFt: number;
+  description: string;
+}
+
+export const profileDatabase: Record<string, AluminiumProfile> = {
+  "casement-41": {
+    name: "41mm Casement",
+    thickness: "1.2mm",
+    pricePerFt: 950,
+    laborRatePerSqFt: 250,
+    description: "Standard casement profile for residential windows."
+  },
+  "sliding-70": {
+    name: "70mm Sliding",
+    thickness: "1.2mm",
+    pricePerFt: 1200,
+    laborRatePerSqFt: 250,
+    description: "Standard sliding profile for medium-sized windows."
+  },
+  "sliding-80": {
+    name: "80mm Sliding",
+    thickness: "1.4mm",
+    pricePerFt: 1600,
+    laborRatePerSqFt: 350,
+    description: "Heavy-duty sliding profile for large Hall windows."
+  },
+  "casement-60": {
+    name: "60mm Casement",
+    thickness: "1.4mm",
+    pricePerFt: 1100,
+    laborRatePerSqFt: 300,
+    description: "Premium casement profile for high-exposure areas."
+  },
+  "sliding-door-100": {
+    name: "100mm Sliding Door",
+    thickness: "1.6mm",
+    pricePerFt: 2500,
+    laborRatePerSqFt: 750,
+    description: "Robust sliding door profile for main entrances."
+  },
+  "swing-door-100": {
+    name: "100mm Swing Door",
+    thickness: "1.4mm",
+    pricePerFt: 1800,
+    laborRatePerSqFt: 450,
+    description: "Standard swing door profile for interior or balcony doors."
+  },
+  "pantry-bar": {
+    name: "Pantry Bar",
+    thickness: "1.2mm",
+    pricePerFt: 2200,
+    laborRatePerSqFt: 750,
+    description: "Specialized profile for pantry and kitchen cupboard fabrication."
+  },
+};
+
 // ---------- Live Estimation Logic ----------
 
 export interface EstimationResult {
-  materialCategory: string;
+  recommendedProfile: AluminiumProfile;
   materialCost: number;
   laborCost: number;
   installationCost: number;
   accessoriesCost: number;
   total: number;
+  explanation: string[];
 }
 
 /**
@@ -192,6 +257,67 @@ export function getRoundedFeet(value: string | number): number {
 }
 
 /**
+ * Mock Rule Engine for Material Recommendation
+ */
+export function recommendProfile(config: {
+  productType: string;
+  measurements: Record<string, number | string>;
+  purpose: string;
+  environment: string;
+  strength: string;
+}): { profile: AluminiumProfile; explanation: string[] } {
+  const { productType, measurements, purpose, environment, strength } = config;
+  const w = getRoundedFeet(measurements.width || measurements.length || 0);
+  const type = String(measurements.type || "");
+
+  let profileKey = "casement-41";
+  let explanation: string[] = ["Standard residential specification."];
+
+  if (productType === "window") {
+    if (type === "Sliding") {
+      if (w > 5) { // Approx 1500mm
+        profileKey = "sliding-80";
+        explanation = ["Large width detected (> 5ft)", "Heavy duty requirements for stability"];
+      } else {
+        profileKey = "sliding-70";
+        explanation = ["Standard sliding configuration selected"];
+      }
+    } else {
+      if (environment === "outdoor" || strength === "heavy") {
+        profileKey = "casement-60";
+        explanation = ["Outdoor/Heavy duty requirement detected", "Enhanced weather resistance"];
+      } else {
+        profileKey = "casement-41";
+        explanation = ["Standard casement selected for indoor/light usage"];
+      }
+    }
+  } else if (productType === "door") {
+    if (type === "Sliding Door") {
+      profileKey = "sliding-door-100";
+      explanation = ["Sliding door profile selected for smooth operation"];
+    } else {
+      profileKey = "swing-door-100";
+      explanation = ["Standard swing door specification"];
+    }
+  } else if (productType === "pantry" || productType === "cupboard") {
+    profileKey = "pantry-bar";
+    explanation = ["Specialized kitchen/pantry bar selected for longevity"];
+    if (purpose.includes("Heavy")) {
+      explanation.push("Heavy usage requirement detected");
+    }
+  } else {
+    // Default fallback
+    profileKey = "casement-41";
+    explanation = ["General purpose profile assigned"];
+  }
+
+  return {
+    profile: profileDatabase[profileKey] || profileDatabase["casement-41"],
+    explanation
+  };
+}
+
+/**
  * Generate a rough estimation based on selected configuration.
  */
 export function calculateEstimate(config: {
@@ -203,62 +329,37 @@ export function calculateEstimate(config: {
   color: string;
   accessories: string[];
 }): EstimationResult {
-  const { productType, measurements, strength, accessories } = config;
+  const { productType, measurements, accessories } = config;
 
-  // Base per-sqft rate by product type (LKR)
-  const baseRates: Record<string, number> = {
-    window: 80,
-    door: 110,
-    cupboard: 90,
-    pantry: 100,
-    partition: 65,
-    railing: 55,
-    other: 75,
-  };
+  // 1. Get recommendation
+  const { profile, explanation } = recommendProfile(config);
 
-  const baseRate = baseRates[productType] || 75;
-
-  // Calculate area (sqft) using rounded feet
-  // e.g. Width 3'2" -> 4ft, Height 5'1" -> 6ft. Area = 4 * 6 = 24 sqft.
+  // 2. Calculate dimensions
   const w = getRoundedFeet(measurements.width || measurements.length || 0);
   const h = getRoundedFeet(measurements.height || 0);
-  
-  // Fallback for linear products like Railing if height is not relevant (though usually it is)
   const area = (w || 1) * (h || 1);
+  const perimeter = (w + h) * 2; // Estimated linear feet for material cost
 
-  // Strength multiplier
-  const strengthMultipliers: Record<string, number> = {
-    light: 1.0,
-    medium: 1.25,
-    heavy: 1.6,
-  };
-  const strengthMult = strengthMultipliers[strength] || 1.0;
+  // 3. Calculate costs
+  // Material: perimeter (linear ft) * price/ft
+  const materialCost = Math.round(perimeter * profile.pricePerFt);
 
-  // Material cost
-  const materialCost = Math.round(area * baseRate * strengthMult);
+  // Labor: Area (sq.ft) * Labor Rate
+  const laborCost = Math.round(area * profile.laborRatePerSqFt);
 
-  // Labor (35% of material)
-  const laborCost = Math.round(materialCost * 0.35);
-
-  // Installation (15% of material)
+  // Installation (15% of material - keeping this as a general rule)
   const installationCost = Math.round(materialCost * 0.15);
 
-  // Accessories (flat rate per selected accessory)
+  // Accessories (flat rate 1500 LKR per accessory)
   const accessoryCost = accessories.length * 1500;
 
-  // Material category
-  const materialCategories: Record<string, string> = {
-    light: "Standard Aluminium Profile",
-    medium: "Reinforced Aluminium Profile",
-    heavy: "Heavy-Gauge Aluminium Profile",
-  };
-
   return {
-    materialCategory: materialCategories[strength] || "Standard Aluminium Profile",
+    recommendedProfile: profile,
     materialCost,
     laborCost,
     installationCost,
     accessoriesCost: accessoryCost,
     total: materialCost + laborCost + installationCost + accessoryCost,
+    explanation
   };
 }
