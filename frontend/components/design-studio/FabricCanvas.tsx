@@ -21,6 +21,8 @@ export interface FabricCanvasHandle {
   duplicateSelected: () => void;
   clearCanvas: () => void;
   toggleGrid: () => void;
+  bringToFront: () => void;
+  sendToBack: () => void;
   undo: () => void;
   redo: () => void;
   toJSON: () => string;
@@ -294,6 +296,35 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
       toggleGrid: () => {
         gridVisibleRef.current = !gridVisibleRef.current;
         if (canvasRef.current) drawGrid(canvasRef.current);
+      },
+
+      bringToFront: () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const activeObjects = canvas.getActiveObjects();
+        activeObjects.forEach((obj) => {
+          canvas.bringObjectToFront(obj);
+        });
+        canvas.renderAll();
+        saveHistory();
+        onObjectModified?.();
+      },
+
+      sendToBack: () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const activeObjects = canvas.getActiveObjects();
+        activeObjects.forEach((obj) => {
+          canvas.sendObjectToBack(obj);
+        });
+        // Ensure grid stays at the very bottom
+        const gridObjects = canvas.getObjects().filter((o: AnyObj) => o.isGrid);
+        gridObjects.forEach((grid) => {
+          canvas.sendObjectToBack(grid);
+        });
+        canvas.renderAll();
+        saveHistory();
+        onObjectModified?.();
       },
 
       undo: () => {

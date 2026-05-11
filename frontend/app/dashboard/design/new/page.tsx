@@ -23,6 +23,7 @@ const itemVariants = {
 const productTypes = [
   { name: "Window", emoji: "🪟", description: "Sliding, casement, fixed & louvre windows" },
   { name: "Door", emoji: "🚪", description: "Entrance, sliding, folding & French doors" },
+  { name: "Pantry", emoji: "🍽️", description: "Kitchen pantries & modular storage units" },
   { name: "Cupboard", emoji: "🗄️", description: "Kitchen, wardrobe & storage cupboards" },
   { name: "Partition", emoji: "🧱", description: "Office, bathroom & room partitions" },
   { name: "Railing", emoji: "🏗️", description: "Balcony, staircase & boundary railings" },
