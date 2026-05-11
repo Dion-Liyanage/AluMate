@@ -122,11 +122,7 @@ export const productAccessories: Record<string, AccessoryOption[]> = {
     { key: "grill", label: "Safety Grill", description: "Decorative safety grille" },
   ],
   door: [
-    { key: "handles", label: "Door Handles", description: "Premium lever or pull handles" },
-    { key: "locks", label: "Door Locks", description: "Standard or multi-point locks" },
-    { key: "glass", label: "Glass Panels", description: "Clear, frosted, or decorative glass" },
-    { key: "hinges", label: "Heavy Duty Hinges", description: "Stainless steel ball bearing hinges" },
-    { key: "closer", label: "Door Closer", description: "Hydraulic automatic closer" },
+    { key: "glassSticker", label: "Glass Sticker", description: "Decorative or privacy glass sticker" },
   ],
   cupboard: [
     { key: "handles", label: "Handles", description: "Modern pull handles or knobs" },
@@ -242,18 +238,11 @@ export function getRoundedFeet(value: string | number): number {
   if (!value) return 0;
   const str = String(value);
   
-  // Pattern to match "5'2\"" or just "5'"
-  const match = str.match(/(\d+)'(?:(\d+)")?/);
-  if (match) {
-    const feet = parseInt(match[1]);
-    const inches = match[2] ? parseInt(match[2]) : 0;
-    
-    // If there are any inches, round up to next foot
-    return inches > 0 ? feet + 1 : feet;
-  }
+  const ft = parseInt(str.match(/(\d+)'/)?.[1] || "0");
+  const inches = parseInt(str.match(/(\d+)"/)?.[1] || "0");
   
-  // If it's just a number, assume it's already feet and return as is
-  return Math.ceil(Number(value) || 0);
+  // If there are any inches, round up to next foot
+  return inches > 0 ? ft + 1 : ft;
 }
 
 /**

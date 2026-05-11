@@ -16,10 +16,11 @@ export function MeasurementForm({ productType, values, onChange }: MeasurementFo
   // Helper to parse "5'2\"" into { ft: 5, in: 2 }
   const parseDimension = (val: string | number) => {
     const str = String(val || "");
-    const match = str.match(/(\d+)'(?:(\d+)")?/);
+    const ftMatch = str.match(/(\d+)'/);
+    const inMatch = str.match(/(\d+)"/);
     return {
-      ft: match ? match[1] : "",
-      in: match ? match[2] : "",
+      ft: ftMatch ? ftMatch[1] : "",
+      in: inMatch ? inMatch[1] : "",
     };
   };
 
@@ -29,11 +30,12 @@ export function MeasurementForm({ productType, values, onChange }: MeasurementFo
     const inch = type === "in" ? newVal : current.in;
     
     // Combine into format 5'2"
-    if (!ft && !inch) {
-      onChange(key, "");
-    } else {
-      onChange(key, `${ft || 0}'${inch || 0}"`);
-    }
+    // Only add parts that are actually entered to allow clearing
+    let result = "";
+    if (ft !== "") result += `${ft}'`;
+    if (inch !== "") result += `${inch}"`;
+    
+    onChange(key, result);
   };
 
   return (
