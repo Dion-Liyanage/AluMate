@@ -1,6 +1,5 @@
-"use client";
-
-import { Eye, Download, MoreVertical, FileCheck, XCircle } from "lucide-react";
+import { useState } from "react";
+import { Eye, Download, MoreVertical, FileCheck, XCircle, ChevronDown, ChevronUp, History } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { OrderStatusBadge, OrderStatus } from "./OrderStatusBadge";
 import { OrderProgressTracker } from "./OrderProgressTracker";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Order {
   id: string;
@@ -68,128 +67,224 @@ const orders: Order[] = [
     status: "completed",
     progress: 100,
   },
+  {
+    id: "ORD-2024-005",
+    productType: "Aluminium Gate",
+    designType: "Custom",
+    date: "2024-04-15",
+    price: "Rs. 320,000",
+    status: "cancelled",
+    progress: 0,
+  },
 ];
 
+const INACTIVE_STATUSES: OrderStatus[] = ["completed", "cancelled"];
+
 export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) => void }) {
+  const [showInactive, setShowInactive] = useState(false);
+
+  const activeOrders = orders.filter(o => !INACTIVE_STATUSES.includes(o.status));
+  const inactiveOrders = orders.filter(o => INACTIVE_STATUSES.includes(o.status));
+
+  const renderRow = (order: Order) => (
+    <TableRow key={order.id} className="border-zinc-800/50 hover:bg-zinc-800/30 transition-colors group cursor-pointer" onClick={() => onViewDetails(order)}>
+      <TableCell className="font-mono text-zinc-300 font-medium">{order.id}</TableCell>
+      <TableCell className="text-zinc-300">{order.productType}</TableCell>
+      <TableCell>
+        <span className={`text-xs px-2 py-0.5 rounded border ${
+          order.designType === 'Custom' 
+            ? 'border-purple-500/30 text-purple-400 bg-purple-500/10' 
+            : 'border-blue-500/30 text-blue-400 bg-blue-500/10'
+        }`}>
+          {order.designType}
+        </span>
+      </TableCell>
+      <TableCell className="text-zinc-400">{order.date}</TableCell>
+      <TableCell className="text-zinc-200 font-semibold">{order.price}</TableCell>
+      <TableCell>
+        <OrderStatusBadge status={order.status} />
+      </TableCell>
+      <TableCell>
+        <OrderProgressTracker progress={order.progress} status={order.status} />
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex items-center justify-end gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-zinc-400 hover:text-blue-400 hover:bg-blue-400/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails(order);
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400" onClick={(e) => e.stopPropagation()}>
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800 text-zinc-200">
+              <DropdownMenuItem className="focus:bg-zinc-800 focus:text-white cursor-pointer">
+                <Download className="h-4 w-4 mr-2" />
+                Download Quotation
+              </DropdownMenuItem>
+              {order.status === 'quotation_sent' && (
+                <DropdownMenuItem className="focus:bg-emerald-500/10 focus:text-emerald-400 cursor-pointer">
+                  <FileCheck className="h-4 w-4 mr-2" />
+                  Accept Quotation
+                </DropdownMenuItem>
+              )}
+              {(order.status === 'pending' || order.status === 'quotation_sent') && (
+                <>
+                  <DropdownMenuSeparator className="bg-zinc-800" />
+                  <DropdownMenuItem className="focus:bg-red-500/10 focus:text-red-400 cursor-pointer">
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Cancel Order
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 backdrop-blur-md overflow-hidden">
-      {/* Desktop Table */}
-      <div className="hidden md:block">
-        <Table>
-          <TableHeader className="bg-zinc-950/50">
-            <TableRow className="hover:bg-transparent border-zinc-800">
-              <TableHead className="text-zinc-400 font-bold">Order ID</TableHead>
-              <TableHead className="text-zinc-400 font-bold">Product</TableHead>
-              <TableHead className="text-zinc-400 font-bold">Design</TableHead>
-              <TableHead className="text-zinc-400 font-bold">Date</TableHead>
-              <TableHead className="text-zinc-400 font-bold">Estimated Price</TableHead>
-              <TableHead className="text-zinc-400 font-bold">Status</TableHead>
-              <TableHead className="text-zinc-400 font-bold w-[180px]">Progress</TableHead>
-              <TableHead className="text-zinc-400 font-bold text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.id} className="border-zinc-800/50 hover:bg-zinc-800/30 transition-colors group">
-                <TableCell className="font-mono text-zinc-300 font-medium">{order.id}</TableCell>
-                <TableCell className="text-zinc-300">{order.productType}</TableCell>
-                <TableCell>
-                  <span className={`text-xs px-2 py-0.5 rounded border ${
-                    order.designType === 'Custom' 
-                      ? 'border-purple-500/30 text-purple-400 bg-purple-500/10' 
-                      : 'border-blue-500/30 text-blue-400 bg-blue-500/10'
-                  }`}>
-                    {order.designType}
-                  </span>
-                </TableCell>
-                <TableCell className="text-zinc-400">{order.date}</TableCell>
-                <TableCell className="text-zinc-200 font-semibold">{order.price}</TableCell>
-                <TableCell>
-                  <OrderStatusBadge status={order.status} />
-                </TableCell>
-                <TableCell>
-                  <OrderProgressTracker progress={order.progress} status={order.status} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-zinc-400 hover:text-blue-400 hover:bg-blue-400/10"
-                      onClick={() => onViewDetails(order)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800 text-zinc-200">
-                        <DropdownMenuItem className="focus:bg-zinc-800 focus:text-white cursor-pointer">
-                          <Download className="h-4 w-4 mr-2" />
-                          Download Quotation
-                        </DropdownMenuItem>
-                        {order.status === 'quotation_sent' && (
-                          <DropdownMenuItem className="focus:bg-emerald-500/10 focus:text-emerald-400 cursor-pointer">
-                            <FileCheck className="h-4 w-4 mr-2" />
-                            Accept Quotation
-                          </DropdownMenuItem>
-                        )}
-                        {(order.status === 'pending' || order.status === 'quotation_sent') && (
-                          <>
-                            <DropdownMenuSeparator className="bg-zinc-800" />
-                            <DropdownMenuItem className="focus:bg-red-500/10 focus:text-red-400 cursor-pointer">
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Cancel Order
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
+    <div className="space-y-6">
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 backdrop-blur-md overflow-hidden">
+        {/* Active Orders Table */}
+        <div className="hidden md:block">
+          <Table>
+            <TableHeader className="bg-zinc-950/50">
+              <TableRow className="hover:bg-transparent border-zinc-800">
+                <TableHead className="text-zinc-400 font-bold">Order ID</TableHead>
+                <TableHead className="text-zinc-400 font-bold">Product</TableHead>
+                <TableHead className="text-zinc-400 font-bold">Design</TableHead>
+                <TableHead className="text-zinc-400 font-bold">Date</TableHead>
+                <TableHead className="text-zinc-400 font-bold">Estimated Price</TableHead>
+                <TableHead className="text-zinc-400 font-bold">Status</TableHead>
+                <TableHead className="text-zinc-400 font-bold w-[180px]">Progress</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {activeOrders.map(renderRow)}
+              {activeOrders.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-32 text-center text-zinc-500">
+                    No active orders found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile Active Cards */}
+        <div className="md:hidden divide-y divide-zinc-800">
+          {activeOrders.map((order) => (
+            <div key={order.id} className="p-4 bg-zinc-900/20 space-y-4" onClick={() => onViewDetails(order)}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-mono text-zinc-500 mb-1">{order.id}</p>
+                  <h3 className="font-bold text-zinc-200">{order.productType}</h3>
+                  <p className="text-xs text-zinc-400">{order.date}</p>
+                </div>
+                <OrderStatusBadge status={order.status} />
+              </div>
+              <OrderProgressTracker progress={order.progress} status={order.status} />
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-lg font-bold text-zinc-100">{order.price}</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="bg-zinc-950 border-zinc-800 text-xs h-8">
+                    Details
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Mobile Cards */}
-      <div className="md:hidden divide-y divide-zinc-800">
-        {orders.map((order) => (
-          <div key={order.id} className="p-4 bg-zinc-900/20 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-mono text-zinc-500 mb-1">{order.id}</p>
-                <h3 className="font-bold text-zinc-200">{order.productType}</h3>
-                <p className="text-xs text-zinc-400">{order.date}</p>
-              </div>
-              <OrderStatusBadge status={order.status} />
-            </div>
-            
-            <OrderProgressTracker progress={order.progress} status={order.status} />
-            
-            <div className="flex items-center justify-between pt-2">
-              <p className="text-lg font-bold text-zinc-100">{order.price}</p>
-              <div className="flex gap-2">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="bg-zinc-950 border-zinc-800 text-xs h-8"
-                  onClick={() => onViewDetails(order)}
-                >
-                  Details
-                </Button>
-                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-zinc-400">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Inactive Toggle */}
+      {inactiveOrders.length > 0 && (
+        <div className="flex flex-col items-center gap-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowInactive(!showInactive)}
+            className="border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 h-9 px-4 rounded-lg transition-all"
+          >
+            {showInactive ? (
+              <ChevronUp className="mr-2 h-4 w-4" />
+            ) : (
+              <ChevronDown className="mr-2 h-4 w-4" />
+            )}
+            {showInactive ? "Hide Inactive Orders" : "Show Inactive Orders"}
+          </Button>
+
+          <AnimatePresence>
+            {showInactive && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="w-full space-y-4"
+              >
+                <div className="rounded-xl border border-zinc-800/50 bg-zinc-950/40 overflow-hidden backdrop-blur-xl">
+                  <div className="px-5 py-3 bg-zinc-900/60 border-b border-zinc-800/40 flex items-center gap-3">
+                    <div className="p-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20">
+                      <History className="h-4 w-4 text-teal-400" />
+                    </div>
+                    <span className="text-sm font-semibold text-zinc-200">Completed and Cancelled Orders</span>
+                  </div>
+                  
+                  <div className="hidden md:block">
+                    <Table>
+                      <TableHeader className="bg-zinc-950/30">
+                        <TableRow className="hover:bg-transparent border-zinc-800/50">
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Order ID</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Product</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Design</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Date</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Price</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Status</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider w-[180px]">Progress</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {inactiveOrders.map(renderRow)}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile Inactive Cards */}
+                  <div className="md:hidden divide-y divide-zinc-800/50">
+                    {inactiveOrders.map((order) => (
+                      <div key={order.id} className="p-4 bg-zinc-900/10 space-y-4" onClick={() => onViewDetails(order)}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="text-[10px] font-mono text-zinc-600 mb-1">{order.id}</p>
+                            <h3 className="font-semibold text-zinc-300">{order.productType}</h3>
+                          </div>
+                          <OrderStatusBadge status={order.status} />
+                        </div>
+                        <OrderProgressTracker progress={order.progress} status={order.status} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

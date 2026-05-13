@@ -1,6 +1,5 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, animate } from "framer-motion";
 import { 
   Package, 
   Clock, 
@@ -10,6 +9,23 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+function AnimatedCounter({ value }: { value: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 1,
+      ease: "easeOut",
+      onUpdate(val) {
+        setCount(Math.round(val));
+      },
+    });
+    return () => controls.stop();
+  }, [value]);
+
+  return <>{count}</>;
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -125,7 +141,7 @@ export function OrdersOverviewCards() {
 
                   <div className="space-y-1">
                     <p className="text-2xl font-bold text-zinc-100 group-hover/card:scale-105 transition-transform origin-left">
-                      {stat.value}
+                      <AnimatedCounter value={stat.value} />
                     </p>
                     <p className="text-xs text-zinc-400 font-medium group-hover/card:text-zinc-300 transition-colors">
                       {stat.title}

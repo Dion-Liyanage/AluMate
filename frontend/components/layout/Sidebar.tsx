@@ -118,6 +118,38 @@ const adminMenuGroups: MenuGroup[] = [
   },
 ];
 
+function Logo() {
+  return (
+    <div className="h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-zinc-400 via-zinc-100 to-zinc-600 shadow-[0_0_20px_rgba(161,161,170,0.4)] flex items-center justify-center group/logo transition-all duration-500 hover:scale-110">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 text-zinc-900"
+      >
+        {/* Main 'A' Structure - Industrial Profile style */}
+        <path
+          d="M12 3L3 21H7.5L12 11.5L16.5 21H21L12 3Z"
+          fill="currentColor"
+          className="group-hover/logo:text-black transition-colors"
+        />
+        {/* Inner shadow/detail for depth */}
+        <path
+          d="M12 6.5L6.5 18.5H9L12 12L15 18.5H17.5L12 6.5Z"
+          fill="white"
+          fillOpacity="0.4"
+        />
+        {/* Connector bar */}
+        <path
+          d="M9.5 14.5H14.5L15.5 16.5H8.5L9.5 14.5Z"
+          fill="white"
+          fillOpacity="0.8"
+        />
+      </svg>
+    </div>
+  );
+}
+
 export function Sidebar({ role, collapsed }: SidebarProps) {
   const [isHovered, setIsHovered] = useState(false);
   const pathname = usePathname();
@@ -196,12 +228,12 @@ export function Sidebar({ role, collapsed }: SidebarProps) {
         className="fixed left-0 top-0 z-40 h-screen bg-zinc-950 border-r border-zinc-800/50 flex flex-col"
       >
         {/* Brand */}
-        <div className="flex h-16 items-center border-b border-zinc-800/50 px-4">
+        <div className="flex h-20 items-center border-b border-zinc-800/50 px-4">
           <Link
             href={role === "admin" ? "/admin" : "/dashboard"}
             className="flex items-center gap-3"
           >
-            <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
+            <Logo />
             <AnimatePresence>
               {!isEffectivelyCollapsed && (
                 <motion.span
@@ -209,7 +241,7 @@ export function Sidebar({ role, collapsed }: SidebarProps) {
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.15 }}
-                  className="text-lg font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent whitespace-nowrap overflow-hidden"
+                  className="text-xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent whitespace-nowrap overflow-hidden tracking-tight"
                 >
                   AluMate
                 </motion.span>
