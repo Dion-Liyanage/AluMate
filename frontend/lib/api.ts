@@ -130,6 +130,11 @@ export const ordersApi = {
     const res = await apiClient.patch<ApiResponse>(`/orders/${id}/cancel`);
     return res.data;
   },
+
+  approve: async (id: string) => {
+    const res = await apiClient.patch<ApiResponse>(`/orders/${id}/approve`);
+    return res.data;
+  },
 };
 
 // ---------- Admin Orders API ----------
@@ -149,14 +154,26 @@ export const adminOrdersApi = {
   },
 
   getById: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<{ order: Order }>>(`/admin/orders/${id}`);
+    const res = await apiClient.get<ApiResponse<{ data: Order }>>(`/admin/orders/${id}`);
     return res.data;
   },
 
-  update: async (id: string, data: Partial<Order>) => {
-    const res = await apiClient.patch<ApiResponse<{ order: Order }>>(
-      `/admin/orders/${id}`,
+  getStats: async () => {
+    const res = await apiClient.get<ApiResponse<any>>("/admin/orders/stats");
+    return res.data;
+  },
+
+  updateStatus: async (id: string, data: { status: string; progress?: number }) => {
+    const res = await apiClient.patch<ApiResponse<{ data: Order }>>(
+      `/admin/orders/${id}/status`,
       data
+    );
+    return res.data;
+  },
+
+  generateQuotation: async (id: string) => {
+    const res = await apiClient.post<ApiResponse<{ data: Order }>>(
+      `/admin/orders/${id}/generate-quotation`
     );
     return res.data;
   },

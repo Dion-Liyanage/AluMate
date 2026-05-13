@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,86 +13,59 @@ import {
 } from "@/components/ui/select";
 import { Search, Filter, X, Loader2, RotateCw } from "lucide-react";
 import { OrdersTable, Order } from "./OrdersTable";
-
-const mockOrders: Order[] = [
-  {
-    id: "ALU-ORD-2024-001",
-    customerName: "Dion Perera",
-    productType: "Sliding Window",
-    designType: 'Custom',
-    price: "Rs. 45,000",
-    status: 'production',
-    progress: 65,
-    date: "2024-05-10"
-  },
-  {
-    id: "ALU-ORD-2024-002",
-    customerName: "Amara Silva",
-    productType: "Main Door",
-    designType: 'Catalogue',
-    price: "Rs. 120,000",
-    status: 'approved',
-    progress: 25,
-    date: "2024-05-12"
-  },
-  {
-    id: "ALU-ORD-2024-003",
-    customerName: "Kushan Perera",
-    productType: "Kitchen Pantry",
-    designType: 'Custom',
-    price: "Rs. 250,000",
-    status: 'quotation_pending',
-    progress: 10,
-    date: "2024-05-13"
-  },
-  {
-    id: "ALU-ORD-2024-004",
-    customerName: "Nimini Fernando",
-    productType: "Office Partition",
-    designType: 'Custom',
-    price: "Rs. 85,000",
-    status: 'installation',
-    progress: 85,
-    date: "2024-05-14"
-  },
-  {
-    id: "ALU-ORD-2024-005",
-    customerName: "Saman Kumara",
-    productType: "Glass Railing",
-    designType: 'Catalogue',
-    price: "Rs. 65,000",
-    status: 'completed',
-    progress: 100,
-    date: "2024-05-15"
-  }
-];
+import { adminOrdersApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export function OrdersManagement() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const filteredOrders = useMemo(() => {
-    return mockOrders.filter((order) => {
-      // 1. Tab Filtering (Design Type)
-      const matchesTab = 
-        activeTab === "all" || 
-        (activeTab === "custom" && order.designType === "Custom") ||
-        (activeTab === "catalogue" && order.designType === "Catalogue");
-      
-      // 2. Search Query (ID, Customer, Product)
-      const matchesSearch = 
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.productType.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // 3. Status Filtering
-      const matchesStatus = statusFilter === "all" || order.status === statusFilter;
-
-      return matchesTab && matchesSearch && matchesStatus;
-    });
+  useEffect(() => {
+    fetchOrders();
   }, [activeTab, searchQuery, statusFilter]);
+
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const params: any = {};
+      if (statusFilter !== "all") params.status = statusFilter;
+      if (searchQuery) params.search = searchQuery;
+      
+      const response = await adminOrdersApi.getAll(params);
+      if (response.success && response.data) {
+        // Map backend orders to frontend format
+        const mappedOrders = (response.data as any).map((o: any) => ({
+          id: o.orderId,
+          _id: o._id,
+          customerName: o.customerId?.firstName ? `${o.customerId.firstName} ${o.customerId.lastName}` : "Unknown Customer",
+          productType: o.productType,
+          designType: o.designType === 'custom' ? 'Custom' : 'Catalogue',
+          price: o.estimatedPrice ? `Rs. ${o.estimatedPrice.toLocaleString()}` : "Pending",
+          status: o.status,
+          progress: o.progress,
+          date: new Date(o.createdAt).toISOString().split('T')[0]
+        }));
+        
+        // Filter by Tab (Design Type) if needed
+        let filtered = mappedOrders;
+        if (activeTab !== "all") {
+          filtered = mappedOrders.filter((o: any) => 
+            activeTab === 'custom' ? o.designType === 'Custom' : o.designType === 'Catalogue'
+          );
+        }
+
+        setOrders(filtered);
+      }
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+      toast.error("Failed to load orders");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -102,8 +75,7 @@ export function OrdersManagement() {
   const hasFilters = searchQuery !== "" || statusFilter !== "all";
 
   const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+    fetchOrders();
   };
 
   return (
@@ -190,13 +162,13 @@ export function OrdersManagement() {
         </div>
 
         <TabsContent value="all" className="mt-0">
-          <OrdersTable orders={filteredOrders} />
+          <OrdersTable orders={orders} isLoading={isLoading} onRefresh={fetchOrders} />
         </TabsContent>
         <TabsContent value="custom" className="mt-0">
-          <OrdersTable orders={filteredOrders} />
+          <OrdersTable orders={orders} isLoading={isLoading} onRefresh={fetchOrders} />
         </TabsContent>
         <TabsContent value="catalogue" className="mt-0">
-          <OrdersTable orders={filteredOrders} />
+          <OrdersTable orders={orders} isLoading={isLoading} onRefresh={fetchOrders} />
         </TabsContent>
       </Tabs>
     </div>

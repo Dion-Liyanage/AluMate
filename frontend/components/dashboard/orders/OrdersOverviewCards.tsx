@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion, animate } from "framer-motion";
 import { 
@@ -9,6 +11,8 @@ import {
   ShoppingCart
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ordersApi } from "@/lib/api";
+import { toast } from "sonner";
 
 function AnimatedCounter({ value }: { value: number }) {
   const [count, setCount] = useState(0);
@@ -40,55 +44,49 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-const stats = [
-  {
-    title: "Total Orders",
-    value: 12,
-    icon: Package,
-    color: "from-indigo-500/30 to-indigo-600/20",
-    iconColor: "text-indigo-300",
-    borderColor: "border-indigo-500/40",
-    glowColor: "hover:shadow-indigo-500/10",
-  },
-  {
-    title: "Active Orders",
-    value: 3,
-    icon: Clock,
-    color: "from-amber-500/30 to-amber-600/20",
-    iconColor: "text-amber-300",
-    borderColor: "border-amber-500/40",
-    glowColor: "hover:shadow-amber-500/10",
-  },
-  {
-    title: "Pending Quotations",
-    value: 2,
-    icon: Receipt,
-    color: "from-purple-500/30 to-purple-600/20",
-    iconColor: "text-purple-300",
-    borderColor: "border-purple-500/40",
-    glowColor: "hover:shadow-purple-500/10",
-  },
-  {
-    title: "Completed Orders",
-    value: 7,
-    icon: CheckCircle2,
-    color: "from-blue-500/30 to-blue-600/20",
-    iconColor: "text-blue-300",
-    borderColor: "border-blue-500/40",
-    glowColor: "hover:shadow-blue-500/10",
-  },
-  {
-    title: "Service Requests",
-    value: 1,
-    icon: Wrench,
-    color: "from-emerald-500/30 to-emerald-600/20",
-    iconColor: "text-emerald-300",
-    borderColor: "border-emerald-500/40",
-    glowColor: "hover:shadow-emerald-500/10",
-  },
-];
-
 export function OrdersOverviewCards() {
+  const [statsData, setStatsData] = useState({
+    total: 0,
+    pending: 0,
+    production: 0,
+    completed: 0,
+    services: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await ordersApi.getAll();
+      if (response.success && response.data) {
+        const orders = response.data.orders || [];
+        setStatsData({
+          total: orders.length,
+          pending: orders.filter(o => o.status === 'quotation_pending' || o.status === 'pending').length,
+          production: orders.filter(o => o.status === 'production').length,
+          completed: orders.filter(o => o.status === 'completed').length,
+          services: 0 // Placeholder for service requests
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch user order stats:", error);
+      // Don't show toast for every fetch error if component re-mounts
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const statCards = [
+    { title: "Total Orders", value: statsData.total, icon: Package, color: "from-indigo-500/30 to-indigo-600/20", iconColor: "text-indigo-300", borderColor: "border-indigo-500/40", glowColor: "hover:shadow-indigo-500/10" },
+    { title: "Active Orders", value: statsData.production, icon: Clock, color: "from-amber-500/30 to-amber-600/20", iconColor: "text-amber-300", borderColor: "border-amber-500/40", glowColor: "hover:shadow-amber-500/10" },
+    { title: "Pending Quotations", value: statsData.pending, icon: Receipt, color: "from-purple-500/30 to-purple-600/20", iconColor: "text-purple-300", borderColor: "border-purple-500/40", glowColor: "hover:shadow-purple-500/10" },
+    { title: "Completed Orders", value: statsData.completed, icon: CheckCircle2, color: "from-blue-500/30 to-blue-600/20", iconColor: "text-blue-300", borderColor: "border-blue-500/40", glowColor: "hover:shadow-blue-500/10" },
+    { title: "Service Requests", value: statsData.services, icon: Wrench, color: "from-emerald-500/30 to-emerald-600/20", iconColor: "text-emerald-300", borderColor: "border-emerald-500/40", glowColor: "hover:shadow-emerald-500/10" },
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -128,7 +126,7 @@ export function OrdersOverviewCards() {
             animate="visible"
             className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5"
           >
-            {stats.map((stat, index) => (
+            {statCards.map((stat, index) => (
               <motion.div key={stat.title} variants={itemVariants} className="h-full">
                 <div className={`relative h-full overflow-hidden rounded-lg border ${stat.borderColor} bg-gradient-to-br ${stat.color} p-4 backdrop-blur-sm transition-all hover:shadow-lg ${stat.glowColor} group/card`}>
                   <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />

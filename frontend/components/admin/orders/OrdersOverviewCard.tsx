@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Package, Receipt, Factory, Truck, CheckCircle2, XCircle, ShoppingCart } from "lucide-react";
 import { motion, animate } from "framer-motion";
 
+import { adminOrdersApi } from "@/lib/api";
+import { toast } from "sonner";
+
 function AnimatedCounter({ value }: { value: number }) {
   const [count, setCount] = useState(0);
 
@@ -24,13 +27,31 @@ function AnimatedCounter({ value }: { value: number }) {
 
 export function OrdersOverviewCard() {
   const [stats, setStats] = useState({
-    totalOrders: 48,
-    pendingQuotations: 12,
-    activeProductions: 18,
-    installations: 5,
-    completed: 145,
-    cancelled: 3,
+    totalOrders: 0,
+    pendingQuotations: 0,
+    activeProductions: 0,
+    installations: 0,
+    completed: 0,
   });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await adminOrdersApi.getStats();
+      if (response.success && response.data) {
+        setStats(response.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch order stats:", error);
+      toast.error("Could not load order statistics");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const statCards = [
     {

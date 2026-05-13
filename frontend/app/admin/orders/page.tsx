@@ -3,14 +3,11 @@
 import { motion } from "framer-motion";
 import { 
   ShoppingCart, 
-  Plus, 
-  FileDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { OrdersOverviewCard } from "@/components/admin/orders/OrdersOverviewCard";
 import { OrdersManagement } from "@/components/admin/orders/OrdersManagement";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import Link from "next/link";
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,16 +45,7 @@ export default function AdminOrdersPage() {
                 Monitor fabrication workflows, review quotations, and track production progress.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white gap-2 h-10 px-4 rounded-xl transition-all shadow-lg">
-                <FileDown className="h-4 w-4" />
-                Export
-              </Button>
-              <Button className="bg-emerald-600/20 text-emerald-200 border border-emerald-500/40 hover:text-emerald-100 hover:bg-emerald-500/30 hover:border-emerald-500/60 transition-all font-semibold shadow-[0_0_15px_rgba(16,185,129,0.1)] rounded-xl h-10 px-5">
-                <Plus className="h-4 w-4 mr-2" />
-                New Order
-              </Button>
-            </div>
+
           </div>
         </motion.div>
 
