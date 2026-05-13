@@ -1,165 +1,266 @@
-AluMate – User Dashboard My Orders Page Frontend Development Plan
-Order Tracking & Order Management Interface
-Project
+user-dashboard-my-orders-backend-with-mock-data-architecture.md
+# AluMate – User Dashboard My Orders Backend Development Plan
+## Backend Architecture + Mock Data Replacement Strategy
+
+---
+
+# Project
 
 AluMate – Aluminium Fabrication and Service Management System
 
-This document defines the frontend implementation plan for the:
+This document defines the backend architecture and implementation plan for:
 
-User Dashboard → My Orders Page
+User Dashboard → My Orders Module
 
-The goal of this module is to allow users to:
+including:
 
-view all fabrication orders
-track quotation progress
-monitor fabrication status
-view installation progress
-access order details
-manage quotations and payments
+- order workflow management
+- quotation handling
+- material & labor calculations
+- API architecture
+- mock data strategy
+- frontend integration architecture
 
-while maintaining the same:
+The system is designed to support:
 
-dark glassmorphism UI
-neon gradient cards
-dashboard layout consistency
-smooth animations
-responsive behavior
+- scalable backend development
+- mock-to-real API transition
+- modular services
+- future feature expansion
 
-used throughout the AluMate system.
+without requiring frontend rewrites.
 
-1. PAGE OBJECTIVE
+---
 
-The My Orders page should function as:
+# 1. CORE OBJECTIVE
 
-a centralized order tracking dashboard
+The My Orders backend should function as:
 
-for residential customers.
+"a scalable fabrication workflow management system"
 
-2. PAGE ROUTE
-/dashboard/orders
-3. PAGE LAYOUT STRUCTURE
-Recommended Layout
--------------------------------------------------
+for residential aluminium fabrication customers.
 
-Sidebar
+---
 
-Top Navigation
+# 2. IMPORTANT DEVELOPMENT PRINCIPLE
 
--------------------------------------------------
+The frontend MUST NOT depend directly on:
 
-Page Header
+- hardcoded mock arrays
+- database schemas
+- specific API structures
 
--------------------------------------------------
+Instead:
 
-Order Overview Cards
+```text
+UI Components
+    ↓
+Hooks
+    ↓
+Service Layer
+    ↓
+Mock Data OR API
 
--------------------------------------------------
+This allows:
 
-Search & Filter Section
+rapid frontend development
+easy backend integration
+scalable architecture
+maintainable codebase
+3. MOCK DATA ARCHITECTURE
+IMPORTANT RULE
 
--------------------------------------------------
+Frontend components should NEVER directly contain mock data.
 
-Orders Table / Cards
+BAD PRACTICE
+const orders = [...]
 
--------------------------------------------------
+inside component files.
 
-Order Details Drawer / Modal
+CORRECT PRACTICE
+const { orders } = useOrders()
+4. RECOMMENDED PROJECT STRUCTURE
+src/
 
--------------------------------------------------
-4. PAGE HEADER SECTION
-Header Content
-Title
-My Orders
-Subtitle
-Track fabrication progress, quotations, payments, and delivery updates.
-5. ORDER OVERVIEW CARDS
-Main Goal
+mock/
+    orders.mock.ts
 
-Display quick statistics.
+services/
+    order.service.ts
 
-Recommended Cards
-Total Orders
-All orders created by user
-Active Orders
-Currently processing orders
-Pending Quotations
-Orders waiting for quotation approval
-Completed Orders
-Successfully completed projects
-Service Requests
-Associated repair/on-site services
-6. OVERVIEW CARD DESIGN
+hooks/
+    useOrders.ts
 
-Follow existing dashboard design:
+types/
+    order.types.ts
 
-gradient backgrounds
-glassmorphism effects
-rounded corners
-neon borders
-glowing icons
-hover lift animations
-Suggested Colors
-Card	Theme
-Total Orders	Blue
-Active Orders	Orange
-Quotations	Purple
-Completed	Green
-Services	Cyan
-7. SEARCH & FILTER SECTION
-Main Goal
+components/
+    dashboard/orders/
+5. DEVELOPMENT FLOW
+PHASE 1 — UI Development
 
-Allow users to quickly locate orders.
+Frontend retrieves:
 
-Search Bar
+Mock Data
 
-Search by:
+through services.
 
-Order ID
-Product Type
-Quotation ID
-Filters
-Status Filter
-All
-Pending
-Quotation Sent
-Approved
-In Production
-Installing
+PHASE 2 — Backend Integration
+
+Replace:
+
+mock data source
+
+with:
+
+real API requests
+
+WITHOUT changing UI components.
+
+6. MOCK DATA FILE STRUCTURE
+orders.mock.ts
+export const mockOrders = [
+  {
+    id: "ALU-ORD-1001",
+
+    productType: "Window",
+
+    status: "In Production",
+
+    estimatedPrice: 85000,
+
+    progress: 50,
+  },
+]
+7. SERVICE LAYER ARCHITECTURE
+order.service.ts
+
+Initial implementation:
+
+import { mockOrders } from "@/mock/orders.mock"
+
+export async function getOrders() {
+  return mockOrders
+}
+AFTER BACKEND INTEGRATION
+export async function getOrders() {
+  const res = await api.get("/orders")
+  return res.data
+}
+8. HOOK ARCHITECTURE
+useOrders.ts
+export function useOrders() {
+  const [orders, setOrders] = useState([])
+
+  useEffect(() => {
+    getOrders().then(setOrders)
+  }, [])
+
+  return { orders }
+}
+9. BENEFITS OF THIS ARCHITECTURE
+
+This structure allows:
+
+backend replacement without UI rewrites
+easier testing
+scalable APIs
+modular architecture
+reusable hooks
+cleaner frontend logic
+10. CORE BACKEND RESPONSIBILITIES
+
+The backend should manage:
+
+order creation
+quotation tracking
+fabrication workflow
+material calculations
+labor calculations
+order progress
+PDF generation
+service requests
+notifications
+11. OVERALL ORDER WORKFLOW
+
+User Creates Design
+↓
+Configuration Submitted
+↓
+Order Created
+↓
+Material Recommendation Engine
+↓
+Labor Calculation
+↓
+Quotation Generation
+↓
+Admin Review
+↓
+Quotation Approval
+↓
+Production
+↓
+Installation
+↓
 Completed
-Cancelled
-Product Type Filter
-Window
-Door
-Pantry
-Partition
-Cupboard
-Date Filter
-Newest
-Oldest
-Recent 30 Days
-8. ORDER LIST SECTION
-Recommended Layout
 
-Desktop:
+12. DATABASE COLLECTIONS
 
-Modern data table layout
+Recommended MongoDB collections:
 
-Mobile:
+users
+orders
+quotations
+orderDesigns
+orderMaterials
+invoices
+serviceRequests
+orderStatusHistory
+13. ORDERS COLLECTION STRUCTURE
+Example Schema
+{
+  "_id": "ObjectId",
 
-Stacked order cards
-9. ORDER TABLE COLUMNS
-Recommended Columns
-Column	Description
-Order ID	Unique order identifier
-Product Type	Window / Door / Pantry
-Design Type	Custom / Catalogue
-Order Date	Submission date
-Estimated Price	Estimated quotation
-Status	Current workflow status
-Progress	Progress bar
-Action	View details button
-10. ORDER STATUS SYSTEM
-Recommended Statuses
+  "orderId": "ALU-ORD-1001",
+
+  "customerId": "ObjectId",
+
+  "productType": "Window",
+
+  "designType": "custom",
+
+  "status": "Quotation Pending",
+
+  "progress": 25,
+
+  "estimatedPrice": 85000,
+
+  "measurements": {
+    "width": 1800,
+    "height": 1200
+  },
+
+  "purpose": "Heavy Usage",
+
+  "environment": "Outdoor",
+
+  "strengthCategory": "Heavy Duty",
+
+  "recommendedMaterials": [],
+
+  "laborCalculation": {},
+
+  "attachments": [],
+
+  "createdAt": "Date",
+
+  "updatedAt": "Date"
+}
+14. ORDER STATUS WORKFLOW
+
+Recommended statuses:
+
 Draft
 Quotation Pending
 Quotation Sent
@@ -168,245 +269,302 @@ In Production
 Installation Scheduled
 Completed
 Cancelled
-11. STATUS BADGE DESIGN
-Use Colored Pills
-Status	Color
-Draft	Gray
-Pending	Orange
-Approved	Blue
-Production	Purple
-Completed	Green
-Cancelled	Red
-Animation Recommendation
+15. ORDER STATUS HISTORY
 
-Use:
+Track all workflow changes.
 
-subtle glow pulse
-smooth transitions
-hover scaling
-12. ORDER PROGRESS TRACKER
-Recommended Progress UI
-
-Each order should display:
-
-Progress Percentage
-Workflow Stage
 Example
-Quotation Approved → 25%
+{
+  "orderId": "ObjectId",
 
-Fabrication Started → 50%
+  "previousStatus": "Approved",
 
-Installation Scheduled → 75%
+  "newStatus": "In Production",
 
-Completed → 100%
-13. ORDER DETAILS VIEW
-Recommended UI
+  "changedBy": "Admin",
 
-Use:
+  "changedAt": "Date"
+}
+16. MATERIAL RECOMMENDATION STORAGE
 
-Right-side drawer
+Orders should permanently store:
 
-OR:
+selected profiles
+accessories
+glass selections
+profile thickness
+material pricing snapshot
 
-fullscreen modal
-14. ORDER DETAILS CONTENT
-Basic Information
-Order ID
-Customer Name
-Created Date
-Expected Completion
-Product Information
-Product Type
-Measurements
-Purpose
-Selected Color
-Strength Category
-Recommended Materials Section
+This prevents quotation changes if admin updates prices later.
 
-Display:
+17. MATERIAL STORAGE STRUCTURE
+{
+  "profileName": "80mm Sliding",
 
-Recommended Aluminium Profiles
-Accessories
-Glass Types
-15. MATERIAL COST BREAKDOWN
-Display
-Item	Quantity	Price
-80mm Sliding	22ft	Rs. 35,200
-Tempered Glass	18sq.ft	Rs. 14,000
-16. LABOR COST BREAKDOWN
-Display
-Area:
-24 sq.ft
+  "thickness": "1.4mm",
 
-Labor Rate:
-Rs. 350 / sq.ft
+  "quantityFeet": 22,
 
-Total Labor:
-Rs. 8,400
-17. QUOTATION SUMMARY SECTION
-Display
-Type	Amount
-Material Cost	Rs. XX
-Labor Cost	Rs. XX
-Installation	Rs. XX
-Transport	Rs. XX
-Total Estimate	Rs. XX
-18. FILES & ATTACHMENTS SECTION
+  "pricePerFeet": 1600,
 
-Allow viewing:
+  "materialCost": 35200
+}
+18. LABOR CALCULATION STORAGE
+
+Store:
+
+area calculations
+labor rate
+labor total
+Example
+{
+  "areaSqFt": 24,
+
+  "laborRate": 350,
+
+  "laborCost": 8400
+}
+19. QUOTATION STORAGE
+
+Store:
+
+quotation breakdown
+admin notes
+generated PDFs
+approval status
+Example
+{
+  "quotationId": "ALU-QT-1001",
+
+  "orderId": "ObjectId",
+
+  "materialCost": 55000,
+
+  "laborCost": 8400,
+
+  "installationCost": 5000,
+
+  "transportCost": 2500,
+
+  "totalAmount": 70900,
+
+  "status": "Pending"
+}
+20. FILE STORAGE SYSTEM
+
+Backend should support:
 
 quotation PDFs
-design previews
-uploaded references
 invoices
-19. ORDER ACTION BUTTONS
-Recommended Buttons
-View Details
-Opens order details drawer
-Download Quotation
-Download quotation PDF
-Accept Quotation
-Approve quotation request
+uploaded references
+design previews
+21. STORAGE OPTIONS
+Development
+local uploads folder
+Production
+Cloudinary
+AWS S3
+Supabase Storage
+22. ORDER SEARCH SYSTEM
+
+Backend should support:
+
+order ID search
+quotation search
+status filters
+product type filters
+date filters
+23. USER AUTHORIZATION
+
+Users should ONLY access:
+
+their own orders
+24. SECURITY REQUIREMENTS
+
+Protect:
+
+quotation data
+invoices
+uploads
+customer information
+Recommended Security
+JWT authentication
+middleware protection
+role validation
+request validation
+25. PAGINATION SUPPORT
+
+Support:
+
+page
+limit
+sorting
+Example
+GET /api/orders?page=1&limit=10
+26. ORDER DETAILS API
+Endpoint
+GET /api/orders/:id
+Response Should Include
+order details
+quotation
+material breakdown
+labor calculations
+progress history
+services
+files
+27. USER ACTION APIS
+Approve Quotation
+PATCH /api/orders/:id/approve
 Cancel Order
-Cancel pending order
+PATCH /api/orders/:id/cancel
 Request Service
-Create repair/service request
-20. SAVED DESIGNS SECTION (OPTIONAL)
+POST /api/orders/:id/service-request
+28. ORDER PROGRESS MAPPING
+Status	Progress
+Draft	0%
+Quotation Pending	10%
+Approved	25%
+Production	50%
+Installation	75%
+Completed	100%
+29. PDF GENERATION SYSTEM
 
-Users can save unfinished designs.
+Generate:
 
-Display
-Design Preview
-Last Modified Date
-Continue Designing Button
-21. EMPTY STATE DESIGN
+quotation PDFs
+invoices
+order summaries
+30. PDF CONTENT
 
-If no orders exist:
+Include:
 
-Display Illustration
-No Orders Yet
-CTA Button
-Create Your First Design
-22. LOADING STATES
+company branding
+quotation breakdown
+material recommendations
+labor calculations
+total estimate
+customer information
+31. NOTIFICATION SYSTEM (OPTIONAL)
 
-Use:
+Users can receive notifications for:
 
-skeleton loaders
-shimmer animations
-glowing placeholders
+quotation sent
+quotation approved
+production started
+installation scheduled
+completed orders
+32. RECOMMENDED API STRUCTURE
+/api/orders
+/api/orders/:id
+/api/orders/:id/approve
+/api/orders/:id/cancel
+/api/orders/:id/files
+/api/orders/:id/progress
+33. SERVICE LAYER STRUCTURE
+services/
 
-consistent with dashboard theme.
+order.service.ts
+quotation.service.ts
+material.service.ts
+labor.service.ts
+pdf.service.ts
+notification.service.ts
+34. CONTROLLER STRUCTURE
+controllers/
 
-23. ERROR STATES
+order.controller.ts
+quotation.controller.ts
+35. VALIDATIONS
 
-Display friendly messages:
+Validate:
 
-Unable to load orders
-Try again
-24. FRONTEND STATE MANAGEMENT
-Recommended States
-orders
-selectedOrder
+measurements
+quotation totals
+status transitions
+uploaded files
+user ownership
+36. ERROR HANDLING
+
+Return consistent API responses.
+
+Example
+{
+  "success": false,
+  "message": "Order not found"
+}
+37. DATABASE INDEXING
+
+Recommended indexes:
+
+orderId
+customerId
+status
+createdAt
+38. FRONTEND INTEGRATION REQUIREMENTS
+
+Backend must support:
+
+overview cards
 filters
-searchQuery
-statusFilter
-loading
-pagination
-25. RECOMMENDED COMPONENT STRUCTURE
-components/dashboard/orders/
+order tables
+detail drawers
+quotation downloads
+service requests
+39. FUTURE SCALABILITY
 
-OrdersOverviewCards.tsx
-OrdersSearchFilters.tsx
-OrdersTable.tsx
-OrderStatusBadge.tsx
-OrderProgressTracker.tsx
-OrderDetailsDrawer.tsx
-QuotationSummary.tsx
-MaterialBreakdown.tsx
-LaborBreakdown.tsx
-EmptyOrdersState.tsx
-26. RESPONSIVE DESIGN REQUIREMENTS
-Desktop
-full table layout
-side detail drawer
-overview cards row
-Tablet
-compact tables
-collapsible filters
-Mobile
-stacked order cards
-fullscreen order details
-simplified filters
-27. UI/UX REQUIREMENTS
+Architecture should support:
 
-Follow existing AluMate design language:
-
-dark UI
-neon gradients
-glassmorphism panels
-rounded cards
-glowing hover effects
-sidebar consistency
-smooth transitions
-28. ANIMATION REQUIREMENTS
-Recommended Animations
-Page Load
-fade-up stagger animations
-Cards
-hover lift + glow effect
-Tables
-smooth row hover highlight
-Modals / Drawers
-slide-in transition
-29. VALIDATION REQUIREMENTS
-
-Users should only be able to:
-
-cancel pending orders
-approve quotations
-request services for completed orders
-30. DEVELOPMENT PHASES
+payment integration
+live fabrication updates
+technician tracking
+delivery tracking
+mobile apps
+40. DEVELOPMENT PHASES
 PHASE 1
-Page layout
-Overview cards
-Table UI
+schemas
+order CRUD
+status workflow
 PHASE 2
-Search & filtering
-Status badges
+quotation system
+material storage
+labor calculations
 PHASE 3
-Order details drawer
-Material breakdown
+file uploads
+PDF generation
 PHASE 4
-Quotation summary
-Download actions
+search & filters
+pagination
 PHASE 5
-Animations
-Responsive optimization
-31. FINAL FRONTEND OBJECTIVE
+notifications
+analytics
+optimization
+41. FINAL BACKEND OBJECTIVE
 
-The My Orders page should behave as:
+The backend should behave as:
 
-a modern residential fabrication order tracking system
+"a scalable fabrication workflow management system"
 
 NOT:
 
-a simple CRUD table
-32. SUMMARY
+"a simple CRUD backend"
 
-This module allows users to:
+42. SUMMARY
 
-track fabrication orders
-monitor quotations
-view material recommendations
-understand labor calculations
-access quotations and invoices
-monitor project progress
-manage completed services
+This backend module manages:
+
+fabrication orders
+quotation workflows
+material calculations
+labor calculations
+progress tracking
+PDFs & invoices
+service integrations
+scalable frontend integration
 
 while maintaining:
 
-modern dashboard aesthetics
-scalable architecture
-smooth UX
-responsive layouts
-intelligent workflow visibility
+clean architecture
+modular services
+secure APIs
+mock-to-real data scalability
+realistic fabrication workflows
