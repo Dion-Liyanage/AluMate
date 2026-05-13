@@ -149,7 +149,7 @@ export function OnSiteVisitForm() {
             <div className="flex justify-between items-start">
               <div className="flex gap-4">
                 <div className="mt-1 h-12 w-12 rounded-xl bg-fuchsia-500/30 flex items-center justify-center border border-fuchsia-500/40 shadow-[0_0_15px_rgba(217,70,239,0.3)]">
-                  <Ruler className="h-6 w-6 text-fuchsia-100" />
+                  <MapPin className="h-6 w-6 text-fuchsia-100" />
                 </div>
                 <div>
                   <CardTitle className="text-2xl text-zinc-100">Schedule a Visit</CardTitle>

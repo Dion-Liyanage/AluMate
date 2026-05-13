@@ -1,6 +1,6 @@
-user-dashboard-my-orders-backend-with-mock-data-architecture.md
-# AluMate – User Dashboard My Orders Backend Development Plan
-## Backend Architecture + Mock Data Replacement Strategy
+admin-dashboard-orders-backend-plan.md
+# AluMate – Admin Dashboard Orders Backend Development Plan
+## Fabrication Workflow, Quotation & Order Management Backend
 
 ---
 
@@ -10,215 +10,114 @@ AluMate – Aluminium Fabrication and Service Management System
 
 This document defines the backend architecture and implementation plan for:
 
-User Dashboard → My Orders Module
+Admin Dashboard → Orders Module
 
-including:
+The purpose of this backend system is to:
 
-- order workflow management
-- quotation handling
-- material & labor calculations
-- API architecture
-- mock data strategy
-- frontend integration architecture
+- manage fabrication orders
+- process quotations
+- control fabrication workflows
+- manage installations
+- handle material recommendations
+- calculate labor costs
+- manage production stages
+- generate PDFs
+- support scalable admin operations
 
-The system is designed to support:
+while maintaining:
 
-- scalable backend development
-- mock-to-real API transition
-- modular services
-- future feature expansion
-
-without requiring frontend rewrites.
+- modular architecture
+- scalable APIs
+- secure role-based access
+- realistic fabrication workflows
+- mock-to-real data scalability
 
 ---
 
 # 1. CORE OBJECTIVE
 
-The My Orders backend should function as:
+The Orders backend should function as:
 
-"a scalable fabrication workflow management system"
+"a centralized fabrication workflow management system"
 
-for residential aluminium fabrication customers.
+for aluminium fabrication business operations.
 
 ---
 
-# 2. IMPORTANT DEVELOPMENT PRINCIPLE
+# 2. ADMIN RESPONSIBILITIES
 
-The frontend MUST NOT depend directly on:
+Admins should be able to:
 
-- hardcoded mock arrays
-- database schemas
-- specific API structures
+- review customer orders
+- manage custom designs
+- manage catalogue orders
+- generate quotations
+- update workflow statuses
+- assign materials
+- review labor calculations
+- schedule installations
+- generate invoices
+- monitor order history
 
-Instead:
+---
 
-```text
-UI Components
-    ↓
-Hooks
-    ↓
-Service Layer
-    ↓
-Mock Data OR API
+# 3. COMPLETE WORKFLOW
 
-This allows:
-
-rapid frontend development
-easy backend integration
-scalable architecture
-maintainable codebase
-3. MOCK DATA ARCHITECTURE
-IMPORTANT RULE
-
-Frontend components should NEVER directly contain mock data.
-
-BAD PRACTICE
-const orders = [...]
-
-inside component files.
-
-CORRECT PRACTICE
-const { orders } = useOrders()
-4. RECOMMENDED PROJECT STRUCTURE
-src/
-
-mock/
-    orders.mock.ts
-
-services/
-    order.service.ts
-
-hooks/
-    useOrders.ts
-
-types/
-    order.types.ts
-
-components/
-    dashboard/orders/
-5. DEVELOPMENT FLOW
-PHASE 1 — UI Development
-
-Frontend retrieves:
-
-Mock Data
-
-through services.
-
-PHASE 2 — Backend Integration
-
-Replace:
-
-mock data source
-
-with:
-
-real API requests
-
-WITHOUT changing UI components.
-
-6. MOCK DATA FILE STRUCTURE
-orders.mock.ts
-export const mockOrders = [
-  {
-    id: "ALU-ORD-1001",
-
-    productType: "Window",
-
-    status: "In Production",
-
-    estimatedPrice: 85000,
-
-    progress: 50,
-  },
-]
-7. SERVICE LAYER ARCHITECTURE
-order.service.ts
-
-Initial implementation:
-
-import { mockOrders } from "@/mock/orders.mock"
-
-export async function getOrders() {
-  return mockOrders
-}
-AFTER BACKEND INTEGRATION
-export async function getOrders() {
-  const res = await api.get("/orders")
-  return res.data
-}
-8. HOOK ARCHITECTURE
-useOrders.ts
-export function useOrders() {
-  const [orders, setOrders] = useState([])
-
-  useEffect(() => {
-    getOrders().then(setOrders)
-  }, [])
-
-  return { orders }
-}
-9. BENEFITS OF THIS ARCHITECTURE
-
-This structure allows:
-
-backend replacement without UI rewrites
-easier testing
-scalable APIs
-modular architecture
-reusable hooks
-cleaner frontend logic
-10. CORE BACKEND RESPONSIBILITIES
-
-The backend should manage:
-
-order creation
-quotation tracking
-fabrication workflow
-material calculations
-labor calculations
-order progress
-PDF generation
-service requests
-notifications
-11. OVERALL ORDER WORKFLOW
-
-User Creates Design
-↓
-Configuration Submitted
-↓
-Order Created
-↓
+Customer Creates Design
+        ↓
+Order Submitted
+        ↓
+Backend Creates Draft Order
+        ↓
 Material Recommendation Engine
-↓
-Labor Calculation
-↓
+        ↓
+Labor Calculation Engine
+        ↓
 Quotation Generation
-↓
+        ↓
 Admin Review
-↓
-Quotation Approval
-↓
-Production
-↓
-Installation
-↓
-Completed
+        ↓
+Quotation Sent
+        ↓
+Customer Approval
+        ↓
+Production Workflow
+        ↓
+Installation Scheduling
+        ↓
+Order Completion
 
-12. DATABASE COLLECTIONS
+---
+
+# 4. DATABASE COLLECTIONS
 
 Recommended MongoDB collections:
 
-users
+- users
+- orders
+- quotations
+- orderDesigns
+- orderMaterials
+- materialRules
+- laborRules
+- invoices
+- orderStatusHistory
+- installationSchedules
+- notifications
+
+---
+
+# 5. ORDERS COLLECTION STRUCTURE
+
+## Collection
+
 orders
-quotations
-orderDesigns
-orderMaterials
-invoices
-serviceRequests
-orderStatusHistory
-13. ORDERS COLLECTION STRUCTURE
-Example Schema
+
+---
+
+## Example Schema
+
+```json
 {
   "_id": "ObjectId",
 
@@ -230,11 +129,17 @@ Example Schema
 
   "designType": "custom",
 
+  "designId": "ObjectId",
+
+  "quotationId": "ObjectId",
+
   "status": "Quotation Pending",
 
   "progress": 25,
 
   "estimatedPrice": 85000,
+
+  "approvedPrice": 0,
 
   "measurements": {
     "width": 1800,
@@ -247,9 +152,13 @@ Example Schema
 
   "strengthCategory": "Heavy Duty",
 
+  "selectedColor": "Black",
+
   "recommendedMaterials": [],
 
   "laborCalculation": {},
+
+  "installation": {},
 
   "attachments": [],
 
@@ -257,7 +166,7 @@ Example Schema
 
   "updatedAt": "Date"
 }
-14. ORDER STATUS WORKFLOW
+6. ORDER STATUS WORKFLOW
 
 Recommended statuses:
 
@@ -265,15 +174,17 @@ Draft
 Quotation Pending
 Quotation Sent
 Approved
+Material Preparation
 In Production
 Installation Scheduled
+Installing
 Completed
 Cancelled
-15. ORDER STATUS HISTORY
+7. STATUS HISTORY TRACKING
 
-Track all workflow changes.
+Track every workflow transition.
 
-Example
+Example Schema
 {
   "orderId": "ObjectId",
 
@@ -285,19 +196,61 @@ Example
 
   "changedAt": "Date"
 }
-16. MATERIAL RECOMMENDATION STORAGE
+8. ORDER ID GENERATION
+Recommended Format
+ALU-ORD-1001
+Requirements
+unique
+sequential
+auto-generated
+indexed
+9. MATERIAL RECOMMENDATION ENGINE
+Core Objective
 
-Orders should permanently store:
+Automatically recommend:
 
-selected profiles
+aluminium profiles
+glass types
 accessories
-glass selections
-profile thickness
-material pricing snapshot
+frame thickness
+hardware
 
-This prevents quotation changes if admin updates prices later.
+based on:
 
-17. MATERIAL STORAGE STRUCTURE
+product type
+measurements
+usage purpose
+strength requirements
+environment
+10. MATERIAL RULES COLLECTION
+
+Admins control all recommendation logic.
+
+Example Schema
+{
+  "productType": "Window",
+
+  "designCategory": "Sliding",
+
+  "minWidth": 0,
+
+  "maxWidth": 2400,
+
+  "purpose": "Heavy Usage",
+
+  "recommendedProfile": "80mm Sliding",
+
+  "thickness": "1.4mm"
+}
+11. MATERIAL PRICING SYSTEM
+
+Admins should manage:
+
+price per feet
+thickness pricing
+glass prices
+accessory prices
+12. MATERIAL STORAGE STRUCTURE
 {
   "profileName": "80mm Sliding",
 
@@ -309,14 +262,28 @@ This prevents quotation changes if admin updates prices later.
 
   "materialCost": 35200
 }
-18. LABOR CALCULATION STORAGE
+13. LABOR CALCULATION ENGINE
+Core Logic
 
-Store:
+Labor should calculate:
 
-area calculations
-labor rate
-labor total
-Example
+area (sq.ft) × labor rate
+14. LABOR RULES COLLECTION
+
+Admins should configure:
+
+labor rates
+product type rates
+material-based rates
+Example Schema
+{
+  "productType": "Window",
+
+  "profileName": "80mm Sliding",
+
+  "laborRatePerSqFt": 350
+}
+15. LABOR STORAGE STRUCTURE
 {
   "areaSqFt": 24,
 
@@ -324,15 +291,16 @@ Example
 
   "laborCost": 8400
 }
-19. QUOTATION STORAGE
+16. QUOTATION SYSTEM
+Quotations Collection
 
 Store:
 
 quotation breakdown
 admin notes
-generated PDFs
+PDF paths
 approval status
-Example
+Example Schema
 {
   "quotationId": "ALU-QT-1001",
 
@@ -350,49 +318,74 @@ Example
 
   "status": "Pending"
 }
-20. FILE STORAGE SYSTEM
+17. INSTALLATION MANAGEMENT
+
+Store:
+
+installation dates
+assigned team
+location details
+transport notes
+Example Schema
+{
+  "orderId": "ObjectId",
+
+  "installationDate": "Date",
+
+  "assignedTeam": "Team A",
+
+  "status": "Scheduled"
+}
+18. FILE STORAGE SYSTEM
 
 Backend should support:
 
 quotation PDFs
 invoices
-uploaded references
 design previews
-21. STORAGE OPTIONS
+customer uploads
+production images
+19. STORAGE OPTIONS
 Development
 local uploads folder
 Production
 Cloudinary
 AWS S3
 Supabase Storage
-22. ORDER SEARCH SYSTEM
+20. ORDER SEARCH SYSTEM
 
-Backend should support:
+Support:
 
 order ID search
+customer search
 quotation search
 status filters
-product type filters
+product filters
 date filters
-23. USER AUTHORIZATION
+21. SEARCH API EXAMPLE
+GET /api/admin/orders?status=Approved
+22. ROLE-BASED ACCESS CONTROL
 
-Users should ONLY access:
+Only admins should:
 
-their own orders
-24. SECURITY REQUIREMENTS
+update workflows
+generate quotations
+edit material rules
+manage installations
+23. SECURITY REQUIREMENTS
 
 Protect:
 
-quotation data
+quotations
 invoices
 uploads
 customer information
 Recommended Security
 JWT authentication
-middleware protection
+admin middleware
 role validation
 request validation
-25. PAGINATION SUPPORT
+24. PAGINATION SUPPORT
 
 Support:
 
@@ -400,99 +393,140 @@ page
 limit
 sorting
 Example
-GET /api/orders?page=1&limit=10
-26. ORDER DETAILS API
+GET /api/admin/orders?page=1&limit=20
+25. ORDER DETAILS API
 Endpoint
-GET /api/orders/:id
+GET /api/admin/orders/:id
 Response Should Include
 order details
-quotation
 material breakdown
 labor calculations
-progress history
-services
+quotation
 files
-27. USER ACTION APIS
-Approve Quotation
-PATCH /api/orders/:id/approve
-Cancel Order
-PATCH /api/orders/:id/cancel
-Request Service
-POST /api/orders/:id/service-request
-28. ORDER PROGRESS MAPPING
+workflow history
+installation details
+26. ADMIN ACTION APIS
+Generate Quotation
+POST /api/admin/orders/:id/generate-quotation
+Update Workflow Status
+PATCH /api/admin/orders/:id/status
+Schedule Installation
+PATCH /api/admin/orders/:id/installation
+Mark Completed
+PATCH /api/admin/orders/:id/complete
+27. ORDER PROGRESS MAPPING
 Status	Progress
 Draft	0%
 Quotation Pending	10%
 Approved	25%
-Production	50%
-Installation	75%
+Material Preparation	40%
+Production	60%
+Installation Scheduled	80%
 Completed	100%
-29. PDF GENERATION SYSTEM
+28. PDF GENERATION SYSTEM
 
 Generate:
 
-quotation PDFs
+quotations
 invoices
 order summaries
-30. PDF CONTENT
+29. PDF CONTENT
 
 Include:
 
 company branding
-quotation breakdown
-material recommendations
-labor calculations
-total estimate
 customer information
-31. NOTIFICATION SYSTEM (OPTIONAL)
+material breakdown
+labor calculations
+installation charges
+total quotation
+30. NOTIFICATION SYSTEM
 
-Users can receive notifications for:
+Notify:
 
 quotation sent
 quotation approved
 production started
 installation scheduled
 completed orders
-32. RECOMMENDED API STRUCTURE
-/api/orders
-/api/orders/:id
-/api/orders/:id/approve
-/api/orders/:id/cancel
-/api/orders/:id/files
-/api/orders/:id/progress
-33. SERVICE LAYER STRUCTURE
+31. RECOMMENDED API STRUCTURE
+/api/admin/orders
+/api/admin/orders/:id
+/api/admin/orders/:id/status
+/api/admin/orders/:id/generate-quotation
+/api/admin/orders/:id/installation
+/api/admin/orders/:id/files
+32. SERVICE LAYER STRUCTURE
 services/
 
 order.service.ts
 quotation.service.ts
 material.service.ts
 labor.service.ts
+installation.service.ts
 pdf.service.ts
 notification.service.ts
-34. CONTROLLER STRUCTURE
+33. CONTROLLER STRUCTURE
 controllers/
 
-order.controller.ts
+adminOrder.controller.ts
 quotation.controller.ts
-35. VALIDATIONS
+installation.controller.ts
+34. MOCK DATA ARCHITECTURE
+
+Frontend components should NEVER directly use mock data.
+
+Instead use:
+
+UI Components
+↓
+Hooks
+↓
+Service Layer
+↓
+Mock Data / API
+
+This allows:
+
+backend replacement without UI rewrites
+scalable frontend architecture
+easier testing
+35. RECOMMENDED PROJECT STRUCTURE
+src/
+
+mock/
+    orders.mock.ts
+
+services/
+    adminOrder.service.ts
+
+hooks/
+    useAdminOrders.ts
+
+types/
+    order.types.ts
+
+components/
+    admin/orders/
+36. VALIDATION REQUIREMENTS
 
 Validate:
 
 measurements
 quotation totals
-status transitions
+workflow transitions
 uploaded files
-user ownership
-36. ERROR HANDLING
+installation schedules
+37. ERROR HANDLING
 
-Return consistent API responses.
+Return consistent responses.
 
 Example
 {
   "success": false,
   "message": "Order not found"
 }
-37. DATABASE INDEXING
+38. DATABASE INDEXING
 
 Recommended indexes:
 
@@ -500,71 +534,72 @@ orderId
 customerId
 status
 createdAt
-38. FRONTEND INTEGRATION REQUIREMENTS
+39. FRONTEND INTEGRATION REQUIREMENTS
 
 Backend must support:
 
 overview cards
 filters
-order tables
-detail drawers
-quotation downloads
-service requests
-39. FUTURE SCALABILITY
+workflow management
+quotation panels
+installation scheduling
+material breakdowns
+PDF downloads
+40. FUTURE SCALABILITY
 
 Architecture should support:
 
-payment integration
-live fabrication updates
+online payments
 technician tracking
+live production updates
 delivery tracking
+AI quotation optimization
 mobile apps
-40. DEVELOPMENT PHASES
+41. DEVELOPMENT PHASES
 PHASE 1
 schemas
 order CRUD
-status workflow
+workflow management
 PHASE 2
-quotation system
-material storage
-labor calculations
+material recommendation engine
+labor calculation engine
 PHASE 3
-file uploads
+quotation generation
 PDF generation
 PHASE 4
-search & filters
-pagination
-PHASE 5
+installation scheduling
 notifications
+PHASE 5
 analytics
 optimization
-41. FINAL BACKEND OBJECTIVE
+scalability improvements
+42. FINAL BACKEND OBJECTIVE
 
-The backend should behave as:
+The Orders backend should behave as:
 
-"a scalable fabrication workflow management system"
+"a realistic aluminium fabrication workflow management system"
 
 NOT:
 
-"a simple CRUD backend"
+"a simple admin CRUD backend"
 
-42. SUMMARY
+43. SUMMARY
 
 This backend module manages:
 
-fabrication orders
-quotation workflows
-material calculations
+fabrication workflows
+quotations
+material recommendations
 labor calculations
-progress tracking
-PDFs & invoices
-service integrations
-scalable frontend integration
+installations
+invoices
+workflow tracking
+scalable admin operations
 
 while maintaining:
 
-clean architecture
-modular services
-secure APIs
+modular architecture
+scalable APIs
+realistic fabrication logic
 mock-to-real data scalability
-realistic fabrication workflows
+secure backend structure

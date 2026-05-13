@@ -45,10 +45,10 @@ const stats = [
     title: "Total Orders",
     value: 12,
     icon: Package,
-    color: "from-teal-500/30 to-teal-600/20",
-    iconColor: "text-teal-300",
-    borderColor: "border-teal-500/40",
-    glowColor: "hover:shadow-teal-500/10",
+    color: "from-indigo-500/30 to-indigo-600/20",
+    iconColor: "text-indigo-300",
+    borderColor: "border-indigo-500/40",
+    glowColor: "hover:shadow-indigo-500/10",
   },
   {
     title: "Active Orders",
@@ -72,19 +72,19 @@ const stats = [
     title: "Completed Orders",
     value: 7,
     icon: CheckCircle2,
-    color: "from-emerald-500/30 to-emerald-600/20",
-    iconColor: "text-emerald-300",
-    borderColor: "border-emerald-500/40",
-    glowColor: "hover:shadow-emerald-500/10",
+    color: "from-blue-500/30 to-blue-600/20",
+    iconColor: "text-blue-300",
+    borderColor: "border-blue-500/40",
+    glowColor: "hover:shadow-blue-500/10",
   },
   {
     title: "Service Requests",
     value: 1,
     icon: Wrench,
-    color: "from-cyan-500/30 to-cyan-600/20",
-    iconColor: "text-cyan-300",
-    borderColor: "border-cyan-500/40",
-    glowColor: "hover:shadow-cyan-500/10",
+    color: "from-emerald-500/30 to-emerald-600/20",
+    iconColor: "text-emerald-300",
+    borderColor: "border-emerald-500/40",
+    glowColor: "hover:shadow-emerald-500/10",
   },
 ];
 
@@ -97,19 +97,19 @@ export function OrdersOverviewCards() {
     >
       <Card className="bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 border-zinc-800 shadow-xl overflow-hidden relative group">
         {/* Color Tints */}
-        <div className="absolute inset-0 bg-gradient-to-r from-teal-500/8 via-emerald-500/8 to-teal-500/8 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/8 via-teal-500/8 to-emerald-500/8 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-black/35 pointer-events-none" />
 
         {/* Shimmer effect */}
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
 
         {/* Background glows */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-teal-500/30 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
-        <div className="absolute bottom-6 right-24 h-56 w-56 bg-teal-500/12 rounded-full blur-[75px] opacity-35" />
+        <div className="absolute -top-24 -right-24 w-80 h-80 bg-emerald-500/30 rounded-full blur-[100px] opacity-70 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="absolute bottom-6 right-24 h-56 w-56 bg-emerald-500/12 rounded-full blur-[75px] opacity-35" />
 
         {/* Large faded ShoppingCart icon */}
         <div className="absolute top-8 right-8 opacity-[0.15] pointer-events-none group-hover:opacity-[0.2] transition-opacity">
-          <ShoppingCart className="w-48 h-48 text-teal-300" />
+          <ShoppingCart className="w-48 h-48 text-emerald-300" />
         </div>
 
         <CardHeader className="relative pb-4">
@@ -156,6 +156,3 @@ export function OrdersOverviewCards() {
     </motion.div>
   );
 }
-
-
-
