@@ -56,8 +56,8 @@ export default function OrdersPage() {
         <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-4 mb-2">
-              <div className="h-12 w-12 rounded-xl bg-blue-500/30 border border-blue-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.3)] relative group">
-                <ShoppingCart className="h-6 w-6 text-blue-100 relative z-10" />
+              <div className="h-12 w-12 rounded-xl bg-emerald-500/30 border border-emerald-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.3)] relative group">
+                <ShoppingCart className="h-6 w-6 text-emerald-100 relative z-10" />
               </div>
               <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">My Orders</h1>
             </div>
