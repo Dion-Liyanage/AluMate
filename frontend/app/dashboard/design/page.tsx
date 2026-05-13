@@ -39,10 +39,12 @@ export default function DesignGatewayPage() {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <h2 className="text-3xl font-bold text-zinc-100 flex items-center gap-2">
-            <PenTool className="h-7 w-7 text-violet-400" />
-            Design Studio
-          </h2>
+          <div className="flex items-center gap-4 mb-2">
+            <div className="h-12 w-12 rounded-xl bg-violet-500/30 border border-violet-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)] relative group">
+              <PenTool className="h-6 w-6 text-violet-100 relative z-10" />
+            </div>
+            <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Design Studio</h2>
+          </div>
           <p className="mt-2 text-zinc-400">
             Create a new aluminium product from scratch or continue where you left off.
           </p>

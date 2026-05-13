@@ -77,10 +77,12 @@ export default function CataloguePage() {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
-            <LayoutGrid className="h-6 w-6 text-sky-400" />
-            Design Catalogue
-          </h2>
+          <div className="flex items-center gap-4 mb-2">
+            <div className="h-12 w-12 rounded-xl bg-sky-500/30 border border-sky-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(56,189,248,0.3)] relative group">
+              <LayoutGrid className="h-6 w-6 text-sky-100 relative z-10" />
+            </div>
+            <h2 className="text-3xl font-bold text-zinc-100 tracking-tight">Design Catalogue</h2>
+          </div>
           <p className="mt-1 text-zinc-400">
             Browse pre-designed aluminium products. Select a design to place an
             order.
