@@ -88,9 +88,9 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
 
   const renderRow = (order: Order) => (
     <TableRow key={order.id} className="border-zinc-800/50 hover:bg-zinc-800/30 transition-colors group cursor-pointer" onClick={() => onViewDetails(order)}>
-      <TableCell className="font-mono text-zinc-300 font-medium">{order.id}</TableCell>
-      <TableCell className="text-zinc-300">{order.productType}</TableCell>
-      <TableCell>
+      <TableCell className="font-mono text-zinc-300 font-medium text-center">{order.id}</TableCell>
+      <TableCell className="text-zinc-300 text-center">{order.productType}</TableCell>
+      <TableCell className="text-center">
         <span className={`text-xs px-2 py-0.5 rounded border ${
           order.designType === 'Custom' 
             ? 'border-purple-500/30 text-purple-400 bg-purple-500/10' 
@@ -99,16 +99,18 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
           {order.designType}
         </span>
       </TableCell>
-      <TableCell className="text-zinc-400">{order.date}</TableCell>
-      <TableCell className="text-zinc-200 font-semibold">{order.price}</TableCell>
-      <TableCell>
-        <OrderStatusBadge status={order.status} />
+      <TableCell className="text-zinc-400 text-center">{order.date}</TableCell>
+      <TableCell className="text-zinc-200 font-semibold text-center">{order.price}</TableCell>
+      <TableCell className="text-center">
+        <div className="flex justify-center">
+          <OrderStatusBadge status={order.status} />
+        </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="text-center">
         <OrderProgressTracker progress={order.progress} status={order.status} />
       </TableCell>
-      <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-2">
+      <TableCell className="text-center">
+        <div className="flex items-center justify-center gap-2">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -161,14 +163,14 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
           <Table>
             <TableHeader className="bg-zinc-950/50">
               <TableRow className="hover:bg-transparent border-zinc-800">
-                <TableHead className="text-zinc-400 font-bold">Order ID</TableHead>
-                <TableHead className="text-zinc-400 font-bold">Product</TableHead>
-                <TableHead className="text-zinc-400 font-bold">Design</TableHead>
-                <TableHead className="text-zinc-400 font-bold">Date</TableHead>
-                <TableHead className="text-zinc-400 font-bold">Estimated Price</TableHead>
-                <TableHead className="text-zinc-400 font-bold">Status</TableHead>
-                <TableHead className="text-zinc-400 font-bold w-[180px]">Progress</TableHead>
-                <TableHead className="text-zinc-400 font-bold text-right">Actions</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-center">Order ID</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-center">Product</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-center">Design</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-center">Date</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-center">Estimated Price</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-center">Status</TableHead>
+                <TableHead className="text-zinc-400 font-bold w-[180px] text-center">Progress</TableHead>
+                <TableHead className="text-zinc-400 font-bold text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -248,14 +250,14 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
                     <Table>
                       <TableHeader className="bg-zinc-950/30">
                         <TableRow className="hover:bg-transparent border-zinc-800/50">
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Order ID</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Product</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Design</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Date</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Price</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider">Status</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider w-[180px]">Progress</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-right">Actions</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Order ID</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Product</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Design</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Date</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Price</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Status</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider w-[180px] text-center">Progress</TableHead>
+                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

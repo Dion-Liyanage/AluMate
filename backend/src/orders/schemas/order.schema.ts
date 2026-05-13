@@ -17,47 +17,115 @@ export class NoteEntry {
 
 export const NoteEntrySchema = SchemaFactory.createForClass(NoteEntry);
 
+@Schema({ _id: false })
+export class MeasurementData {
+  @Prop()
+  width: number;
+
+  @Prop()
+  height: number;
+
+  @Prop()
+  unit: string; // mm, inches, etc.
+}
+
+@Schema({ _id: false })
+export class MaterialItem {
+  @Prop()
+  profileName: string;
+
+  @Prop()
+  thickness: string;
+
+  @Prop()
+  quantityFeet: number;
+
+  @Prop()
+  pricePerFeet: number;
+
+  @Prop()
+  materialCost: number;
+}
+
+@Schema({ _id: false })
+export class LaborData {
+  @Prop()
+  areaSqFt: number;
+
+  @Prop()
+  laborRate: number;
+
+  @Prop()
+  laborCost: number;
+}
+
 @Schema({ timestamps: true })
 export class Order {
+  @Prop({ unique: true })
+  orderId: string;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   customerId: Types.ObjectId;
 
   @Prop({ required: true })
-  title: string;
+  productType: string; // Window, Door, Cabinet, etc.
 
-  @Prop({ required: true })
-  description: string;
-
-  @Prop()
-  materialType: string;
-
-  @Prop()
-  dimensions: string;
-
-  @Prop()
-  quantity: number;
+  @Prop({ enum: ['custom', 'catalogue'], default: 'custom' })
+  designType: string;
 
   @Prop({
-    enum: ['pending', 'quoted', 'confirmed', 'in-progress', 'completed', 'cancelled'],
-    default: 'pending',
+    enum: [
+      'draft',
+      'quotation_pending',
+      'quotation_sent',
+      'approved',
+      'production',
+      'installation',
+      'completed',
+      'cancelled',
+    ],
+    default: 'quotation_pending',
   })
   status: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Quotation' })
-  quotationId: Types.ObjectId;
+  @Prop({ default: 0 })
+  progress: number;
 
   @Prop()
-  assignedTo: string;
+  estimatedPrice: number;
+
+  @Prop({ type: MeasurementData })
+  measurements: MeasurementData;
 
   @Prop()
-  totalAmount: number;
+  purpose: string;
+
+  @Prop()
+  environment: string;
+
+  @Prop()
+  strengthCategory: string;
+
+  @Prop({ type: [MaterialItem] })
+  recommendedMaterials: MaterialItem[];
+
+  @Prop({ type: LaborData })
+  laborCalculation: LaborData;
 
   @Prop({ type: [NoteEntrySchema], default: [] })
   notes: NoteEntry[];
+
+  @Prop({ type: [String] })
+  attachments: string[];
+
+  @Prop({ type: Types.ObjectId, ref: 'Quotation' })
+  quotationId: Types.ObjectId;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
 // Indexes
+OrderSchema.index({ orderId: 1 });
 OrderSchema.index({ customerId: 1 });
 OrderSchema.index({ status: 1 });
+OrderSchema.index({ createdAt: -1 });

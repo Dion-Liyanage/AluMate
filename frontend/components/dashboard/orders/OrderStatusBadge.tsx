@@ -65,16 +65,6 @@ export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
         className
       )}
     >
-      <span className="relative flex h-2 w-2 mr-2">
-        <span className={cn(
-          "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
-          config.className.split(' ')[1].replace('text-', 'bg-')
-        )}></span>
-        <span className={cn(
-          "relative inline-flex rounded-full h-2 w-2",
-          config.className.split(' ')[1].replace('text-', 'bg-')
-        )}></span>
-      </span>
       {config.label}
     </Badge>
   );

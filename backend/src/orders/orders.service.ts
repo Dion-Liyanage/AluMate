@@ -9,12 +9,24 @@ export class OrdersService {
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
   ) {}
 
+  private generateOrderId(): string {
+    const year = new Date().getFullYear();
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `ALU-ORD-${year}-${random}`;
+  }
+
   async findAll(filter: Record<string, any> = {}): Promise<OrderDocument[]> {
-    return this.orderModel.find(filter).sort({ createdAt: -1 }).exec();
+    const { page = 1, limit = 10, ...otherFilters } = filter;
+    return this.orderModel
+      .find(otherFilters)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
   }
 
   async findById(id: string): Promise<OrderDocument | null> {
-    return this.orderModel.findById(id).exec();
+    return this.orderModel.findById(id).populate('quotationId').exec();
   }
 
   async findByCustomerId(customerId: string): Promise<OrderDocument[]> {
@@ -25,7 +37,8 @@ export class OrdersService {
   }
 
   async create(orderData: Partial<Order>): Promise<OrderDocument> {
-    const newOrder = new this.orderModel(orderData);
+    const orderId = this.generateOrderId();
+    const newOrder = new this.orderModel({ ...orderData, orderId });
     return newOrder.save();
   }
 
