@@ -103,14 +103,27 @@ export function OrderDetailsDrawer({ order, isOpen, onClose }: OrderDetailsDrawe
                 transport={2500} 
               />
 
+              <Separator className="bg-zinc-800" />
+
               {/* Actions */}
-              <div className="flex flex-col gap-3">
-                <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-6">
-                  <FileDown className="h-5 w-5 mr-2" />
-                  Download Quotation PDF
-                </Button>
+              <div className="flex flex-col gap-3 pt-2 pb-6">
+                <div className="flex justify-end gap-3">
+                  <Button 
+                    variant="outline" 
+                    className="bg-zinc-900 border-zinc-800 text-zinc-100 hover:bg-zinc-800 font-bold px-8 h-12 rounded-xl transition-all"
+                    onClick={onClose}
+                  >
+                    Close
+                  </Button>
+                  <Button 
+                    className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 font-bold px-8 h-12 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.1)] flex items-center gap-2"
+                  >
+                    <FileDown className="h-5 w-5" />
+                    Download Quotation PDF
+                  </Button>
+                </div>
                 {order.status === 'quotation_sent' && (
-                  <Button variant="outline" className="w-full border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 py-6">
+                  <Button variant="outline" className="w-full border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 py-4 rounded-xl font-bold">
                     Approve & Proceed
                   </Button>
                 )}
