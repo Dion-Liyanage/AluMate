@@ -33,8 +33,10 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useState } from "react";
 
+import { adminOrdersApi } from "@/lib/api";
+
 interface OrderDetailsModalProps {
-  order: Order | null;
+  order: (Order & { _id?: string }) | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onRefresh?: () => void;
@@ -45,14 +47,28 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
 
   if (!order) return null;
 
-  const handleUpdateStatus = (status: string) => {
+  const handleUpdateStatus = async (status: string) => {
+    if (!order._id) {
+      toast.error("Order ID is missing. Cannot update status.");
+      return;
+    }
+
     setIsUpdating(true);
-    setTimeout(() => {
-      toast.success(`Order status updated to ${status}`);
+    try {
+      const response = await adminOrdersApi.updateStatus(order._id, { status });
+      if (response.success) {
+        toast.success(`Order status updated to ${status}`);
+        onRefresh?.();
+        onOpenChange(false);
+      } else {
+        toast.error(response.message || "Failed to update status");
+      }
+    } catch (error) {
+      console.error("Status update error:", error);
+      toast.error("An error occurred while updating order status");
+    } finally {
       setIsUpdating(false);
-      onRefresh?.();
-      onOpenChange(false);
-    }, 1000);
+    }
   };
 
   return (

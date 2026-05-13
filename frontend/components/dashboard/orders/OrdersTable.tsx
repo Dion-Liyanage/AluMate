@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Eye, Download, MoreVertical, FileCheck, XCircle, ChevronDown, ChevronUp, History } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Eye, Download, MoreVertical, FileCheck, XCircle, ChevronDown, ChevronUp, History, Loader2 } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -19,9 +21,12 @@ import {
 import { OrderStatusBadge, OrderStatus } from "./OrderStatusBadge";
 import { OrderProgressTracker } from "./OrderProgressTracker";
 import { motion, AnimatePresence } from "framer-motion";
+import { ordersApi } from "@/lib/api";
+import { toast } from "sonner";
 
 interface Order {
   id: string;
+  _id: string;
   productType: string;
   designType: "Custom" | "Catalogue";
   date: string;
@@ -30,64 +35,71 @@ interface Order {
   progress: number;
 }
 
-const orders: Order[] = [
-  {
-    id: "ORD-2024-001",
-    productType: "Sliding Window",
-    designType: "Custom",
-    date: "2024-05-10",
-    price: "Rs. 45,000",
-    status: "production",
-    progress: 65,
-  },
-  {
-    id: "ORD-2024-002",
-    productType: "Main Door",
-    designType: "Catalogue",
-    date: "2024-05-12",
-    price: "Rs. 120,000",
-    status: "approved",
-    progress: 25,
-  },
-  {
-    id: "ORD-2024-003",
-    productType: "Kitchen Pantry",
-    designType: "Custom",
-    date: "2024-05-13",
-    price: "Rs. 250,000",
-    status: "pending",
-    progress: 10,
-  },
-  {
-    id: "ORD-2024-004",
-    productType: "Office Partition",
-    designType: "Custom",
-    date: "2024-04-28",
-    price: "Rs. 85,000",
-    status: "completed",
-    progress: 100,
-  },
-  {
-    id: "ORD-2024-005",
-    productType: "Aluminium Gate",
-    designType: "Custom",
-    date: "2024-04-15",
-    price: "Rs. 320,000",
-    status: "cancelled",
-    progress: 0,
-  },
-];
-
 const INACTIVE_STATUSES: OrderStatus[] = ["completed", "cancelled"];
 
-export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) => void }) {
+export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => void }) {
   const [showInactive, setShowInactive] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const response = await ordersApi.getAll();
+      if (response.success && response.data) {
+        const mappedOrders = response.data.orders.map((o: any) => ({
+          id: o.orderId,
+          _id: o._id,
+          productType: o.productType,
+          designType: o.designType === 'custom' ? 'Custom' : 'Catalogue',
+          date: new Date(o.createdAt).toISOString().split('T')[0],
+          price: o.estimatedPrice ? `Rs. ${o.estimatedPrice.toLocaleString()}` : "Pending",
+          status: o.status,
+          progress: o.progress
+        }));
+        setOrders(mappedOrders);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user orders:", error);
+      toast.error("Failed to load your orders");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const activeOrders = orders.filter(o => !INACTIVE_STATUSES.includes(o.status));
   const inactiveOrders = orders.filter(o => INACTIVE_STATUSES.includes(o.status));
 
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await ordersApi.approve(id);
+      if (response.success) {
+        toast.success("Quotation approved successfully!");
+        fetchOrders();
+      }
+    } catch (error) {
+      toast.error("Failed to approve quotation");
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    try {
+      const response = await ordersApi.cancel(id);
+      if (response.success) {
+        toast.success("Order cancelled");
+        fetchOrders();
+      }
+    } catch (error) {
+      toast.error("Failed to cancel order");
+    }
+  };
+
   const renderRow = (order: Order) => (
-    <TableRow key={order.id} className="border-zinc-800/50 hover:bg-zinc-800/30 transition-colors group cursor-pointer" onClick={() => onViewDetails(order)}>
+    <TableRow key={order._id} className="border-zinc-800/50 hover:bg-zinc-800/30 transition-colors group cursor-pointer" onClick={() => onViewDetails(order)}>
       <TableCell className="font-mono text-zinc-300 font-medium text-center">{order.id}</TableCell>
       <TableCell className="text-zinc-300 text-center">{order.productType}</TableCell>
       <TableCell className="text-center">
@@ -134,15 +146,27 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
                 Download Quotation
               </DropdownMenuItem>
               {order.status === 'quotation_sent' && (
-                <DropdownMenuItem className="focus:bg-emerald-500/10 focus:text-emerald-400 cursor-pointer">
+                <DropdownMenuItem 
+                  className="focus:bg-emerald-500/10 focus:text-emerald-400 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleApprove(order._id);
+                  }}
+                >
                   <FileCheck className="h-4 w-4 mr-2" />
                   Accept Quotation
                 </DropdownMenuItem>
               )}
-              {(order.status === 'pending' || order.status === 'quotation_sent') && (
+              {(!INACTIVE_STATUSES.includes(order.status) && order.status !== 'production' && order.status !== 'installation') && (
                 <>
                   <DropdownMenuSeparator className="bg-zinc-800" />
-                  <DropdownMenuItem className="focus:bg-red-500/10 focus:text-red-400 cursor-pointer">
+                  <DropdownMenuItem 
+                    className="focus:bg-red-500/10 focus:text-red-400 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancel(order._id);
+                    }}
+                  >
                     <XCircle className="h-4 w-4 mr-2" />
                     Cancel Order
                   </DropdownMenuItem>
@@ -154,6 +178,15 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
       </TableCell>
     </TableRow>
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 bg-zinc-900/10 rounded-xl border border-zinc-800">
+        <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
+        <p className="text-zinc-500 font-medium">Loading your orders...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -189,7 +222,7 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
         {/* Mobile Active Cards */}
         <div className="md:hidden divide-y divide-zinc-800">
           {activeOrders.map((order) => (
-            <div key={order.id} className="p-4 bg-zinc-900/20 space-y-4" onClick={() => onViewDetails(order)}>
+            <div key={order._id} className="p-4 bg-zinc-900/20 space-y-4" onClick={() => onViewDetails(order)}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-mono text-zinc-500 mb-1">{order.id}</p>
@@ -269,7 +302,7 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: Order) =
                   {/* Mobile Inactive Cards */}
                   <div className="md:hidden divide-y divide-zinc-800/50">
                     {inactiveOrders.map((order) => (
-                      <div key={order.id} className="p-4 bg-zinc-900/10 space-y-4" onClick={() => onViewDetails(order)}>
+                      <div key={order._id} className="p-4 bg-zinc-900/10 space-y-4" onClick={() => onViewDetails(order)}>
                         <div className="flex items-start justify-between">
                           <div>
                             <p className="text-[10px] font-mono text-zinc-600 mb-1">{order.id}</p>
