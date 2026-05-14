@@ -45,7 +45,6 @@ interface DesignTableProps {
 export function DesignTable({ designs, onRefresh }: DesignTableProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
   const [activeDesign, setActiveDesign] = useState<Design | null>(null);
   const [formData, setFormData] = useState({
@@ -56,7 +55,6 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
 
   const openEditDialog = (design: Design) => {
     setActiveDesign(design);
-    setSelectedFile(null);
     setSelectedModelFile(null);
     setFormData({
       title: design.title,
@@ -91,9 +89,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
     
-    if (selectedFile) {
-      submitData.append("images", selectedFile);
-    }
+
 
     if (selectedModelFile) {
       submitData.append("model", selectedModelFile);
@@ -141,13 +137,13 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                 )}
                 {/* 3D label is now managed by Design3DViewer component */}
               </div>
-              <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
+              <CardContent className="relative pt-0 px-4 pb-4 -mt-3">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-zinc-100 line-clamp-1">{design.title}</h3>
+                  <h3 className="font-semibold text-zinc-100 line-clamp-1 group-hover:text-sky-300 transition-colors">{design.title}</h3>
                 </div>
 
 
-                <div className="flex items-center justify-between mt-4 -mb-1">
+                <div className="flex items-center justify-between mt-3">
                   <Badge variant="outline" className="bg-sky-500/10 text-sky-300 border-sky-500/20 capitalize group-hover:bg-sky-500/20 group-hover:border-sky-500/40 transition-colors">
                     {design.category}
                   </Badge>
@@ -230,65 +226,46 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                             />
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="edit-images">Replace Image</Label>
-                              <Input
-                                id="edit-images"
+                          <div className="space-y-3 max-w-md mx-auto w-full">
+                            <Label htmlFor="edit-model">Replace 3D Model (.glb)</Label>
+                            <div className={`relative flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 transition-all min-h-[140px] ${
+                              selectedModelFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+                            }`}>
+                              <input
+                                id="edit-model"
                                 type="file"
-                                accept="image/*"
-                                className="bg-zinc-900 border-zinc-800"
+                                accept=".glb"
+                                className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                 onChange={(e) => {
                                   const file = e.target.files?.[0] || null;
                                   if (!file) {
-                                    setSelectedFile(null);
+                                    setSelectedModelFile(null);
                                     return;
                                   }
-                                  if (file.size > 10 * 1024 * 1024) {
-                                    toast.error("Image size must be 10MB or less");
-                                    e.target.value = "";
-                                    setSelectedFile(null);
+                                  if (file.size > 50 * 1024 * 1024) {
+                                    toast.error("Model size must be 50MB or less");
+                                    setSelectedModelFile(null);
                                     return;
                                   }
-                                  setSelectedFile(file);
+                                  setSelectedModelFile(file);
                                 }}
                               />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="edit-model">Replace 3D Model (.glb)</Label>
-                              <div className={`relative flex items-center justify-center border-2 border-dashed rounded-lg p-2 transition-all min-h-[40px] ${
-                                selectedModelFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-800 bg-zinc-900/50'
-                              }`}>
-                                <input
-                                  id="edit-model"
-                                  type="file"
-                                  accept=".glb"
-                                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0] || null;
-                                    if (!file) {
-                                      setSelectedModelFile(null);
-                                      return;
-                                    }
-                                    if (file.size > 50 * 1024 * 1024) {
-                                      toast.error("Model size must be 50MB or less");
-                                      setSelectedModelFile(null);
-                                      return;
-                                    }
-                                    setSelectedModelFile(file);
-                                  }}
-                                />
-                                <div className="flex items-center gap-2">
-                                  {selectedModelFile ? (
-                                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                                  ) : (
-                                    <CubeIcon className="h-4 w-4 text-zinc-500" />
-                                  )}
-                                  <span className="text-[10px] text-zinc-400 truncate max-w-[120px]">
-                                    {selectedModelFile ? selectedModelFile.name : (design.modelUrl ? "Update Current Model" : "Upload Model")}
-                                  </span>
-                                </div>
+                              <div className="flex flex-col items-center gap-3">
+                                {selectedModelFile ? (
+                                  <>
+                                    <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+                                    <span className="text-sm text-zinc-200 font-bold truncate max-w-[200px]">
+                                      {selectedModelFile.name}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <CubeIcon className="h-10 w-10 text-zinc-600" />
+                                    <span className="text-sm text-sky-400 font-medium hover:text-sky-300">
+                                      {design.modelUrl ? "Update Current Model" : "Upload 3D Model"}
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
