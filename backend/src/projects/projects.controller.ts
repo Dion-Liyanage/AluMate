@@ -13,53 +13,49 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { memoryStorage } from 'multer';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Controller('projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
-
-  private static getUploadDestination() {
-    const uploadDir = join(__dirname, '..', '..', 'uploads', 'projects');
-    if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, { recursive: true });
-    }
-    return uploadDir;
-  }
+  constructor(
+    private readonly projectsService: ProjectsService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
     FilesInterceptor('images', 5, {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          cb(null, ProjectsController.getUploadDestination());
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
     }),
   )
-  create(
+  async create(
     @Body() createProjectDto: CreateProjectDto,
-    @UploadedFiles() files: any[],
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    const totalSize = files?.reduce((acc, file) => acc + file.size, 0) || 0;
-    if (totalSize > 20 * 1024 * 1024) {
-      throw new BadRequestException('Total file size exceeds 20MB limit for 5 images');
+    if (!files || files.length === 0) {
+      return this.projectsService.create({ ...createProjectDto, imageUrls: [] });
     }
-    const imageUrls = files?.map(file => `/uploads/projects/${file.filename}`) || [];
+
+    const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 20 * 1024 * 1024) {
+      throw new BadRequestException('Total file size exceeds 20MB limit');
+    }
+
+    const uploadPromises = files.map(file => 
+      this.cloudinaryService.uploadFile(file, 'alumate/projects')
+    );
+    const uploadResults = await Promise.all(uploadPromises);
+    const imageUrls = uploadResults.map(result => result.secure_url);
+
     return this.projectsService.create({ ...createProjectDto, imageUrls });
   }
 
@@ -91,31 +87,34 @@ export class ProjectsController {
   @Roles('admin')
   @UseInterceptors(
     FilesInterceptor('images', 5, {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          cb(null, ProjectsController.getUploadDestination());
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
     }),
   )
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateProjectDto: UpdateProjectDto,
-    @UploadedFiles() files: any[],
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    const totalSize = files?.reduce((acc, file) => acc + file.size, 0) || 0;
-    if (totalSize > 20 * 1024 * 1024) {
-      throw new BadRequestException('Total file size exceeds 20MB limit for 5 images');
+    let imageUrls = undefined;
+
+    if (files && files.length > 0) {
+      const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+      if (totalSize > 20 * 1024 * 1024) {
+        throw new BadRequestException('Total file size exceeds 20MB limit');
+      }
+
+      const uploadPromises = files.map(file => 
+        this.cloudinaryService.uploadFile(file, 'alumate/projects')
+      );
+      const uploadResults = await Promise.all(uploadPromises);
+      imageUrls = uploadResults.map(result => result.secure_url);
     }
-    const newImageUrls = files?.map(file => `/uploads/projects/${file.filename}`) || [];
-    const updateData = newImageUrls.length > 0
-      ? { ...updateProjectDto, imageUrls: newImageUrls }
+
+    const updateData = imageUrls 
+      ? { ...updateProjectDto, imageUrls } 
       : updateProjectDto;
+
     return this.projectsService.update(id, updateData);
   }
 

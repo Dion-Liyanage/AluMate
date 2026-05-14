@@ -17,6 +17,8 @@ import { DesignsModule } from './designs/designs.module';
 import { ProjectsModule } from './projects/projects.module';
 import { AdminCustomersModule } from './admin-customers/admin-customers.module';
 import { AdminOrdersModule } from './admin-orders/admin-orders.module';
+import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
+
 
 @Module({
   imports: [
@@ -53,7 +55,9 @@ import { AdminOrdersModule } from './admin-orders/admin-orders.module';
     ProjectsModule,
     AdminCustomersModule,
     AdminOrdersModule,
+    CloudinaryModule,
   ],
+
   controllers: [AppController],
   providers: [],
 })

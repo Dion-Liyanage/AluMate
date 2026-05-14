@@ -13,9 +13,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { memoryStorage } from 'multer';
 import { ServicesService } from './services.service';
 import { CreateOnSiteVisitDto } from './dto/create-onsite-visit.dto';
 import { CreateRepairDto } from './dto/create-repair.dto';
@@ -25,19 +23,14 @@ import { UpsertServiceAvailabilityDto } from './dto/upsert-service-availability.
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Controller('services')
 export class ServicesController {
-  constructor(private readonly servicesService: ServicesService) {}
-
-  // ── Helper: Ensure uploads directory exists ──
-  private static getUploadDestination() {
-    const uploadDir = join(__dirname, '..', '..', 'uploads', 'services');
-    if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, { recursive: true });
-    }
-    return uploadDir;
-  }
+  constructor(
+    private readonly servicesService: ServicesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // CUSTOMER ENDPOINTS
@@ -45,7 +38,6 @@ export class ServicesController {
 
   /**
    * POST /api/v1/services/on-site-visit
-   * Customer submits an on-site visit request
    */
   @Post('on-site-visit')
   @UseGuards(JwtAuthGuard)
@@ -71,33 +63,28 @@ export class ServicesController {
 
   /**
    * POST /api/v1/services/repair
-   * Customer submits a repair request (with optional image upload)
    */
   @Post('repair')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          cb(null, ServicesController.getUploadDestination());
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `repair-${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     }),
   )
   async createRepair(
     @Request() req: any,
     @Body() dto: CreateRepairDto,
-    @UploadedFile() file?: any,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     const userId = req.user.id;
     const userName = `${req.user.firstName} ${req.user.lastName}`;
-    const imageUrl = file ? `/uploads/services/${file.filename}` : undefined;
+    
+    let imageUrl = undefined;
+    if (file) {
+      const uploadResult = await this.cloudinaryService.uploadFile(file, 'alumate/services');
+      imageUrl = uploadResult.secure_url;
+    }
 
     const request = await this.servicesService.createRepair(
       userId,
@@ -115,7 +102,6 @@ export class ServicesController {
 
   /**
    * GET /api/v1/services/my-requests
-   * Customer fetches their own service requests
    */
   @Get('my-requests')
   @UseGuards(JwtAuthGuard)
@@ -129,7 +115,6 @@ export class ServicesController {
 
   /**
    * PATCH /api/v1/services/:id/cancel
-   * Customer cancels their own request (soft cancel)
    */
   @Patch(':id/cancel')
   @UseGuards(JwtAuthGuard)
@@ -147,10 +132,6 @@ export class ServicesController {
   // ADMIN ENDPOINTS
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /**
-   * GET /api/v1/services
-   * Admin fetches all service requests (with optional filters)
-   */
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -168,10 +149,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * GET /api/v1/services/availability?date=YYYY-MM-DD
-   * Get available (not-booked) time slots for a date
-   */
   @Get('availability')
   @UseGuards(JwtAuthGuard)
   async getAvailability(@Query('date') date?: string) {
@@ -190,10 +167,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * GET /api/v1/services/availability/dates
-   * Get dates that currently have at least one available slot
-   */
   @Get('availability/dates')
   @UseGuards(JwtAuthGuard)
   async getAvailabilityDates() {
@@ -204,10 +177,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * GET /api/v1/services/availability/config?date=YYYY-MM-DD
-   * Admin gets configured slots (including booked ones)
-   */
   @Get('availability/config')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -219,10 +188,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * GET /api/v1/services/availability/all
-   * Admin gets all configured availability records
-   */
   @Get('availability/all')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -234,10 +199,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * POST /api/v1/services/availability
-   * Admin creates or updates available slots for a date
-   */
   @Post('availability')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -250,10 +211,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * DELETE /api/v1/services/availability/:date
-   * Admin deletes configured slots for a date
-   */
   @Delete('availability/:date')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -265,10 +222,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * POST /api/v1/services/availability/delete
-   * Admin deletes configured slots for a date (fallback for clients where DELETE may be blocked)
-   */
   @Post('availability/delete')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -280,10 +233,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * GET /api/v1/services/:id
-   * Admin fetches a single service request by ID
-   */
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string) {
@@ -294,10 +243,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * PATCH /api/v1/services/:id/status
-   * Admin updates the status of a service request
-   */
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
@@ -313,10 +258,6 @@ export class ServicesController {
     };
   }
 
-  /**
-   * PATCH /api/v1/services/:id/schedule
-   * Admin updates date and time slot of an on-site visit request
-   */
   @Patch(':id/schedule')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
