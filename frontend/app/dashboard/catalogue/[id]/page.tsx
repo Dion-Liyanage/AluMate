@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, LayoutGrid, ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, LayoutGrid, ImageIcon, ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AuthContext } from "@/contexts/AuthContext";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,6 +51,11 @@ const categoryToProductType: Record<string, string> = {
 export default function CatalogueDesignDetailPage() {
   const params = useParams<{ id: string }>();
   const designId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
+  const isAuthLoading = auth?.isLoading;
+  const isAdmin = user?.role === "admin";
 
   const [design, setDesign] = useState<Design | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,7 +107,7 @@ export default function CatalogueDesignDetailPage() {
           </Link>
         </motion.div>
 
-        {isLoading ? (
+        {isLoading || isAuthLoading ? (
           <motion.div 
             key="loader"
             initial={{ opacity: 0 }}
@@ -132,12 +138,12 @@ export default function CatalogueDesignDetailPage() {
             variants={containerVariants}
             className="grid gap-6 lg:grid-cols-5"
           >
-            {/* Left: Design preview & info (3 cols) */}
+            {/* Left: Design preview & info */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
-              className="lg:col-span-3 space-y-4"
+              className={`${isAdmin ? "lg:col-span-5" : "lg:col-span-3"} space-y-4`}
             >
               {/* Image/3D preview */}
               <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden relative group/preview">
@@ -240,40 +246,58 @@ export default function CatalogueDesignDetailPage() {
                   </p>
 
                   {/* Info note */}
-                  <div className="rounded-lg bg-sky-500/5 border border-sky-500/20 px-3 py-2.5">
-                    <p className="text-[11px] leading-relaxed text-sky-400/80">
-                      <strong>Note:</strong> You can customize the measurements, color,
-                      accessories, and other options. The design structure cannot be
-                      modified.
-                    </p>
-                  </div>
+                  {!isAdmin && (
+                    <div className="rounded-lg bg-sky-500/5 border border-sky-500/20 px-3 py-2.5">
+                      <p className="text-[11px] leading-relaxed text-sky-400/80">
+                        <strong>Note:</strong> You can customize the measurements, color,
+                        accessories, and other options. The design structure cannot be
+                        modified.
+                      </p>
+                    </div>
+                  )}
+
+                  {isAdmin && (
+                    <div className="flex items-center gap-2 pt-2 border-t border-zinc-800">
+                      <div className="flex-1 flex items-center gap-2 text-zinc-500 text-xs">
+                        <Settings className="h-3 w-3" />
+                        Administrator View: Quotation panel hidden.
+                      </div>
+                      <Link href="/admin/designs">
+                        <Button variant="ghost" size="sm" className="h-7 text-[10px] text-zinc-400">
+                          Edit Design In Dashboard
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
 
             {/* Right: Quotation Configuration Panel (2 cols) */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="lg:col-span-2"
-            >
-              <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden">
-                <div className="border-b border-zinc-800 px-5 py-3 flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4 text-sky-400" />
-                  <h3 className="text-sm font-semibold text-zinc-200">
-                    Configure & Request Quotation
-                  </h3>
-                </div>
-                <div className="h-[calc(100vh-16rem)] min-h-[500px] overflow-hidden">
-                  <QuotationConfigPanel
-                    productType={productType}
-                    catalogueDesignId={design._id}
-                    catalogueDesignTitle={design.title}
-                  />
-                </div>
-              </Card>
-            </motion.div>
+            {!isAdmin && (
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="lg:col-span-2"
+              >
+                <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden">
+                  <div className="border-b border-zinc-800 px-5 py-3 flex items-center gap-2">
+                    <LayoutGrid className="h-4 w-4 text-sky-400" />
+                    <h3 className="text-sm font-semibold text-zinc-200">
+                      Configure & Request Quotation
+                    </h3>
+                  </div>
+                  <div className="h-[calc(100vh-16rem)] min-h-[500px] overflow-hidden">
+                    <QuotationConfigPanel
+                      productType={productType}
+                      catalogueDesignId={design._id}
+                      catalogueDesignTitle={design.title}
+                    />
+                  </div>
+                </Card>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </motion.div>
