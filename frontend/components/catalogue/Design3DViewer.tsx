@@ -54,7 +54,7 @@ export function Design3DViewer({ modelUrl }: { modelUrl: string }) {
         </Suspense>
       </Canvas>
       
-      <div className="absolute top-3 right-3 bg-sky-500/30 backdrop-blur-md border border-sky-500/40 text-sky-100 text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase tracking-widest pointer-events-none transition-all duration-300 group-hover:bg-sky-500/50 group-hover:shadow-[0_0_15px_rgba(14,165,233,0.4)] group-hover:border-sky-400/50 group-hover:scale-105 z-20">
+      <div className="absolute top-2.5 right-2.5 bg-sky-500/30 backdrop-blur-md border border-sky-500/40 text-sky-100 text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-widest pointer-events-none transition-all duration-300 group-hover:bg-sky-500/50 group-hover:shadow-[0_0_15px_rgba(14,165,233,0.4)] group-hover:border-sky-400/50 group-hover:scale-105 z-20">
         Interactive 3D
       </div>
     </div>

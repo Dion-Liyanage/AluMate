@@ -251,19 +251,7 @@ export default function CatalogueDesignDetailPage() {
                     </div>
                   )}
 
-                  {isAdmin && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-zinc-800">
-                      <div className="flex-1 flex items-center gap-2 text-zinc-500 text-xs">
-                        <Settings className="h-3 w-3" />
-                        Administrator View: Quotation panel hidden.
-                      </div>
-                      <Link href="/admin/designs">
-                        <Button variant="ghost" size="sm" className="h-7 text-[10px] text-zinc-400">
-                          Edit Design In Dashboard
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
+
                 </CardContent>
               </Card>
             </motion.div>
