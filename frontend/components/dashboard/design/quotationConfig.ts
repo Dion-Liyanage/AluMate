@@ -35,18 +35,9 @@ export const productMeasurements: Record<string, MeasurementField[]> = {
     { key: "width", label: "Total Width", type: "dimension", min: 2, max: 30 },
     { key: "height", label: "Total Height", type: "dimension", min: 2, max: 15 },
   ],
-  partition: [
-    { key: "width", label: "Total Width", type: "dimension", min: 2, max: 50 },
-    { key: "height", label: "Total Height", type: "dimension", min: 5, max: 15 },
-    { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 3", min: 1, max: 10 },
-  ],
-  railing: [
-    { key: "length", label: "Total Length", type: "dimension", min: 2, max: 100 },
-    { key: "height", label: "Total Height", type: "dimension", min: 2, max: 5 },
-  ],
-  other: [
-    { key: "width", label: "Total Width", type: "dimension", min: 1, max: 50 },
-    { key: "height", label: "Total Height", type: "dimension", min: 1, max: 50 },
+  ceiling: [
+    { key: "width", label: "Total Width", type: "dimension", min: 5, max: 100 },
+    { key: "length", label: "Total Length", type: "dimension", min: 5, max: 100 },
   ],
 };
 
@@ -57,9 +48,7 @@ export const productPurposes: Record<string, string[]> = {
   door: ["Main Entrance", "Interior Room", "Balcony / Patio", "Kitchen Door", "Security Door"],
   cupboard: ["Wardrobe", "Kitchen Storage", "Office Storage", "Display Cabinet", "Utility Storage"],
   pantry: ["Light Home Usage", "Standard Family Usage", "Heavy Kitchen Usage", "Luxury Interior Usage"],
-  partition: ["Office Partition", "Bathroom Partition", "Room Divider", "Showroom Display", "Balcony Enclosure"],
-  railing: ["Balcony Railing", "Staircase Railing", "Boundary Fence", "Pool Railing", "Terrace Railing"],
-  other: ["Residential", "Commercial", "Industrial", "Custom Fabrication"],
+  ceiling: ["Living Room Ceiling", "Office Ceiling", "Kitchen Ceiling", "Decorative Feature", "Commercial Ceiling"],
 };
 
 // ---------- Environment Options ----------
@@ -131,21 +120,10 @@ export const productAccessories: Record<string, AccessoryOption[]> = {
     { key: "pullOutBaskets", label: "Pull-out Baskets", description: "Wire basket storage" },
     { key: "internalLight", label: "Internal Lighting", description: "LED strip lighting" },
   ],
-  partition: [
-    { key: "glass", label: "Glass Panels", description: "Clear, frosted, or tinted" },
-    { key: "blinds", label: "Integrated Blinds", description: "Built-in privacy blinds" },
-    { key: "doorPanel", label: "Door Panel", description: "Sliding or hinged access" },
-  ],
-  railing: [
-    { key: "glass", label: "Glass Panels", description: "Tempered safety glass" },
-    { key: "topRail", label: "Top Rail Cap", description: "Rounded top rail cover" },
-    { key: "basePlate", label: "Base Plates", description: "Stainless steel anchor plates" },
-  ],
-  other: [
-    { key: "handles", label: "Handles" },
-    { key: "locks", label: "Locks" },
-    { key: "glass", label: "Glass Components" },
-    { key: "hinges", label: "Hinges" },
+  ceiling: [
+    { key: "ledStrip", label: "LED Strip Lighting", description: "Perimeter lighting effect" },
+    { key: "cornice", label: "Decorative Cornice", description: "Premium edge finishing" },
+    { key: "paneling", label: "Accent Paneling", description: "High-contrast material panels" },
   ],
 };
 
@@ -276,6 +254,9 @@ export function recommendProfile(config: {
     if (purpose.includes("Heavy") || strength === "heavy") {
       explanation.push("Heavy usage requirement detected");
     }
+  } else if (productType === "ceiling") {
+    profileKey = "casement-60"; // Using casement-60 as a base for ceiling frames
+    explanation = ["Ceiling grid framework selected", "Lightweight but rigid profile for overhead safety"];
   } else {
     // Default fallback
     profileKey = "casement-41";

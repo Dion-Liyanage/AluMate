@@ -293,7 +293,7 @@ export default function Home() {
                   {/* Glow effect behind image */}
                   <div className="absolute -inset-4 bg-gradient-to-r from-zinc-500/20 via-zinc-400/10 to-transparent rounded-2xl blur-2xl" />
                   <Image
-                    src="/landing-page/hero_1.png"
+                    src="https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/landing-page/hero_1.png"
                     alt="Premium aluminum extrusion bars and profiles"
                     width={1000}
                     height={800}

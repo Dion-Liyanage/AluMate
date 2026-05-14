@@ -23,7 +23,14 @@ function buildRemotePattern(url: string) {
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [buildRemotePattern(apiUrl)],
+    remotePatterns: [
+      buildRemotePattern(apiUrl),
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+    ],
   },
 };
 
