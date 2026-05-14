@@ -16,13 +16,18 @@ export class OrdersService {
   }
 
   async findAll(filter: Record<string, any> = {}): Promise<OrderDocument[]> {
-    const { page = 1, limit = 10, ...otherFilters } = filter;
-    return this.orderModel
+    const { page = 1, limit = 10, populate, ...otherFilters } = filter;
+    const query = this.orderModel
       .find(otherFilters)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit)
-      .exec();
+      .limit(limit);
+
+    if (populate) {
+      query.populate('customerId', 'firstName lastName email phone');
+    }
+
+    return query.exec();
   }
 
   async findById(id: string): Promise<OrderDocument | null> {

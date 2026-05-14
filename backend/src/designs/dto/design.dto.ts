@@ -3,6 +3,10 @@ import { IsString, IsNotEmpty, IsEnum, IsOptional, IsArray, IsUrl, IsBoolean } f
 export class CreateDesignDto {
   @IsString()
   @IsNotEmpty()
+  designCode: string;
+
+  @IsString()
+  @IsNotEmpty()
   title: string;
 
   @IsString()
@@ -32,6 +36,10 @@ export class CreateDesignDto {
 }
 
 export class UpdateDesignDto {
+  @IsString()
+  @IsOptional()
+  designCode?: string;
+
   @IsString()
   @IsOptional()
   title?: string;

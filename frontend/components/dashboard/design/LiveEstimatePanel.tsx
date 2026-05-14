@@ -218,10 +218,10 @@ export function LiveEstimatePanel({
               {/* Total */}
               <div className="flex items-center justify-between">
                 <span className="text-base font-semibold text-zinc-200">
-                  Estimated Total
+                  Estimated Cost Range
                 </span>
                 <span className={`text-xl font-bold ${showStalePrice ? "text-zinc-500" : "bg-gradient-to-r from-violet-400 to-sky-400 bg-clip-text text-transparent"}`}>
-                  {formatLKR(lastGeneratedEstimate?.total || 0)}
+                  {formatLKR((lastGeneratedEstimate?.total || 0) * 0.9)} - {formatLKR((lastGeneratedEstimate?.total || 0) * 1.15)}
                 </span>
               </div>
             </div>
@@ -243,8 +243,7 @@ export function LiveEstimatePanel({
         <div className="flex items-start gap-2 rounded-lg bg-amber-500/5 border border-amber-500/20 px-3 py-2.5">
           <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
           <p className="text-[11px] leading-relaxed text-amber-400/80">
-            This is a rough estimate only. The final quotation will be reviewed and
-            confirmed by our team based on detailed measurements.
+            This is a preliminary estimate range based on standard specifications. The final quotation will be calculated and verified by our fabrication experts upon your request.
           </p>
         </div>
       </div>

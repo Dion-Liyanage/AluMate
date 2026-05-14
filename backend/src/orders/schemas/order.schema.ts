@@ -17,17 +17,6 @@ export class NoteEntry {
 
 export const NoteEntrySchema = SchemaFactory.createForClass(NoteEntry);
 
-@Schema({ _id: false })
-export class MeasurementData {
-  @Prop()
-  width: number;
-
-  @Prop()
-  height: number;
-
-  @Prop()
-  unit: string; // mm, inches, etc.
-}
 
 @Schema({ _id: false })
 export class MaterialItem {
@@ -94,8 +83,8 @@ export class Order {
   @Prop()
   estimatedPrice: number;
 
-  @Prop({ type: MeasurementData })
-  measurements: MeasurementData;
+  @Prop({ type: Object, default: {} })
+  measurements: Record<string, any>;
 
   @Prop()
   purpose: string;
@@ -120,6 +109,15 @@ export class Order {
 
   @Prop({ type: Types.ObjectId, ref: 'Quotation' })
   quotationId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Design' })
+  catalogueDesignId: Types.ObjectId;
+
+  @Prop()
+  color: string;
+
+  @Prop({ type: [String] })
+  accessories: string[];
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

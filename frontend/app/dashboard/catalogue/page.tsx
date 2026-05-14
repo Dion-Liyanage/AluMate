@@ -17,6 +17,7 @@ import { AuthContext } from "@/contexts/AuthContext";
 
 interface Design {
   _id: string;
+  designCode: string;
   title: string;
   category: string;
   description: string;
@@ -169,9 +170,12 @@ export default function CataloguePage() {
                       )}
                     </div>
                     <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
-                      <h3 className="font-semibold text-zinc-100">
-                        {item.title}
-                      </h3>
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold text-zinc-100 line-clamp-1">
+                          {item.title}
+                        </h3>
+                        <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest shrink-0">{item.designCode}</span>
+                      </div>
 
                       <div className="flex items-center justify-between mt-4 -mb-1">
                         <Badge

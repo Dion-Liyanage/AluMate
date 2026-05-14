@@ -20,7 +20,7 @@ export class QuotationsController {
 
   @Get()
   async getMyQuotations(@Request() req, @Query() query: any) {
-    const customerId = req.user.userId;
+    const customerId = req.user.id;
     const quotations = await this.quotationsService.findByCustomerId(customerId);
     return {
       success: true,
@@ -31,9 +31,27 @@ export class QuotationsController {
     };
   }
 
+  @Post('request')
+  async requestQuotation(@Body() body: any, @Request() req) {
+    const customerId = req.user.id;
+    const quoteNumber = `QT-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+    
+    const newQuotation = await this.quotationsService.create({
+      ...body,
+      customerId,
+      quoteNumber,
+      status: 'pending',
+    });
+
+    return {
+      success: true,
+      data: { quotation: newQuotation },
+    };
+  }
+
   @Get(':id')
   async getQuotationDetails(@Param('id') id: string, @Request() req) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const quotation = await this.quotationsService.findById(id);
 
     if (quotation && quotation.customerId.toString() !== userId) {
@@ -48,7 +66,7 @@ export class QuotationsController {
 
   @Patch(':id/accept')
   async acceptQuotation(@Param('id') id: string, @Request() req) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const quotation = await this.quotationsService.findById(id);
 
     if (!quotation || quotation.customerId.toString() !== userId) {
@@ -60,7 +78,7 @@ export class QuotationsController {
 
   @Patch(':id/reject')
   async rejectQuotation(@Param('id') id: string, @Request() req) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const quotation = await this.quotationsService.findById(id);
 
     if (!quotation || quotation.customerId.toString() !== userId) {

@@ -33,6 +33,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
+    designCode: "",
     title: "",
     description: "",
     category: "doors",
@@ -62,6 +63,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
 
   const handleClear = () => {
     setFormData({
+      designCode: "",
       title: "",
       description: "",
       category: "doors",
@@ -74,6 +76,9 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     setIsLoading(true);
 
     const submitData = new FormData();
+    if (formData.designCode) {
+      submitData.append("designCode", formData.designCode);
+    }
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
@@ -113,10 +118,20 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
+            <Label htmlFor="designCode">Design Number</Label>
+            <Input
+              id="designCode"
+              required
+              value={formData.designCode}
+              onChange={(e) => setFormData({ ...formData, designCode: e.target.value })}
+              className="bg-zinc-900 border-zinc-800 focus:border-zinc-700"
+            />
+            <p className="text-[10px] text-zinc-500">A unique tracking number to identify this design.</p>
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
-              placeholder="e.g. Modern Sliding Door"
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -145,7 +160,6 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              placeholder="Provide details about the design, materials, etc."
               required
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
