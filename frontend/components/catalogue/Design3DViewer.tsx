@@ -48,7 +48,7 @@ export function Design3DViewer({ modelUrl }: { modelUrl: string }) {
           <OrbitControls 
             enableZoom={false} 
             autoRotate 
-            autoRotateSpeed={0.5} 
+            autoRotateSpeed={1.5} 
             makeDefault 
           />
         </Suspense>

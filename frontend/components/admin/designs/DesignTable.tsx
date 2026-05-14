@@ -157,7 +157,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-sky-400 hover:text-sky-300 hover:bg-sky-500/10"
+                        className="h-8 w-8 text-zinc-400 group-hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
@@ -176,7 +176,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                          className="h-8 w-8 text-zinc-400 group-hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
                           onClick={() => openEditDialog(design)}
                           title="Edit Design"
                         >
@@ -313,7 +313,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-red-400/10"
+                      className="h-8 w-8 text-zinc-400 group-hover:text-red-400 hover:bg-red-400/10 transition-colors"
                       onClick={() => handleDelete(design._id)}
                       disabled={isDeleting === design._id}
                       title="Delete Design"

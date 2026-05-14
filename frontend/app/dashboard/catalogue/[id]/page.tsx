@@ -232,7 +232,7 @@ export default function CatalogueDesignDetailPage() {
                 <CardContent className="p-5 space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="text-xl font-bold text-zinc-100">{design.title}</h2>
-                    <Badge variant="outline" className="text-zinc-400 border-zinc-700 capitalize">
+                    <Badge variant="outline" className="bg-sky-500/10 text-sky-300 border-sky-500/20 capitalize">
                       {design.category}
                     </Badge>
                   </div>

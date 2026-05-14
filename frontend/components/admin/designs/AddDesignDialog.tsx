@@ -31,8 +31,6 @@ interface AddDesignDialogProps {
 export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -40,28 +38,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     category: "doors",
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
 
-    if (selectedFiles.length + files.length > 5) {
-      toast.error("You can only upload a maximum of 5 images");
-      return;
-    }
-
-    const currentTotalSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
-    const newFilesTotalSize = files.reduce((acc, f) => acc + f.size, 0);
-
-    if (currentTotalSize + newFilesTotalSize > 20 * 1024 * 1024) {
-      toast.error("Total size of all images cannot exceed 20MB");
-      return;
-    }
-
-    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
-
-    setSelectedFiles((prev) => [...prev, ...files]);
-    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
-  };
 
   const handleModelFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,11 +58,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     toast.success(`3D Model selected: ${file.name}`);
   };
 
-  const removeImage = (index: number) => {
-    URL.revokeObjectURL(previewUrls[index]);
-    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+
 
   const handleClear = () => {
     setFormData({
@@ -93,9 +66,6 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
       description: "",
       category: "doors",
     });
-    previewUrls.forEach((url) => URL.revokeObjectURL(url));
-    setSelectedFiles([]);
-    setPreviewUrls([]);
     setSelectedModelFile(null);
   };
 
@@ -108,9 +78,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
     
-    selectedFiles.forEach((file) => {
-      submitData.append("images", file);
-    });
+
 
     if (selectedModelFile) {
       submitData.append("model", selectedModelFile);
@@ -185,73 +153,38 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
             />
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label>Design Images</Label>
-              <div className="grid grid-cols-2 gap-4">
-                {previewUrls.map((url, index) => (
-                  <div key={index} className="relative rounded-lg overflow-hidden border border-zinc-800 aspect-square">
-                    <img src={url} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 p-1 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-                {previewUrls.length < 5 && (
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 rounded-lg p-2 hover:border-zinc-700 transition-colors bg-zinc-900/50 aspect-square">
-                    <ImageIcon className="h-5 w-5 text-zinc-600 mb-1" />
-                    <label className="cursor-pointer text-center">
-                      <span className="text-sky-400 font-medium hover:text-sky-300 text-[10px]">Add Image</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>3D Model (Blender Export)</Label>
-              <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 transition-all h-full min-h-[120px] ${
-                selectedModelFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
-              }`}>
-                {selectedModelFile ? (
-                  <div className="text-center">
-                    <CheckCircle2 className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
-                    <p className="text-xs font-bold text-zinc-200 line-clamp-1">{selectedModelFile.name}</p>
-                    <button 
-                      type="button" 
-                      onClick={() => setSelectedModelFile(null)}
-                      className="text-[10px] text-red-400 font-bold hover:underline mt-1"
-                    >
-                      Remove Model
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <CubeIcon className="h-8 w-8 text-zinc-600 mb-2" />
-                    <label className="cursor-pointer text-center">
-                      <span className="text-sky-400 font-medium hover:text-sky-300 text-sm">Upload .glb File</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept=".glb"
-                        onChange={handleModelFileChange}
-                      />
-                    </label>
-                    <p className="text-[10px] text-zinc-500 mt-2">Maximum file size: 50MB</p>
-                  </>
-                )}
-              </div>
+          <div className="space-y-3 max-w-md mx-auto w-full">
+            <Label>3D Model (Blender Export)</Label>
+            <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 transition-all min-h-[160px] ${
+              selectedModelFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-800 bg-zinc-900/50 hover:border-zinc-700'
+            }`}>
+              {selectedModelFile ? (
+                <div className="text-center">
+                  <CheckCircle2 className="h-10 w-10 text-emerald-400 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-zinc-200 line-clamp-1">{selectedModelFile.name}</p>
+                  <button 
+                    type="button" 
+                    onClick={() => setSelectedModelFile(null)}
+                    className="text-xs text-red-400 font-bold hover:underline mt-2"
+                  >
+                    Remove Model
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <CubeIcon className="h-10 w-10 text-zinc-600 mb-2" />
+                  <label className="cursor-pointer text-center">
+                    <span className="text-sky-400 font-medium hover:text-sky-300 text-sm">Upload .glb File</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".glb"
+                      onChange={handleModelFileChange}
+                    />
+                  </label>
+                  <p className="text-[10px] text-zinc-500 mt-2">Maximum file size: 50MB</p>
+                </>
+              )}
             </div>
           </div>
 
