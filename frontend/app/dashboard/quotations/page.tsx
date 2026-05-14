@@ -3,22 +3,18 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
-  FileText, 
-  Plus, 
-  RefreshCcw,
-  ArrowRight
+  FileText
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Button } from "@/components/ui/button";
 import { QuotationsOverviewCards } from "@/components/dashboard/quotations/QuotationsOverviewCards";
-import { QuotationsSearchFilters } from "@/components/dashboard/quotations/QuotationsSearchFilters";
-import { QuotationsTable } from "@/components/dashboard/quotations/QuotationsTable";
+import { QuotationFilters } from "@/components/dashboard/quotations/QuotationFilters";
+import { QuotationTable } from "@/components/dashboard/quotations/QuotationTable";
+import { QuotationCard } from "@/components/dashboard/quotations/QuotationCard";
 import { EmptyQuotationState } from "@/components/dashboard/quotations/EmptyQuotationState";
 import { QuotationDetailsDrawer } from "@/components/dashboard/quotations/QuotationDetailsDrawer";
 import { quotationsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { Quotation } from "@/types";
-import Link from "next/link";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -39,6 +35,7 @@ export default function QuotationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [designTypeFilter, setDesignTypeFilter] = useState("all");
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -104,11 +101,14 @@ export default function QuotationsPage() {
 
   const filteredQuotations = quotations.filter(q => {
     const matchesSearch = q.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         (q.orderId && q.orderId.toLowerCase().includes(searchQuery.toLowerCase()));
+                         (q.productType && q.productType.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = statusFilter === "all" || q.status === statusFilter;
     const matchesType = typeFilter === "all" || q.productType?.toLowerCase() === typeFilter.toLowerCase();
     
-    return matchesSearch && matchesStatus && matchesType;
+    // For now, mock design type since it's not in the base Quotation type
+    const matchesDesignType = designTypeFilter === "all" || "custom" === designTypeFilter;
+    
+    return matchesSearch && matchesStatus && matchesType && matchesDesignType;
   });
 
   return (
@@ -120,36 +120,17 @@ export default function QuotationsPage() {
         className="space-y-8"
       >
         {/* Header Section */}
-        <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <motion.div variants={itemVariants}>
           <div>
             <h2 className="text-3xl font-bold text-zinc-100 flex items-center gap-3">
-              <span className="h-12 w-12 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+              <span className="h-12 w-12 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
                 <FileText className="h-6 w-6 text-blue-400" />
               </span>
               Quotations
             </h2>
             <p className="mt-2 text-zinc-400">
-              Review and approve your fabrication estimates, material breakdowns, and labor costs.
+              Review, compare, and approve your fabrication quotations.
             </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="icon"
-              className="bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:text-zinc-200 h-11 w-11 rounded-xl transition-all"
-              onClick={fetchQuotations}
-              disabled={isLoading}
-            >
-              <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Link href="/dashboard/design/new">
-              <Button className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl h-11 px-6 font-semibold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 group">
-                <Plus className="h-4 w-4 mr-2" />
-                New Design
-                <ArrowRight className="h-4 w-4 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </Button>
-            </Link>
           </div>
         </motion.div>
 
@@ -158,15 +139,17 @@ export default function QuotationsPage() {
           <QuotationsOverviewCards />
         </motion.div>
 
-        {/* Filters and Table */}
+        {/* Filters and Table/Cards */}
         <motion.div variants={itemVariants} className="space-y-4">
-          <QuotationsSearchFilters 
+          <QuotationFilters 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
             typeFilter={typeFilter}
             setTypeFilter={setTypeFilter}
+            designTypeFilter={designTypeFilter}
+            setDesignTypeFilter={setDesignTypeFilter}
           />
 
           {isLoading ? (
@@ -177,19 +160,35 @@ export default function QuotationsPage() {
               </div>
               <p className="mt-4 text-zinc-400 font-medium">Loading your quotations...</p>
             </div>
-          ) : quotations.length === 0 ? (
+          ) : filteredQuotations.length === 0 ? (
             <EmptyQuotationState />
           ) : (
-            <QuotationsTable 
-              quotations={filteredQuotations}
-              onViewDetails={(q) => {
-                setSelectedQuotation(q);
-                setIsDrawerOpen(true);
-              }}
-              onApprove={handleApprove}
-              onReject={handleReject}
-              onDownload={handleDownload}
-            />
+            <>
+              {/* Desktop View */}
+              <div className="hidden lg:block">
+                <QuotationTable 
+                  quotations={filteredQuotations}
+                  onViewDetails={(q) => {
+                    setSelectedQuotation(q);
+                    setIsDrawerOpen(true);
+                  }}
+                />
+              </div>
+
+              {/* Mobile/Tablet View */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
+                {filteredQuotations.map((q) => (
+                  <QuotationCard 
+                    key={q.id} 
+                    quotation={q} 
+                    onView={(q) => {
+                      setSelectedQuotation(q);
+                      setIsDrawerOpen(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </motion.div>
       </motion.div>

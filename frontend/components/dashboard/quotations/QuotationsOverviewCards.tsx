@@ -78,11 +78,9 @@ export function QuotationsOverviewCards() {
   };
 
   const statCards = [
-    { title: "Total Quotations", value: statsData.total, icon: FileText, color: "from-blue-500/30 to-blue-600/20", iconColor: "text-blue-300", borderColor: "border-blue-500/40", glowColor: "hover:shadow-blue-500/10" },
     { title: "Pending Approval", value: statsData.pending, icon: Clock, color: "from-amber-500/30 to-amber-600/20", iconColor: "text-amber-300", borderColor: "border-amber-500/40", glowColor: "hover:shadow-amber-500/10" },
     { title: "Approved", value: statsData.approved, icon: CheckCircle2, color: "from-emerald-500/30 to-emerald-600/20", iconColor: "text-emerald-300", borderColor: "border-emerald-500/40", glowColor: "hover:shadow-emerald-500/10" },
-    { title: "Rejected", value: statsData.rejected, icon: XCircle, color: "from-red-500/30 to-red-600/20", iconColor: "text-red-300", borderColor: "border-red-500/40", glowColor: "hover:shadow-red-500/10" },
-    { title: "Draft", value: statsData.draft, icon: FileEdit, color: "from-purple-500/30 to-purple-600/20", iconColor: "text-purple-300", borderColor: "border-purple-500/40", glowColor: "hover:shadow-purple-500/10" },
+    { title: "Expired", value: 0, icon: XCircle, color: "from-zinc-500/30 to-zinc-600/20", iconColor: "text-zinc-300", borderColor: "border-zinc-500/40", glowColor: "hover:shadow-zinc-500/10" },
   ];
 
   return (
@@ -115,7 +113,7 @@ export function QuotationsOverviewCards() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5"
+            className="grid gap-4 grid-cols-1 sm:grid-cols-3"
           >
             {statCards.map((stat) => (
               <motion.div key={stat.title} variants={itemVariants} className="h-full">

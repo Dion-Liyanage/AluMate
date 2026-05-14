@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
+import { Design3DViewer } from "@/components/catalogue/Design3DViewer";
 import { designsApi } from "@/lib/api";
 
 interface Design {
@@ -18,6 +19,7 @@ interface Design {
   category: string;
   description: string;
   imageUrls?: string[];
+  modelUrl?: string;
   isActive: boolean;
 }
 
@@ -123,18 +125,27 @@ export default function CataloguePage() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
           </motion.div>
         ) : (
-          <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <motion.div
+            key={`grid-${filtered.length}`}
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {filtered.map((item, i) => (
               <motion.div
                 key={item._id}
-                variants={itemVariants}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08, duration: 0.4 }}
               >
                 <Link href={`/dashboard/catalogue/${item._id}`} className="block">
                   <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-                    <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
-                      {item.imageUrls && item.imageUrls.length > 0 ? (
+                    <div className="relative h-64 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
+                      {item.modelUrl ? (
+                        <Design3DViewer modelUrl={item.modelUrl} />
+                      ) : item.imageUrls && item.imageUrls.length > 0 ? (
                         <img 
                           src={item.imageUrls[0].startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${item.imageUrls[0]}` : item.imageUrls[0]} 
                           alt={item.title} 

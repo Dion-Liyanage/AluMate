@@ -12,7 +12,7 @@ import {
   UploadedFiles,
   BadRequestException,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { DesignsService } from './designs.service';
 import { CreateDesignDto, UpdateDesignDto } from './dto/design.dto';
@@ -32,33 +32,47 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 5, {
-      storage: memoryStorage(),
-      limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'images', maxCount: 5 },
+        { name: 'model', maxCount: 1 },
+      ],
+      {
+        storage: memoryStorage(),
+        limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+      },
+    ),
   )
   async create(
     @Body() createDesignDto: CreateDesignDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles()
+    files: { images?: Express.Multer.File[]; model?: Express.Multer.File[] },
   ) {
-    if (!files || files.length === 0) {
-      return this.designsService.create({ ...createDesignDto, imageUrls: [] });
+    let imageUrls: string[] = [];
+    let modelUrl: string | undefined = undefined;
+
+    if (files.images && files.images.length > 0) {
+      const uploadPromises = files.images.map((file) =>
+        this.cloudinaryService.uploadFile(file, 'alumate/designs/images'),
+      );
+      const uploadResults = await Promise.all(uploadPromises);
+      imageUrls = uploadResults.map((result) => result.secure_url);
     }
 
-    const totalSize = files.reduce((acc, file) => acc + file.size, 0);
-    if (totalSize > 20 * 1024 * 1024) {
-      throw new BadRequestException('Total file size exceeds 20MB limit');
+    if (files.model && files.model.length > 0) {
+      const modelFile = files.model[0];
+      const uploadResult = await this.cloudinaryService.uploadFile(
+        modelFile,
+        'alumate/designs/models',
+      );
+      modelUrl = uploadResult.secure_url;
     }
 
-    // Upload files to Cloudinary in parallel
-    const uploadPromises = files.map(file => 
-      this.cloudinaryService.uploadFile(file, 'alumate/designs')
-    );
-    
-    const uploadResults = await Promise.all(uploadPromises);
-    const imageUrls = uploadResults.map(result => result.secure_url);
-
-    return this.designsService.create({ ...createDesignDto, imageUrls });
+    return this.designsService.create({
+      ...createDesignDto,
+      imageUrls,
+      modelUrl,
+    });
   }
 
   @Get()
@@ -75,34 +89,48 @@ export class DesignsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(
-    FilesInterceptor('images', 5, {
-      storage: memoryStorage(),
-      limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
-    }),
+    FileFieldsInterceptor(
+      [
+        { name: 'images', maxCount: 5 },
+        { name: 'model', maxCount: 1 },
+      ],
+      {
+        storage: memoryStorage(),
+        limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+      },
+    ),
   )
   async update(
     @Param('id') id: string,
     @Body() updateDesignDto: UpdateDesignDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles()
+    files: { images?: Express.Multer.File[]; model?: Express.Multer.File[] },
   ) {
     let imageUrls = undefined;
+    let modelUrl = undefined;
 
-    if (files && files.length > 0) {
-      const totalSize = files.reduce((acc, file) => acc + file.size, 0);
-      if (totalSize > 20 * 1024 * 1024) {
-        throw new BadRequestException('Total file size exceeds 20MB limit');
-      }
-
-      const uploadPromises = files.map(file => 
-        this.cloudinaryService.uploadFile(file, 'alumate/designs')
+    if (files.images && files.images.length > 0) {
+      const uploadPromises = files.images.map((file) =>
+        this.cloudinaryService.uploadFile(file, 'alumate/designs/images'),
       );
       const uploadResults = await Promise.all(uploadPromises);
-      imageUrls = uploadResults.map(result => result.secure_url);
+      imageUrls = uploadResults.map((result) => result.secure_url);
     }
 
-    const updateData = imageUrls 
-      ? { ...updateDesignDto, imageUrls } 
-      : updateDesignDto;
+    if (files.model && files.model.length > 0) {
+      const modelFile = files.model[0];
+      const uploadResult = await this.cloudinaryService.uploadFile(
+        modelFile,
+        'alumate/designs/models',
+      );
+      modelUrl = uploadResult.secure_url;
+    }
+
+    const updateData = {
+      ...updateDesignDto,
+      ...(imageUrls && { imageUrls }),
+      ...(modelUrl && { modelUrl }),
+    };
 
     return this.designsService.update(id, updateData);
   }

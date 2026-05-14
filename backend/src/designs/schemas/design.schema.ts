@@ -17,6 +17,9 @@ export class Design {
   @Prop({ type: [String], default: [] })
   imageUrls: string[];
 
+  @Prop({ required: false })
+  modelUrl?: string;
+
   @Prop({ type: [String], default: [] })
   features: string[];
 
