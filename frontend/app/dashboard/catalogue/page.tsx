@@ -168,15 +168,15 @@ export default function CataloguePage() {
                         <div className="text-zinc-600 text-sm">Design Preview</div>
                       )}
                     </div>
-                    <CardContent className="relative p-4">
-                      <h3 className="font-semibold text-zinc-100 group-hover:text-sky-300 transition-colors">
+                    <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
+                      <h3 className="font-semibold text-zinc-100">
                         {item.title}
                       </h3>
-                      <p className="text-sm text-zinc-500 mt-1 line-clamp-2">{item.description}</p>
-                      <div className="flex items-center justify-between mt-3">
+
+                      <div className="flex items-center justify-between mt-4 -mb-1">
                         <Badge
                           variant="outline"
-                          className="text-zinc-400 border-zinc-700 capitalize"
+                          className="bg-sky-500/10 text-sky-300 border-sky-500/20 capitalize group-hover:bg-sky-500/20 group-hover:border-sky-500/40 transition-colors"
                         >
                           {item.category}
                         </Badge>
