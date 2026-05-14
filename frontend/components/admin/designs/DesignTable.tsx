@@ -124,7 +124,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
           {designs.map((design) => (
             <Card
               key={design._id}
-              className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden"
+              className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]"
             >
               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
               <div className="relative h-64 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
@@ -139,20 +139,15 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                 ) : (
                   <LayoutGrid className="h-10 w-10 text-zinc-600" />
                 )}
-                {design.modelUrl && (
-                  <div className="absolute top-2 right-2 bg-sky-500/20 backdrop-blur-md border border-sky-500/30 text-sky-300 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest pointer-events-none z-10">
-                    3D
-                  </div>
-                )}
+                {/* 3D label is now managed by Design3DViewer component */}
               </div>
-              <CardContent className="relative p-4 space-y-3">
+              <CardContent className="relative p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-zinc-100 line-clamp-1">{design.title}</h3>
+                  <h3 className="font-semibold text-zinc-100 line-clamp-1 group-hover:text-sky-300 transition-colors">{design.title}</h3>
                 </div>
+                <p className="text-sm text-zinc-500 mt-1 line-clamp-2">{design.description}</p>
 
-                <p className="text-sm text-zinc-500 line-clamp-2">{design.description}</p>
-
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mt-3">
                   <Badge variant="outline" className="bg-zinc-900 text-zinc-400 border-zinc-700 capitalize">
                     {design.category}
                   </Badge>
