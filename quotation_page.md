@@ -1,62 +1,57 @@
-user-dashboard-quotations-frontend-ui-plan.md
-# AluMate – User Dashboard Quotations Page Frontend Development Plan
-## Quotation Management & Estimation Interface
-
----
-
-# Project
+AluMate – User Dashboard Quotations Page (Revised)
+Frontend UI Development Plan
+Quotation Review & Approval Center
+Project
 
 AluMate – Aluminium Fabrication and Service Management System
 
-This document defines the frontend UI implementation plan for:
+This document defines the revised frontend implementation plan for:
 
 User Dashboard → Quotations Page
 
-The purpose of this module is to allow users to:
+This revised structure focuses ONLY on:
 
-- view all quotations
-- review quotation breakdowns
-- understand material calculations
-- review labor costs
-- approve/reject quotations
-- download quotation PDFs
-- monitor quotation statuses
-- track quotation revisions
+quotation review
+cost transparency
+material recommendations
+quotation approval workflow
+quotation comparison
+modification requests
 
-while maintaining:
+while avoiding duplication with:
 
-- dark dashboard UI
-- glassmorphism styling
-- neon gradient effects
-- responsive layouts
-- smooth animations
-- scalable frontend architecture
+My Orders page
+Dashboard tracking
+Production workflow sections
+1. MODULE OBJECTIVE
 
----
+The Quotations page should behave as:
 
-# 1. PAGE OBJECTIVE
+“A professional quotation review and approval center”
 
-The Quotations page should function as:
+NOT:
 
-"a centralized quotation review and approval dashboard"
+an order tracking page
+a production management page
+a duplicate order history page
+2. PRIMARY USER GOALS
 
-for residential aluminium fabrication customers.
+Users should be able to:
 
----
-
-# 2. PAGE ROUTE
-
+review quotation pricing
+understand material selection
+compare quotations
+approve quotations
+request modifications
+download quotation PDFs
+3. PAGE ROUTE
 /dashboard/quotations
-
----
-
-# 3. PAGE LAYOUT STRUCTURE
-
+4. PAGE LAYOUT STRUCTURE
 -------------------------------------------------
 
-Sidebar
+Sidebar Navigation
 
-Top Navigation
+Top Navbar
 
 -------------------------------------------------
 
@@ -64,494 +59,318 @@ Page Header
 
 -------------------------------------------------
 
-Quotation Overview Cards
+Mini Overview Cards
 
 -------------------------------------------------
 
-Search & Filter Section
+Search & Filters
 
 -------------------------------------------------
 
-Quotation Table / Cards
+Quotation List
 
 -------------------------------------------------
 
 Quotation Details Drawer / Modal
 
 -------------------------------------------------
-
-PDF Preview & Download Section
-
--------------------------------------------------
-
----
-
-# 4. PAGE HEADER SECTION
-
-## Header Title
-
+5. PAGE HEADER SECTION
+Title
 Quotations
+Subtitle
+Review, compare, and approve your fabrication quotations.
+6. MINI OVERVIEW CARDS
 
----
+Keep this section lightweight.
 
-## Subtitle
+Only include:
 
-Review quotations, material breakdowns, labor costs, and approve your fabrication estimates.
+Card	Purpose
+Pending Approval	Waiting for customer action
+Approved	Accepted quotations
+Expired	Expired quotations
+7. UI DESIGN STYLE
 
----
+Follow existing AluMate dashboard styling:
 
-# 5. QUOTATION OVERVIEW CARDS
+dark glassmorphism UI
+neon gradients
+glowing hover effects
+rounded corners
+subtle blur backgrounds
+animated transitions
+dashboard consistency
+8. SEARCH & FILTER SECTION
+Search Inputs
 
-## Main Goal
+Allow searching by:
 
-Display quotation statistics.
+quotation ID
+product type
+design name
+Filters
+Status Filter
+All
+Pending
+Approved
+Expired
+Revision Requested
+Product Type Filter
+Windows
+Doors
+Pantry
+Partition
+Cupboard
+Railings
+Design Type Filter
+Custom Design
+Catalogue Design
+9. MAIN QUOTATION LIST
 
----
+This becomes the primary section.
 
-## Recommended Cards
+Use:
 
-### Total Quotations
+Desktop
 
-All generated quotations
+Modern responsive table
 
----
-
-### Pending Approval
-
-Waiting for customer approval
-
----
-
-### Approved Quotations
-
-Accepted quotations
-
----
-
-### Rejected Quotations
-
-Declined quotations
-
----
-
-### Draft Quotations
-
-Under admin review
-
----
-
-# 6. CARD DESIGN SYSTEM
-
-Follow existing dashboard UI style:
-
-- glassmorphism panels
-- neon gradients
-- rounded corners
-- glowing icons
-- hover lift effects
-- animated highlights
-
----
-
-## Suggested Colors
-
-| Card | Theme |
-|---|---|
-| Total Quotations | Blue |
-| Pending | Orange |
-| Approved | Green |
-| Rejected | Red |
-| Draft | Purple |
-
----
-
-# 7. SEARCH & FILTER SECTION
-
-## Search Features
-
-Search by:
-
-- Quotation ID
-- Order ID
-- Product Type
-
----
-
-## Filters
-
-### Status Filter
-
-- All
-- Draft
-- Pending Approval
-- Approved
-- Rejected
-- Expired
-
----
-
-### Product Type Filter
-
-- Window
-- Door
-- Pantry
-- Partition
-- Cupboard
-- Railing
-
----
-
-### Date Filter
-
-- Latest
-- Oldest
-- Last 30 Days
-
----
-
-# 8. QUOTATION LIST SECTION
-
-## Recommended Layout
-
-Desktop:
-
-Modern quotation table
-
----
-
-Mobile:
+Mobile
 
 Stacked quotation cards
 
----
+10. TABLE COLUMNS
+Column	Description
+Quote ID	Unique quotation reference
+Product	Product category
+Design Type	Custom / Catalogue
+Estimated Total	Final estimate
+Status	Approval status
+Generated Date	Creation date
+Expiry Date	Validity period
+Action	View quotation
+11. STATUS BADGES
 
-# 9. QUOTATION TABLE COLUMNS
+Use glowing pill badges.
 
-| Column | Description |
-|---|---|
-| Quotation ID | Unique quotation identifier |
-| Order ID | Related order |
-| Product Type | Product category |
-| Estimated Amount | Total quotation value |
-| Status | Approval status |
-| Created Date | Quotation generated date |
-| Expiry Date | Quotation validity |
-| Action | View details |
-
----
-
-# 10. QUOTATION STATUS SYSTEM
-
-## Recommended Statuses
-
-- Draft
-- Pending Approval
-- Approved
-- Rejected
-- Expired
-
----
-
-# 11. STATUS BADGE DESIGN
+Status	Color
+Pending	Orange
+Approved	Green
+Expired	Gray
+Revision Requested	Purple
+12. QUOTATION DETAILS VIEW
+Recommended UI
 
 Use:
 
-- glowing pill badges
-- neon border highlights
-- hover animations
-
----
-
-## Suggested Colors
-
-| Status | Color |
-|---|---|
-| Draft | Purple |
-| Pending | Orange |
-| Approved | Green |
-| Rejected | Red |
-| Expired | Gray |
-
----
-
-# 12. QUOTATION DETAILS VIEW
-
-## Recommended UI
-
-Use:
-
-Right-side drawer
-
-OR:
-
+slide drawer
+OR
 fullscreen modal
-
----
-
-# 13. QUOTATION DETAILS CONTENT
-
-## Basic Information
-
-- Quotation ID
-- Order ID
-- Product Type
-- Design Type
-- Generated Date
-- Expiry Date
-
----
-
-## Customer Inputs Section
+13. QUOTATION DETAILS STRUCTURE
+SECTION 1 — PRODUCT PREVIEW
 
 Display:
 
-- measurements
-- purpose
-- environment
-- selected colors
-- strength category
-
----
-
-# 14. DESIGN PREVIEW SECTION
+product image
+2D design preview
+3D preview image
+design type
+measurements summary
+SECTION 2 — CUSTOMER INPUTS
 
 Display:
 
-- 2D preview image
-- 3D rendered preview
-- catalogue preview image
+Field	Example
+Width	8ft
+Height	7ft
+Color	Matte Black
+Usage Purpose	Heavy Daily Use
+Environment	Outdoor
+14. COST BREAKDOWN SECTION
 
----
+This becomes one of the MOST IMPORTANT sections.
 
-# 15. MATERIAL BREAKDOWN PANEL
+Breakdown Table
+Type	Cost
+Aluminium Profiles	Rs.XX
+Glass	Rs.XX
+Accessories	Rs.XX
+Labor	Rs.XX
+Installation	Rs.XX
+Transport	Rs.XX
+15. MATERIAL RECOMMENDATION SECTION
+Main Goal
 
-## Main Goal
+Explain WHY certain materials were selected.
 
-Allow users to understand material recommendations.
-
----
-
-## Display
-
-| Material | Qty | Rate | Total |
-|---|---|---|---|
-| 80mm Sliding | 22ft | Rs.1600 | Rs.35,200 |
-| Tempered Glass | 18sq.ft | Rs.700 | Rs.12,600 |
-
----
-
-# 16. MATERIAL RECOMMENDATION EXPLANATION
-
-Display reasons for selected materials.
-
----
-
-## Example
-
+Example Display
+Recommended Materials
+80mm Sliding Profile
+Tempered Glass
+Heavy-duty rollers
+Recommendation Reason
 Selected because:
+• Large dimensions detected
+• Heavy usage selected
+• Outdoor installation environment
+16. ALTERNATIVE MATERIAL OPTIONS
 
-- Large dimensions detected
-- Heavy usage selected
-- Outdoor environment selected
-
----
-
-# 17. LABOR COST BREAKDOWN PANEL
+This is a VERY strong feature.
 
 Display:
 
-- calculated area
-- labor rate
-- labor total
+Option Type	Material
+Budget Option	70mm Sliding
+Standard Option	80mm Sliding
+Premium Option	Heavy-duty 100mm System
+Purpose
 
----
+Allows users to:
 
-## Example
-
-Area:
-24 sq.ft
-
-Labor Rate:
-Rs.350 / sq.ft
-
-Labor Cost:
-Rs.8,400
-
----
-
-# 18. QUOTATION SUMMARY PANEL
-
-## Display
-
-| Type | Amount |
-|---|---|
-| Material Cost | Rs.XX |
-| Labor Cost | Rs.XX |
-| Installation | Rs.XX |
-| Transport | Rs.XX |
-| Total Estimate | Rs.XX |
-
----
-
-# 19. IMPORTANT NOTICE SECTION
+reduce budget
+increase durability
+compare options
+17. LABOR COST SECTION
 
 Display:
 
-```text
-Final measurements may slightly affect
-the final quotation amount.
-20. QUOTATION PDF SECTION
+Item	Value
+Calculated Area	XX sq.ft
+Labor Rate	Rs.350 / sq.ft
+Labor Total	Rs.XX
+18. QUOTATION SUMMARY PANEL
+Final Summary
+Category	Amount
+Material Cost	Rs.XX
+Labor Cost	Rs.XX
+Installation	Rs.XX
+Transport	Rs.XX
+Grand Total	Rs.XX
+19. IMPORTANT NOTICE SECTION
+Final measurements and site conditions may slightly affect the final quotation amount.
+20. QUOTATION VERSION HISTORY
 
-Allow users to:
+Highly recommended feature.
+
+Example
+Version	Total	Date
+V1	Rs.120,000	Jan 12
+V2	Rs.110,000	Jan 15
+V3	Rs.98,000	Jan 18
+Purpose
+
+Allows users to:
+
+compare revisions
+understand pricing changes
+review admin modifications
+21. MAIN ACTION BUTTONS
+
+Only include:
+
+Action	Purpose
+Approve Quotation	Confirm quotation
+Request Modification	Ask for changes
+Download PDF	Save quotation
+22. REQUEST MODIFICATION FLOW
+
+Instead of:
+
+Reject Quotation
+
+Use:
+
+Request Modification
+
+This is much more realistic.
+
+Example Requests
+reduce budget
+change color
+replace profile type
+reduce glass quality
+simplify design
+23. APPROVAL CONFIRMATION MODAL
+
+Before approval:
+
+Display:
+
+Approving this quotation will begin
+the fabrication process.
+
+Include:
+
+quotation total
+payment reminder
+production notice
+24. PDF SECTION
+
+Users should be able to:
 
 preview PDF
 download PDF
 print quotation
-21. ACTION BUTTONS
-Recommended Actions
-View Details
-
-Open quotation drawer
-
-Download PDF
-
-Download quotation file
-
-Approve Quotation
-
-Accept quotation
-
-Reject Quotation
-
-Decline quotation
-
-Contact Admin
-
-Open support/chat
-
-22. APPROVAL CONFIRMATION MODAL
-
-Before approving:
-
-Display:
-
-quotation total
-payment notice
-production notice
-Example
-Approving this quotation will begin
-the fabrication process.
-23. REJECTION FLOW
-
-Users may provide:
-
-rejection reason
-modification requests
-budget concerns
-24. EMPTY STATE DESIGN
+25. EMPTY STATE DESIGN
 
 If no quotations exist:
 
-Display:
+No Quotations Available
 
-"No Quotations Available"
-
-CTA Button
+CTA:
 
 Create New Design
-
-25. LOADING STATES
+26. LOADING STATES
 
 Use:
 
 skeleton loaders
-shimmer placeholders
-animated cards
+shimmer effects
+animated placeholders
+27. RESPONSIVE DESIGN REQUIREMENTS
+Desktop
+advanced table layout
+slide drawer
+side-by-side breakdown panels
+Tablet
+collapsible filters
+compact quotation cards
+Mobile
+stacked cards
+fullscreen detail modal
+simplified actions
+28. RECOMMENDED COMPONENT STRUCTURE
+components/dashboard/quotations/
 
-consistent with dashboard theme.
-
-26. ERROR STATES
-
-Display:
-
-Unable to load quotations
-
-Try again
-
-27. FRONTEND STATE MANAGEMENT
-Recommended States
+QuotationsOverviewCards.tsx
+QuotationFilters.tsx
+QuotationTable.tsx
+QuotationCard.tsx
+QuotationStatusBadge.tsx
+QuotationDetailsDrawer.tsx
+CostBreakdown.tsx
+MaterialRecommendation.tsx
+AlternativeMaterials.tsx
+LaborCostPanel.tsx
+QuotationSummary.tsx
+VersionHistory.tsx
+PdfPreview.tsx
+EmptyQuotationState.tsx
+29. RECOMMENDED STATE MANAGEMENT
 quotations
 selectedQuotation
 filters
 searchQuery
 statusFilter
 loading
-quotationModal
-pagination
-28. RECOMMENDED COMPONENT STRUCTURE
-
-components/dashboard/quotations/
-
-QuotationsOverviewCards.tsx
-QuotationsSearchFilters.tsx
-QuotationsTable.tsx
-QuotationStatusBadge.tsx
-QuotationDetailsDrawer.tsx
-MaterialBreakdown.tsx
-LaborBreakdown.tsx
-QuotationSummary.tsx
-PdfPreviewPanel.tsx
-EmptyQuotationState.tsx
-29. RESPONSIVE DESIGN REQUIREMENTS
-Desktop
-advanced table layout
-side detail drawer
-multiple breakdown panels
-Tablet
-collapsible filters
-compact quotation cards
-Mobile
-stacked quotation cards
-fullscreen detail views
-simplified actions
-30. UI/UX REQUIREMENTS
-
-Follow existing AluMate design system:
-
-dark dashboard theme
-neon gradients
-glassmorphism cards
-glowing hover effects
-rounded corners
-smooth transitions
-sidebar consistency
-31. ANIMATION REQUIREMENTS
-Recommended Animations
-Page Load
-
-fade-up stagger animations
-
-Cards
-
-hover glow + lift effects
-
-Tables
-
-smooth row hover highlight
-
-Drawers / Modals
-
-slide-in animations
-
-Status Changes
-
-animated badge transitions
-
-32. MOCK DATA ARCHITECTURE
+quotationDrawer
+comparisonMode
+revisionRequest
+30. MOCK DATA ARCHITECTURE
 
 Frontend components should NEVER directly contain mock data.
 
-Instead use:
+Use:
 
 UI Components
 ↓
@@ -559,82 +378,71 @@ Hooks
 ↓
 Service Layer
 ↓
-Mock Data / API
+Mock Data / Backend API
 
-This allows:
+This ensures:
 
-easy backend integration
+clean backend integration
 scalable architecture
-no UI rewrites
-33. RECOMMENDED PROJECT STRUCTURE
-
-src/
-
-mock/
-quotations.mock.ts
-
-services/
-quotation.service.ts
-
-hooks/
-useQuotations.ts
-
-types/
-quotation.types.ts
-
-components/
-dashboard/quotations/
-
-34. VALIDATION REQUIREMENTS
-
-Users should only:
-
-approve pending quotations
-reject valid quotations
-download authorized quotation files
-35. DEVELOPMENT PHASES
+easy transition to production
+31. ANIMATION REQUIREMENTS
+Recommended Animations
+Page Load
+stagger fade-up animation
+Cards
+glow hover
+slight lift effect
+Drawer
+smooth slide animation
+Buttons
+neon hover transitions
+Status Changes
+animated badge transitions
+32. DEVELOPMENT PHASES
 PHASE 1
-layout
-overview cards
+page layout
+mini overview cards
 quotation table
 PHASE 2
 filters
 status badges
-detail drawer
+responsive cards
 PHASE 3
-material breakdown
-labor calculations
-quotation summary
+quotation details drawer
+cost breakdown
+material recommendation panels
 PHASE 4
+quotation comparison
+version history
+alternative materials
+PHASE 5
 PDF preview
 approval workflow
-PHASE 5
+modification requests
+PHASE 6
 animations
 responsive optimization
-36. FINAL FRONTEND OBJECTIVE
+final polish
+33. FINAL OBJECTIVE
 
-The Quotations page should behave as:
+The revised Quotations page should feel like:
 
-"a professional quotation review and approval system"
+“A professional estimation and quotation approval system”
 
-NOT:
+focused on:
 
-"a simple quotation list"
+transparency
+recommendations
+customer decision-making
+realistic fabrication workflow
 
-37. SUMMARY
+without duplicating:
 
-This module allows users to:
+order tracking
+production workflow
+installation monitoring
 
-review fabrication quotations
-understand material recommendations
-monitor labor calculations
-download quotation PDFs
-approve/reject quotations
-communicate with admins
+which are already handled inside:
 
-while maintaining:
-
-scalable architecture
-modern UI consistency
-realistic quotation workflows
-intelligent estimation visibility
+My Orders page
+Dashboard modules.

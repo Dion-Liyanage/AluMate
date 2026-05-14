@@ -13,10 +13,13 @@ export class CreateDesignDto {
   @IsNotEmpty()
   category: string;
 
-  @IsArray()
-  @IsString({ each: true })
   @IsOptional()
   imageUrls?: string[];
+
+  @IsString()
+  @IsUrl()
+  @IsOptional()
+  modelUrl?: string;
 
   @IsArray()
   @IsString({ each: true })
@@ -41,10 +44,13 @@ export class UpdateDesignDto {
   @IsOptional()
   category?: string;
 
-  @IsArray()
-  @IsString({ each: true })
   @IsOptional()
   imageUrls?: string[];
+
+  @IsString()
+  @IsUrl()
+  @IsOptional()
+  modelUrl?: string;
 
   @IsArray()
   @IsString({ each: true })

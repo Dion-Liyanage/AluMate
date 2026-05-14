@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Edit, Trash2, LayoutGrid } from "lucide-react";
+import { Edit, Trash2, LayoutGrid, Box as CubeIcon, CheckCircle2 } from "lucide-react";
 import { designsApi } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ interface Design {
   category: string;
   description: string;
   imageUrls?: string[];
+  modelUrl?: string;
 }
 
 interface DesignTableProps {
@@ -43,6 +44,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
   const [activeDesign, setActiveDesign] = useState<Design | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -53,6 +55,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
   const openEditDialog = (design: Design) => {
     setActiveDesign(design);
     setSelectedFile(null);
+    setSelectedModelFile(null);
     setFormData({
       title: design.title,
       description: design.description,
@@ -85,8 +88,13 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
+    
     if (selectedFile) {
       submitData.append("images", selectedFile);
+    }
+
+    if (selectedModelFile) {
+      submitData.append("model", selectedModelFile);
     }
 
     try {
@@ -127,6 +135,11 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                 ) : (
                   <LayoutGrid className="h-8 w-8 text-zinc-600" />
                 )}
+                {design.modelUrl && (
+                  <div className="absolute top-2 right-2 bg-sky-500/20 backdrop-blur-md border border-sky-500/30 text-sky-300 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest pointer-events-none">
+                    3D
+                  </div>
+                )}
               </div>
               <CardContent className="relative p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
@@ -159,7 +172,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                           <Edit className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <DialogHeader>
                           <DialogTitle>Edit Design</DialogTitle>
                         </DialogHeader>
@@ -206,31 +219,70 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                             />
                           </div>
 
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-images">Replace Image (Optional)</Label>
-                            <Input
-                              id="edit-images"
-                              type="file"
-                              accept="image/*"
-                              className="bg-zinc-900 border-zinc-800"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0] || null;
-                                if (!file) {
-                                  setSelectedFile(null);
-                                  return;
-                                }
-                                if (file.size > 10 * 1024 * 1024) {
-                                  toast.error("Image size must be 10MB or less");
-                                  e.target.value = "";
-                                  setSelectedFile(null);
-                                  return;
-                                }
-                                setSelectedFile(file);
-                              }}
-                            />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-images">Replace Image</Label>
+                              <Input
+                                id="edit-images"
+                                type="file"
+                                accept="image/*"
+                                className="bg-zinc-900 border-zinc-800"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0] || null;
+                                  if (!file) {
+                                    setSelectedFile(null);
+                                    return;
+                                  }
+                                  if (file.size > 10 * 1024 * 1024) {
+                                    toast.error("Image size must be 10MB or less");
+                                    e.target.value = "";
+                                    setSelectedFile(null);
+                                    return;
+                                  }
+                                  setSelectedFile(file);
+                                }}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="edit-model">Replace 3D Model (.glb)</Label>
+                              <div className={`relative flex items-center justify-center border-2 border-dashed rounded-lg p-2 transition-all min-h-[40px] ${
+                                selectedModelFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-zinc-800 bg-zinc-900/50'
+                              }`}>
+                                <input
+                                  id="edit-model"
+                                  type="file"
+                                  accept=".glb"
+                                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    if (!file) {
+                                      setSelectedModelFile(null);
+                                      return;
+                                    }
+                                    if (file.size > 50 * 1024 * 1024) {
+                                      toast.error("Model size must be 50MB or less");
+                                      setSelectedModelFile(null);
+                                      return;
+                                    }
+                                    setSelectedModelFile(file);
+                                  }}
+                                />
+                                <div className="flex items-center gap-2">
+                                  {selectedModelFile ? (
+                                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                                  ) : (
+                                    <CubeIcon className="h-4 w-4 text-zinc-500" />
+                                  )}
+                                  <span className="text-[10px] text-zinc-400 truncate max-w-[120px]">
+                                    {selectedModelFile ? selectedModelFile.name : (design.modelUrl ? "Update Current Model" : "Upload Model")}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          <DialogFooter>
+                          <DialogFooter className="pt-4">
                             <Button
                               type="button"
                               variant="ghost"
@@ -239,7 +291,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                             >
                               Cancel
                             </Button>
-                            <Button type="submit" disabled={isEditing} className="bg-sky-600 hover:bg-sky-500 text-white">
+                            <Button type="submit" disabled={isEditing} className="bg-sky-600 hover:bg-sky-500 text-white min-w-[100px]">
                               {isEditing ? "Saving..." : "Save Changes"}
                             </Button>
                           </DialogFooter>

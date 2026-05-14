@@ -11,6 +11,7 @@ interface QuotationStatusBadgeProps {
 export function QuotationStatusBadge({ status, className }: QuotationStatusBadgeProps) {
   const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
+      case "revision_requested":
       case "draft":
         return "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]";
       case "pending_approval":
@@ -48,14 +49,14 @@ export function QuotationStatusBadge({ status, className }: QuotationStatusBadge
           status.toLowerCase() === 'approved' ? 'bg-emerald-400' : 
           status.toLowerCase() === 'pending' || status.toLowerCase() === 'pending_approval' ? 'bg-amber-400' :
           status.toLowerCase() === 'rejected' ? 'bg-red-400' :
-          status.toLowerCase() === 'draft' ? 'bg-purple-400' : 'bg-zinc-400'
+          status.toLowerCase() === 'draft' || status.toLowerCase() === 'revision_requested' ? 'bg-purple-400' : 'bg-zinc-400'
         )}></span>
         <span className={cn(
           "relative inline-flex rounded-full h-2 w-2",
           status.toLowerCase() === 'approved' ? 'bg-emerald-500' : 
           status.toLowerCase() === 'pending' || status.toLowerCase() === 'pending_approval' ? 'bg-amber-500' :
           status.toLowerCase() === 'rejected' ? 'bg-red-500' :
-          status.toLowerCase() === 'draft' ? 'bg-purple-500' : 'bg-zinc-500'
+          status.toLowerCase() === 'draft' || status.toLowerCase() === 'revision_requested' ? 'bg-purple-500' : 'bg-zinc-500'
         )}></span>
       </span>
       {formatStatus(status)}
