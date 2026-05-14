@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { LayoutGrid, Search, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Design3DViewer } from "@/components/catalogue/Design3DViewer";
 import { designsApi } from "@/lib/api";
+import { AuthContext } from "@/contexts/AuthContext";
 
 interface Design {
   _id: string;
@@ -39,10 +41,21 @@ const itemVariants = {
 };
 
 export default function CataloguePage() {
+  const router = useRouter();
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
+  const isAdmin = user?.role === "admin";
+
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [designs, setDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!auth?.isLoading && isAdmin) {
+      router.replace("/admin/designs");
+    }
+  }, [auth?.isLoading, isAdmin, router]);
 
   const fetchDesigns = async () => {
     setIsLoading(true);

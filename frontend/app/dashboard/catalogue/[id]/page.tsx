@@ -96,7 +96,7 @@ export default function CatalogueDesignDetailPage() {
       >
         {/* Back button */}
         <motion.div variants={itemVariants} className="flex items-center justify-between gap-4">
-          <Link href="/dashboard/catalogue">
+          <Link href={isAdmin ? "/admin/designs" : "/dashboard/catalogue"}>
             <Button
               variant="outline"
               className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-300"
@@ -223,12 +223,7 @@ export default function CatalogueDesignDetailPage() {
                     </div>
                   )}
 
-                  {/* 3D Indicator */}
-                  {design.modelUrl && (
-                    <div className="absolute top-4 right-4 bg-sky-500/20 backdrop-blur-md border border-sky-500/30 text-sky-300 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest pointer-events-none shadow-[0_0_15px_rgba(14,165,233,0.2)]">
-                      Interactive 3D View
-                    </div>
-                  )}
+                  {/* 3D Indicator is now managed inside Design3DViewer */}
                 </div>
               </Card>
 
