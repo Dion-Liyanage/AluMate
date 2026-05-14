@@ -64,8 +64,8 @@ export function OrdersOverviewCard() {
     },
     {
       icon: Receipt,
-      label: "Quotations",
-      value: stats.pendingQuotations,
+      label: "Approved",
+      value: (stats as any).approved || 0,
       color: "from-amber-500/30 to-amber-600/20",
       iconColor: "text-amber-300",
       borderColor: "border-amber-500/40",

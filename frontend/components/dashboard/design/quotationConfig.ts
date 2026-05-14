@@ -18,42 +18,35 @@ export interface MeasurementField {
 
 export const productMeasurements: Record<string, MeasurementField[]> = {
   window: [
-    { key: "width", label: "Width", type: "dimension", min: 1, max: 20 },
-    { key: "height", label: "Height", type: "dimension", min: 1, max: 15 },
-    { key: "type", label: "Window Type", type: "select", options: ["Sliding", "Casement", "Fixed"] },
+    { key: "width", label: "Total Width", type: "dimension", min: 1, max: 20 },
+    { key: "height", label: "Total Height", type: "dimension", min: 1, max: 15 },
     { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 2", min: 1, max: 8 },
   ],
   door: [
-    { key: "width", label: "Width", type: "dimension", min: 2, max: 10 },
-    { key: "height", label: "Height", type: "dimension", min: 6, max: 12 },
-    { key: "type", label: "Door Type", type: "select", options: ["Sliding Door", "Swing Door"] },
+    { key: "width", label: "Total Width", type: "dimension", min: 2, max: 10 },
+    { key: "height", label: "Total Height", type: "dimension", min: 6, max: 12 },
+    { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 1", min: 1, max: 4 },
   ],
   cupboard: [
-    { key: "width", label: "Width", type: "dimension", min: 1, max: 20 },
-    { key: "height", label: "Height", type: "dimension", min: 2, max: 15 },
-    { key: "depth", label: "Depth", type: "dimension", min: 1, max: 5 },
-    { key: "compartmentCount", label: "Compartment Count", type: "number", placeholder: "e.g. 4", min: 1, max: 12 },
+    { key: "width", label: "Total Width", type: "dimension", min: 1, max: 20 },
+    { key: "height", label: "Total Height", type: "dimension", min: 2, max: 15 },
   ],
   pantry: [
-    { key: "width", label: "Width", type: "dimension", min: 2, max: 30 },
-    { key: "height", label: "Height", type: "dimension", min: 2, max: 15 },
-    { key: "depth", label: "Depth", type: "dimension", min: 1, max: 5 },
-    { key: "compartmentCount", label: "Compartment Count", type: "number", placeholder: "e.g. 6", min: 1, max: 20 },
+    { key: "width", label: "Total Width", type: "dimension", min: 2, max: 30 },
+    { key: "height", label: "Total Height", type: "dimension", min: 2, max: 15 },
   ],
   partition: [
-    { key: "width", label: "Width", type: "dimension", min: 2, max: 50 },
-    { key: "height", label: "Height", type: "dimension", min: 5, max: 15 },
+    { key: "width", label: "Total Width", type: "dimension", min: 2, max: 50 },
+    { key: "height", label: "Total Height", type: "dimension", min: 5, max: 15 },
     { key: "panelCount", label: "Panel Count", type: "number", placeholder: "e.g. 3", min: 1, max: 10 },
   ],
   railing: [
-    { key: "length", label: "Length", type: "dimension", min: 2, max: 100 },
-    { key: "height", label: "Height", type: "dimension", min: 2, max: 5 },
-    { key: "postCount", label: "Post Count", type: "number", placeholder: "e.g. 6", min: 2, max: 40 },
+    { key: "length", label: "Total Length", type: "dimension", min: 2, max: 100 },
+    { key: "height", label: "Total Height", type: "dimension", min: 2, max: 5 },
   ],
   other: [
-    { key: "width", label: "Width", type: "dimension", min: 1, max: 50 },
-    { key: "height", label: "Height", type: "dimension", min: 1, max: 50 },
-    { key: "depth", label: "Depth (Optional)", type: "dimension", min: 0, max: 20 },
+    { key: "width", label: "Total Width", type: "dimension", min: 1, max: 50 },
+    { key: "height", label: "Total Height", type: "dimension", min: 1, max: 50 },
   ],
 };
 
@@ -245,9 +238,6 @@ export function getRoundedFeet(value: string | number): number {
   return inches > 0 ? ft + 1 : ft;
 }
 
-/**
- * Mock Rule Engine for Material Recommendation
- */
 export function recommendProfile(config: {
   productType: string;
   measurements: Record<string, number | string>;
@@ -257,47 +247,39 @@ export function recommendProfile(config: {
 }): { profile: AluminiumProfile; explanation: string[] } {
   const { productType, measurements, purpose, environment, strength } = config;
   const w = getRoundedFeet(measurements.width || measurements.length || 0);
-  const type = String(measurements.type || "");
 
   let profileKey = "casement-41";
   let explanation: string[] = ["Standard residential specification."];
 
   if (productType === "window") {
-    if (type === "Sliding") {
-      if (w > 5) { // Approx 1500mm
-        profileKey = "sliding-80";
-        explanation = ["Large width detected (> 5ft)", "Heavy duty requirements for stability"];
-      } else {
-        profileKey = "sliding-70";
-        explanation = ["Standard sliding configuration selected"];
-      }
+    if (w > 5) {
+      profileKey = "sliding-80";
+      explanation = ["Large width detected (> 5ft)", "Heavy duty sliding profile recommended for stability"];
+    } else if (environment === "outdoor" || strength === "heavy") {
+      profileKey = "casement-60";
+      explanation = ["Outdoor/Heavy duty requirement detected", "Enhanced weather resistance recommended"];
     } else {
-      if (environment === "outdoor" || strength === "heavy") {
-        profileKey = "casement-60";
-        explanation = ["Outdoor/Heavy duty requirement detected", "Enhanced weather resistance"];
-      } else {
-        profileKey = "casement-41";
-        explanation = ["Standard casement selected for indoor/light usage"];
-      }
+      profileKey = "sliding-70";
+      explanation = ["Standard profile suggested for indoor/light usage"];
     }
   } else if (productType === "door") {
-    if (type === "Sliding Door") {
+    if (w > 4) {
       profileKey = "sliding-door-100";
-      explanation = ["Sliding door profile selected for smooth operation"];
+      explanation = ["Large width detected", "Sliding door profile recommended for wide entrances"];
     } else {
       profileKey = "swing-door-100";
-      explanation = ["Standard swing door specification"];
+      explanation = ["Standard swing door specification recommended"];
     }
   } else if (productType === "pantry" || productType === "cupboard") {
     profileKey = "pantry-bar";
     explanation = ["Specialized kitchen/pantry bar selected for longevity"];
-    if (purpose.includes("Heavy")) {
+    if (purpose.includes("Heavy") || strength === "heavy") {
       explanation.push("Heavy usage requirement detected");
     }
   } else {
     // Default fallback
     profileKey = "casement-41";
-    explanation = ["General purpose profile assigned"];
+    explanation = ["General purpose profile assigned based on dimensions"];
   }
 
   return {

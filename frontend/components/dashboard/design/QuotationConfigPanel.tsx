@@ -23,7 +23,7 @@ import { AccessoriesSelector } from "./AccessoriesSelector";
 import { RecommendedMaterialsPanel } from "./RecommendedMaterialsPanel";
 import { LiveEstimatePanel } from "./LiveEstimatePanel";
 import { calculateEstimate, productMeasurements } from "./quotationConfig";
-import { quotationsApi } from "@/lib/api";
+import { ordersApi } from "@/lib/api";
 
 interface QuotationConfigPanelProps {
   productType: string;
@@ -250,29 +250,15 @@ export function QuotationConfigPanel({
         accessories: config.accessories,
       });
 
-      await quotationsApi.request({
-        description: [
-          `Product: ${productType}`,
-          catalogueDesignTitle
-            ? `Catalogue Design: ${catalogueDesignTitle}`
-            : "Custom Design",
-          `Purpose: ${config.purpose}`,
-          `Environment: ${config.environment}`,
-          `Strength: ${config.strength}`,
-          `Color: ${config.color === "custom" ? config.customColor : config.color}`,
-          `Accessories: ${config.accessories.join(", ") || "None"}`,
-          `Measurements: ${JSON.stringify(config.measurements)}`,
-          config.additionalNotes
-            ? `Notes: ${config.additionalNotes}`
-            : "",
-          `Estimated Total: LKR ${estimate.total.toLocaleString()}`,
-        ]
-          .filter(Boolean)
-          .join("\n"),
-        material: estimate.materialCategory,
-        dimensions: Object.entries(config.measurements)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(", "),
+      await ordersApi.create({
+        productType,
+        designType: catalogueDesignId ? "catalogue" : "custom",
+        measurements: config.measurements,
+        purpose: config.purpose,
+        environment: config.environment,
+        strengthCategory: config.strength,
+        estimatedPrice: estimate.total,
+        notes: config.additionalNotes ? [{ message: config.additionalNotes, createdBy: "Customer" }] : [],
       });
 
       setIsSubmitted(true);
@@ -298,8 +284,7 @@ export function QuotationConfigPanel({
           Quotation Request Submitted!
         </h3>
         <p className="text-sm text-zinc-400 max-w-md">
-          Your quotation request has been submitted successfully. Our team will review
-          your requirements and get back to you with a detailed quotation.
+          Your request has been successfully forwarded to our experts. They will review your measurements and preferences, perform technical calculations, and generate your official final quotation shortly.
         </p>
         <Button
           onClick={() => {
@@ -498,7 +483,7 @@ export function QuotationConfigPanel({
           ) : (
             <>
               <Send className="h-4 w-4 mr-2" />
-              Generate Quotation Request
+              Request Final Quotation
             </>
           )}
         </Button>

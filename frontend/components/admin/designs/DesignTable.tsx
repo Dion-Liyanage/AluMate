@@ -30,6 +30,7 @@ import { toast } from "sonner";
 
 interface Design {
   _id: string;
+  designCode: string;
   title: string;
   category: string;
   description: string;
@@ -49,6 +50,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
   const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
   const [activeDesign, setActiveDesign] = useState<Design | null>(null);
   const [formData, setFormData] = useState({
+    designCode: "",
     title: "",
     description: "",
     category: "doors",
@@ -59,6 +61,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
     setSelectedFile(null);
     setSelectedModelFile(null);
     setFormData({
+      designCode: design.designCode,
       title: design.title,
       description: design.description,
       category: design.category,
@@ -87,6 +90,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
 
     setIsEditing(true);
     const submitData = new FormData();
+    submitData.append("designCode", formData.designCode);
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
@@ -142,7 +146,8 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                 {/* 3D label is now managed by Design3DViewer component */}
               </div>
               <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-col items-start gap-1">
+                  <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest">{design.designCode}</span>
                   <h3 className="font-semibold text-zinc-100 line-clamp-1">{design.title}</h3>
                 </div>
 
@@ -189,6 +194,16 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                         </DialogHeader>
 
                         <form onSubmit={handleEditSubmit} className="space-y-4 py-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-designCode">Design Number / SKU</Label>
+                            <Input
+                              id="edit-designCode"
+                              value={formData.designCode}
+                              onChange={(e) => setFormData({ ...formData, designCode: e.target.value })}
+                              className="bg-zinc-900 border-zinc-800"
+                              required
+                            />
+                          </div>
                           <div className="space-y-2">
                             <Label htmlFor="edit-title">Title</Label>
                             <Input

@@ -36,7 +36,7 @@ export class AdminOrdersController {
       ];
     }
 
-    const orders = await this.ordersService.findAll({ ...filter, page, limit });
+    const orders = await this.ordersService.findAll({ ...filter, page, limit, populate: true });
     return {
       success: true,
       data: orders,
@@ -49,14 +49,16 @@ export class AdminOrdersController {
 
   @Get('stats')
   async getStats() {
-    const orders = await this.ordersService.findAll({ limit: 1000 }); // Simple way for mock
+    const orders = await this.ordersService.findAll({ limit: 1000 });
     
     const stats = {
       totalOrders: orders.length,
       pendingQuotations: orders.filter(o => o.status === 'quotation_pending').length,
+      quotationsSent: orders.filter(o => o.status === 'quotation_sent').length,
       activeProductions: orders.filter(o => o.status === 'production').length,
       installations: orders.filter(o => o.status === 'installation').length,
       completed: orders.filter(o => o.status === 'completed').length,
+      approved: orders.filter(o => o.status === 'approved').length,
     };
 
     return {
@@ -106,17 +108,58 @@ export class AdminOrdersController {
   }
 
   @Post(':id/generate-quotation')
-  async generateQuotation(@Param('id') id: string) {
-    // Placeholder for Phase 2/3 logic
-    const updatedOrder = await this.ordersService.update(id, { 
+  async generateQuotation(
+    @Param('id') id: string,
+    @Body() body: {
+      recommendedMaterials?: any[];
+      laborCalculation?: any;
+      estimatedPrice?: number;
+      adminNotes?: string;
+    }
+  ) {
+    const order = await this.ordersService.findById(id);
+    if (!order) {
+      return { success: false, message: 'Order not found' };
+    }
+
+    const updateData: any = {
       status: 'quotation_sent',
-      progress: 15
-    });
+      progress: 15,
+    };
+
+    // Apply admin-provided material/labor data if present
+    if (body.recommendedMaterials) {
+      updateData.recommendedMaterials = body.recommendedMaterials;
+    }
+    if (body.laborCalculation) {
+      updateData.laborCalculation = body.laborCalculation;
+    }
+    if (body.estimatedPrice) {
+      updateData.estimatedPrice = body.estimatedPrice;
+    }
+    if (body.adminNotes) {
+      updateData.notes = [
+        ...(order.notes || []),
+        { message: body.adminNotes, createdBy: 'Admin', createdAt: new Date() },
+      ];
+    }
+
+    const updatedOrder = await this.ordersService.update(id, updateData);
     
     return {
       success: true,
       message: 'Quotation generated and sent to customer',
       data: updatedOrder
+    };
+  }
+
+  @Delete(':id')
+  async deleteOrder(@Param('id') id: string) {
+    const result = await this.ordersService.delete(id);
+    return {
+      success: true,
+      message: 'Order deleted',
+      data: result,
     };
   }
 }

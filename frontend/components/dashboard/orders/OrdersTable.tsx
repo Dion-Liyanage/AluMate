@@ -51,7 +51,11 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
     try {
       const response = await ordersApi.getAll();
       if (response.success && response.data) {
-        const mappedOrders = response.data.orders.map((o: any) => ({
+        const allOrders = (response.data.orders || response.data || []) as any[];
+        // Only show orders that have been approved (past quotation stage)
+        const QUOTATION_STATUSES = ['quotation_pending', 'quotation_sent', 'draft'];
+        const confirmedOrders = allOrders.filter((o: any) => !QUOTATION_STATUSES.includes(o.status));
+        const mappedOrders = confirmedOrders.map((o: any) => ({
           id: o.orderId,
           _id: o._id,
           productType: o.productType,

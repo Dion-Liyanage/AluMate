@@ -36,8 +36,12 @@ export function OrdersManagement() {
       
       const response = await adminOrdersApi.getAll(params);
       if (response.success && response.data) {
+        const allOrders = Array.isArray(response.data) ? response.data : ((response.data as any).orders || []);
+        // Only show orders past the quotation stage (approved and beyond)
+        const QUOTATION_STATUSES = ['quotation_pending', 'quotation_sent', 'draft'];
+        const confirmedOrders = allOrders.filter((o: any) => !QUOTATION_STATUSES.includes(o.status));
         // Map backend orders to frontend format
-        const mappedOrders = (response.data as any).map((o: any) => ({
+        const mappedOrders = confirmedOrders.map((o: any) => ({
           id: o.orderId,
           _id: o._id,
           customerName: o.customerId?.firstName ? `${o.customerId.firstName} ${o.customerId.lastName}` : "Unknown Customer",

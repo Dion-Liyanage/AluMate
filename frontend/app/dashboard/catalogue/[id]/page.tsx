@@ -30,6 +30,7 @@ const itemVariants = {
 
 interface Design {
   _id: string;
+  designCode: string;
   title: string;
   category: string;
   description: string;
@@ -231,7 +232,10 @@ export default function CatalogueDesignDetailPage() {
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardContent className="p-5 space-y-4">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="text-xl font-bold text-zinc-100">{design.title}</h2>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[11px] font-bold text-sky-400 uppercase tracking-[0.2em]">{design.designCode}</span>
+                      <h2 className="text-xl font-bold text-zinc-100">{design.title}</h2>
+                    </div>
                     <Badge variant="outline" className="bg-sky-500/10 text-sky-300 border-sky-500/20 capitalize">
                       {design.category}
                     </Badge>

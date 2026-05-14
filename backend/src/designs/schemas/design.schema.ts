@@ -5,6 +5,9 @@ export type DesignDocument = Design & Document;
 
 @Schema({ timestamps: true })
 export class Design {
+  @Prop({ required: true, unique: true })
+  designCode: string;
+
   @Prop({ required: true })
   title: string;
 

@@ -22,14 +22,36 @@ export class OrdersController {
 
   @Get()
   async getMyOrders(@Request() req, @Query() query: any) {
-    const customerId = req.user.userId;
+    const customerId = req.user.id;
     const filter = { customerId, ...query };
-    return this.ordersService.findAll(filter);
+    const orders = await this.ordersService.findAll(filter);
+    return {
+      success: true,
+      data: { orders, total: orders.length },
+    };
+  }
+
+  @Post()
+  async createOrder(@Body() body: any, @Request() req) {
+    const customerId = req.user.id;
+    const orderId = `ORD-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
+    
+    const newOrder = await this.ordersService.create({
+      ...body,
+      customerId,
+      orderId,
+      status: 'quotation_pending',
+    });
+
+    return {
+      success: true,
+      data: { order: newOrder },
+    };
   }
 
   @Get(':id')
   async getOrderDetails(@Param('id') id: string, @Request() req) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const order = await this.ordersService.findById(id);
     
     // Security check: ensure user owns the order
@@ -42,7 +64,7 @@ export class OrdersController {
 
   @Patch(':id/approve')
   async approveQuotation(@Param('id') id: string, @Request() req) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const order = await this.ordersService.findById(id);
 
     if (!order || order.customerId.toString() !== userId) {
@@ -61,7 +83,7 @@ export class OrdersController {
 
   @Patch(':id/cancel')
   async cancelOrder(@Param('id') id: string, @Request() req) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const order = await this.ordersService.findById(id);
 
     if (!order || order.customerId.toString() !== userId) {

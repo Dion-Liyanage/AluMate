@@ -36,7 +36,17 @@ export class DesignsService {
     }
   }
 
+  private async generateDesignCode(category: string): Promise<string> {
+    const prefix = category.substring(0, 3).toUpperCase();
+    const count = await this.designModel.countDocuments({ category }).exec();
+    const sequence = (count + 1).toString().padStart(4, '0');
+    return `${prefix}-${sequence}`;
+  }
+
   async create(createDesignDto: CreateDesignDto): Promise<Design> {
+    if (!createDesignDto.designCode) {
+      createDesignDto.designCode = await this.generateDesignCode(createDesignDto.category);
+    }
     const createdDesign = new this.designModel(createDesignDto);
     return createdDesign.save();
   }

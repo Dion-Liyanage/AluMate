@@ -115,13 +115,7 @@ export const ordersApi = {
     return res.data;
   },
 
-  create: async (data: {
-    title: string;
-    description: string;
-    materialType?: string;
-    dimensions?: string;
-    quantity?: number;
-  }) => {
+  create: async (data: any) => {
     const res = await apiClient.post<ApiResponse<{ order: Order }>>("/orders", data);
     return res.data;
   },
@@ -143,6 +137,7 @@ export const adminOrdersApi = {
   getAll: async (params?: {
     status?: string;
     customerId?: string;
+    search?: string;
     page?: number;
     limit?: number;
   }) => {
@@ -171,9 +166,15 @@ export const adminOrdersApi = {
     return res.data;
   },
 
-  generateQuotation: async (id: string) => {
+  generateQuotation: async (id: string, data?: {
+    recommendedMaterials?: any[];
+    laborCalculation?: any;
+    estimatedPrice?: number;
+    adminNotes?: string;
+  }) => {
     const res = await apiClient.post<ApiResponse<{ data: Order }>>(
-      `/admin/orders/${id}/generate-quotation`
+      `/admin/orders/${id}/generate-quotation`,
+      data || {}
     );
     return res.data;
   },

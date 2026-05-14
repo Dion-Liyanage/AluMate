@@ -62,18 +62,20 @@ export function OrdersOverviewCards() {
     try {
       const response = await ordersApi.getAll();
       if (response.success && response.data) {
-        const orders = response.data.orders || [];
+        const allOrders = (response.data.orders || response.data || []) as any[];
+        // Only count orders past the quotation stage
+        const QUOTATION_STATUSES = ['quotation_pending', 'quotation_sent', 'draft'];
+        const orders = allOrders.filter((o: any) => !QUOTATION_STATUSES.includes(o.status));
         setStatsData({
           total: orders.length,
-          pending: orders.filter(o => o.status === 'quotation_pending' || o.status === 'pending').length,
-          production: orders.filter(o => o.status === 'production').length,
+          pending: orders.filter(o => o.status === 'approved').length,
+          production: orders.filter(o => o.status === 'production' || o.status === 'installation').length,
           completed: orders.filter(o => o.status === 'completed').length,
-          services: 0 // Placeholder for service requests
+          services: 0
         });
       }
     } catch (error) {
       console.error("Failed to fetch user order stats:", error);
-      // Don't show toast for every fetch error if component re-mounts
     } finally {
       setIsLoading(false);
     }
