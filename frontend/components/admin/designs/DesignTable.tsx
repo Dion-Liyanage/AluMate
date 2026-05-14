@@ -22,8 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Edit, Trash2, LayoutGrid, Box as CubeIcon, CheckCircle2 } from "lucide-react";
+import { Edit, Trash2, LayoutGrid, Box as CubeIcon, CheckCircle2, Eye, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { designsApi } from "@/lib/api";
+import { Design3DViewer } from "@/components/catalogue/Design3DViewer";
 import { toast } from "sonner";
 
 interface Design {
@@ -125,18 +127,20 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
               className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden"
             >
               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
-              <div className="relative h-40 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
-                {design.imageUrls && design.imageUrls.length > 0 ? (
+              <div className="relative h-64 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
+                {design.modelUrl ? (
+                  <Design3DViewer modelUrl={design.modelUrl} />
+                ) : design.imageUrls && design.imageUrls.length > 0 ? (
                   <img
                     src={design.imageUrls[0].startsWith("/") ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${design.imageUrls[0]}` : design.imageUrls[0]}
                     alt={design.title}
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <LayoutGrid className="h-8 w-8 text-zinc-600" />
+                  <LayoutGrid className="h-10 w-10 text-zinc-600" />
                 )}
                 {design.modelUrl && (
-                  <div className="absolute top-2 right-2 bg-sky-500/20 backdrop-blur-md border border-sky-500/30 text-sky-300 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest pointer-events-none">
+                  <div className="absolute top-2 right-2 bg-sky-500/20 backdrop-blur-md border border-sky-500/30 text-sky-300 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-widest pointer-events-none z-10">
                     3D
                   </div>
                 )}
@@ -153,7 +157,18 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                     {design.category}
                   </Badge>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <Link href={`/dashboard/catalogue/${design._id}`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-sky-400 hover:text-sky-300 hover:bg-sky-500/10"
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
+
                     <Dialog
                       open={activeDesign?._id === design._id}
                       onOpenChange={(open) => {
@@ -168,6 +183,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                           size="icon"
                           className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
                           onClick={() => openEditDialog(design)}
+                          title="Edit Design"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -305,6 +321,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                       className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-red-400/10"
                       onClick={() => handleDelete(design._id)}
                       disabled={isDeleting === design._id}
+                      title="Delete Design"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
