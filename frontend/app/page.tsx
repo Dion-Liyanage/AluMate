@@ -230,10 +230,17 @@ export default function Home() {
               {/* Logo */}
               <button
                 onClick={() => scrollToSection("home")}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-3 cursor-pointer group"
               >
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
-                <span className="text-3xl font-bold bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+                <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.2)] transition-transform duration-300 group-hover:scale-110">
+                  <Image
+                    src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png"
+                    alt="AluMate Logo"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <span className="text-3xl font-bold bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent tracking-tight">
                   AluMate
                 </span>
               </button>

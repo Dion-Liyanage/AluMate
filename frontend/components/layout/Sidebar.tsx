@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -120,32 +121,13 @@ const adminMenuGroups: MenuGroup[] = [
 
 function Logo() {
   return (
-    <div className="h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-zinc-400 via-zinc-100 to-zinc-600 shadow-[0_0_20px_rgba(161,161,170,0.4)] flex items-center justify-center group/logo transition-all duration-500 hover:scale-110">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 text-zinc-900"
-      >
-        {/* Main 'A' Structure - Industrial Profile style */}
-        <path
-          d="M12 3L3 21H7.5L12 11.5L16.5 21H21L12 3Z"
-          fill="currentColor"
-          className="group-hover/logo:text-black transition-colors"
-        />
-        {/* Inner shadow/detail for depth */}
-        <path
-          d="M12 6.5L6.5 18.5H9L12 12L15 18.5H17.5L12 6.5Z"
-          fill="white"
-          fillOpacity="0.4"
-        />
-        {/* Connector bar */}
-        <path
-          d="M9.5 14.5H14.5L15.5 16.5H8.5L9.5 14.5Z"
-          fill="white"
-          fillOpacity="0.8"
-        />
-      </svg>
+    <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-500 hover:scale-110">
+      <Image
+        src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png"
+        alt="AluMate Logo"
+        fill
+        className="object-cover"
+      />
     </div>
   );
 }

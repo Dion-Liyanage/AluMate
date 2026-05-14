@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AluMate - Aluminium Fabrication & Service Management System",
   description: "Streamline your aluminium fabrication orders, quotations, inventory, and service management",
+  icons: {
+    icon: "https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png",
+  },
 };
 
 export default function RootLayout({
