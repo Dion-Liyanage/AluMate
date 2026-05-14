@@ -253,10 +253,13 @@ export function QuotationConfigPanel({
       await ordersApi.create({
         productType,
         designType: catalogueDesignId ? "catalogue" : "custom",
+        catalogueDesignId,
         measurements: config.measurements,
         purpose: config.purpose,
         environment: config.environment,
         strengthCategory: config.strength,
+        color: config.color === "custom" ? config.customColor : config.color,
+        accessories: config.accessories,
         estimatedPrice: estimate.total,
         notes: config.additionalNotes ? [{ message: config.additionalNotes, createdBy: "Customer" }] : [],
       });

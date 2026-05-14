@@ -118,10 +118,10 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="designCode">Design Number / SKU (Optional)</Label>
+            <Label htmlFor="designCode">Design Number</Label>
             <Input
               id="designCode"
-              placeholder="e.g. MOD-001 (Leave empty to auto-generate)"
+              required
               value={formData.designCode}
               onChange={(e) => setFormData({ ...formData, designCode: e.target.value })}
               className="bg-zinc-900 border-zinc-800 focus:border-zinc-700"
@@ -132,7 +132,6 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
-              placeholder="e.g. Modern Sliding Door"
               required
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -161,7 +160,6 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              placeholder="Provide details about the design, materials, etc."
               required
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}

@@ -109,6 +109,15 @@ export class Order {
 
   @Prop({ type: Types.ObjectId, ref: 'Quotation' })
   quotationId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Design' })
+  catalogueDesignId: Types.ObjectId;
+
+  @Prop()
+  color: string;
+
+  @Prop({ type: [String] })
+  accessories: string[];
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

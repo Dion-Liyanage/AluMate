@@ -143,12 +143,11 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                 ) : (
                   <LayoutGrid className="h-10 w-10 text-zinc-600" />
                 )}
-                {/* 3D label is now managed by Design3DViewer component */}
               </div>
               <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
-                <div className="flex flex-col items-start gap-1">
-                  <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest">{design.designCode}</span>
+                <div className="flex items-center justify-between gap-2">
                   <h3 className="font-semibold text-zinc-100 line-clamp-1">{design.title}</h3>
+                  <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest shrink-0">{design.designCode}</span>
                 </div>
 
 
@@ -195,7 +194,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
 
                         <form onSubmit={handleEditSubmit} className="space-y-4 py-2">
                           <div className="space-y-2">
-                            <Label htmlFor="edit-designCode">Design Number / SKU</Label>
+                            <Label htmlFor="edit-designCode">Design Number</Label>
                             <Input
                               id="edit-designCode"
                               value={formData.designCode}

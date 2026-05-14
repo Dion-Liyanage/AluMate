@@ -170,11 +170,11 @@ export default function CataloguePage() {
                       )}
                     </div>
                     <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
-                      <div className="flex flex-col items-start gap-0.5">
-                        <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest">{item.designCode}</span>
-                        <h3 className="font-semibold text-zinc-100">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold text-zinc-100 line-clamp-1">
                           {item.title}
                         </h3>
+                        <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest shrink-0">{item.designCode}</span>
                       </div>
 
                       <div className="flex items-center justify-between mt-4 -mb-1">

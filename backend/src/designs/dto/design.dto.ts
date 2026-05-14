@@ -2,8 +2,8 @@ import { IsString, IsNotEmpty, IsEnum, IsOptional, IsArray, IsUrl, IsBoolean } f
 
 export class CreateDesignDto {
   @IsString()
-  @IsOptional()
-  designCode?: string;
+  @IsNotEmpty()
+  designCode: string;
 
   @IsString()
   @IsNotEmpty()
