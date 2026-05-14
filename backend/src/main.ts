@@ -1,4 +1,6 @@
+/// <reference types="multer" />
 import { NestFactory } from '@nestjs/core';
+
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { json, urlencoded } from 'express';
