@@ -19,6 +19,7 @@ import { AdminCustomersModule } from './admin-customers/admin-customers.module';
 import { AdminOrdersModule } from './admin-orders/admin-orders.module';
 import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import { MessagesModule } from './messages/messages.module';
+import { MailModule } from './mail/mail.module';
 
 
 @Module({
@@ -58,6 +59,7 @@ import { MessagesModule } from './messages/messages.module';
     AdminOrdersModule,
     CloudinaryModule,
     MessagesModule,
+    MailModule,
   ],
 
   controllers: [AppController],
