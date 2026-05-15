@@ -13,6 +13,7 @@ describe('Authentication System (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });
@@ -24,14 +25,14 @@ describe('Authentication System (e2e)', () => {
   describe('/auth/register (POST)', () => {
     it('should fail with 400 if data is missing', () => {
       return request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({})
         .expect(400);
     });
 
     it('should fail with 400 if email is invalid', () => {
       return request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'not-an-email',
           password: 'password123',
@@ -46,7 +47,7 @@ describe('Authentication System (e2e)', () => {
   describe('/auth/login (POST)', () => {
     it('should return 401 for incorrect credentials', () => {
       return request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'nonexistent@example.com',
           password: 'wrongpassword'
@@ -56,7 +57,7 @@ describe('Authentication System (e2e)', () => {
 
     it('should return 400 for malformed request', () => {
       return request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'not-an-email'
         })
