@@ -15,6 +15,7 @@ import {
   Activity,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { 
   LineChart, 
