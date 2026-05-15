@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   FileText, Eye, Send, Clock, CheckCircle2, Loader2,
-  Search, Filter, X, RotateCw, MoreHorizontal, IndianRupee, Calendar
+  Search, Filter, X, RotateCw, MoreHorizontal, Banknote, Calendar
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
@@ -238,7 +238,7 @@ export default function AdminQuotationsPage() {
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center text-emerald-400 font-bold">
-                        <IndianRupee className="h-3 w-3 mr-0.5" />
+                        <span className="text-[10px] mr-1 opacity-70">LKR</span>
                         {q.estimatedPrice?.toLocaleString() || "Pending"}
                       </div>
                     </TableCell>

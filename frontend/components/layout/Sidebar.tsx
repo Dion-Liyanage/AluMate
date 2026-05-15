@@ -113,7 +113,6 @@ const adminMenuGroups: MenuGroup[] = [
     title: "More",
     items: [
       { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-      { href: "/admin/announcements", icon: Megaphone, label: "Announcements" },
       { href: "/profile", icon: User, label: "Profile" },
     ],
   },

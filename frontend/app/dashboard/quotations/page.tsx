@@ -9,7 +9,7 @@ import {
   X,
   MoreVertical,
   Calendar,
-  IndianRupee,
+  Banknote,
   Loader2,
   Clock,
   CheckCircle2,
@@ -42,13 +42,13 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
-  Sheet, 
-  SheetContent, 
-  SheetDescription, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
-} from "@/components/ui/sheet";
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ordersApi } from "@/lib/api";
@@ -362,8 +362,8 @@ export default function QuotationsPage() {
                         </span>
                       </TableCell>
                       <TableCell className="text-center">
-                        <div className="flex items-center justify-center text-emerald-400 font-bold">
-                          <IndianRupee className="h-3 w-3 mr-0.5" />
+                        <div className="flex items-center justify-center text-emerald-400 font-bold text-[13px]">
+                          <span className="text-[10px] mr-1 opacity-70">LKR</span>
                           {q.estimatedPrice?.toLocaleString() || "Pending"}
                         </div>
                       </TableCell>
@@ -421,46 +421,53 @@ export default function QuotationsPage() {
           )}
         </motion.div>
 
-        {/* Quotation Details Sheet */}
-        <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <SheetContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-xl overflow-y-auto custom-scrollbar">
-            <SheetHeader className="border-b border-zinc-800 pb-4 mb-6">
+        {/* Quotation Details Dialog */}
+        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <DialogHeader className="border-b border-zinc-800 pb-4 mb-6 sticky top-0 bg-zinc-950 z-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <SheetTitle className="text-2xl font-bold text-zinc-100">Quotation Details</SheetTitle>
-                  <SheetDescription className="text-zinc-400">
+                  <DialogTitle className="text-2xl font-bold text-zinc-100">Quotation Details</DialogTitle>
+                  <DialogDescription className="text-zinc-400">
                     Order ID: {selectedQuotation?.orderId}
-                  </SheetDescription>
+                  </DialogDescription>
                 </div>
                 <QuotationStatusBadge status={selectedQuotation?.status || ""} />
               </div>
-            </SheetHeader>
+            </DialogHeader>
 
             {selectedQuotation && (
               <div className="space-y-8">
                 {/* Product Info */}
                 <section>
-                  <h4 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Product Information</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold">Product Type</p>
-                      <p className="text-sm text-zinc-200 font-semibold capitalize">{selectedQuotation.productType}</p>
+                  <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">Product Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50 hover:bg-zinc-900/80 transition-colors">
+                      <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Product Type</p>
+                      <p className="text-sm text-zinc-100 font-bold capitalize">{selectedQuotation.productType}</p>
                     </div>
-                    <div className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold">Design Type</p>
-                      <p className="text-sm text-zinc-200 font-semibold capitalize">
-                        {selectedQuotation.designType === 'catalogue' ? 'Catalogue Design' : 'Custom Design'}
+                    <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50 hover:bg-zinc-900/80 transition-colors">
+                      <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Design Source</p>
+                      <p className="text-sm text-zinc-100 font-bold capitalize">
+                        {selectedQuotation.designType === 'catalogue' ? 'Catalogue Selection' : 'Custom Design'}
                       </p>
                     </div>
                     {selectedQuotation.catalogueDesignId && (
-                      <div className="col-span-2 bg-blue-500/5 p-3 rounded-lg border border-blue-500/20">
-                        <p className="text-[10px] text-blue-400 uppercase font-bold">Selected Design</p>
-                        <p className="text-sm text-zinc-100 font-bold">{selectedQuotation.catalogueDesignId.title || "Selected Catalogue Design"}</p>
-                        {selectedQuotation.catalogueDesignId.designCode && (
-                          <Badge variant="outline" className="mt-1 bg-blue-500/10 text-blue-300 border-blue-500/20 text-[10px]">
-                            {selectedQuotation.catalogueDesignId.designCode}
-                          </Badge>
-                        )}
+                      <div className="md:col-span-2 bg-blue-500/5 p-4 rounded-xl border border-blue-500/20 shadow-[inset_0_0_20px_rgba(59,130,246,0.05)]">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mb-1">Selected Design</p>
+                            <p className="text-sm text-zinc-100 font-bold">{selectedQuotation.catalogueDesignId.title || "Standard Design"}</p>
+                          </div>
+                          {selectedQuotation.catalogueDesignId.designCode && (
+                            <div className="bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20 text-right">
+                              <p className="text-[9px] text-blue-400 uppercase font-black mb-0.5">Design Number</p>
+                              <p className="text-xs font-mono font-bold text-blue-300 tracking-tighter">
+                                {selectedQuotation.catalogueDesignId.designCode}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -526,7 +533,7 @@ export default function QuotationsPage() {
                                   <span className="text-zinc-500 ml-2">({m.thickness})</span>
                                 </div>
                                 <div className="text-emerald-400 font-bold">
-                                  ₹{m.materialCost.toLocaleString()}
+                                  LKR {m.materialCost.toLocaleString()}
                                 </div>
                               </div>
                             ))}
@@ -537,14 +544,14 @@ export default function QuotationsPage() {
                       {selectedQuotation.laborCalculation && (
                         <div className="flex justify-between items-center p-3 rounded-lg bg-zinc-900/40 border border-zinc-800 mb-6">
                           <span className="text-xs text-zinc-400">Labor & Fabrication ({selectedQuotation.laborCalculation.areaSqFt} sq.ft)</span>
-                          <span className="text-emerald-400 font-bold text-sm">₹{selectedQuotation.laborCalculation.laborCost.toLocaleString()}</span>
+                          <span className="text-emerald-400 font-bold text-sm">LKR {selectedQuotation.laborCalculation.laborCost.toLocaleString()}</span>
                         </div>
                       )}
 
                       <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-5 flex justify-between items-center">
                         <div>
-                          <p className="text-[10px] text-emerald-400 uppercase font-bold tracking-widest">Total Estimated Price</p>
-                          <p className="text-2xl font-black text-emerald-400">₹{selectedQuotation.estimatedPrice.toLocaleString()}</p>
+                          <p className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] mb-1">Total Estimated Price</p>
+                          <p className="text-2xl font-black text-emerald-400">LKR {selectedQuotation.estimatedPrice.toLocaleString()}</p>
                         </div>
                         <Button 
                           onClick={() => {
@@ -594,8 +601,8 @@ export default function QuotationsPage() {
                 </div>
               </div>
             )}
-          </SheetContent>
-        </Sheet>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </DashboardLayout>
   );

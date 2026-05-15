@@ -1,6 +1,6 @@
 "use client";
 
-import { Receipt, IndianRupee, AlertCircle } from "lucide-react";
+import { Receipt, Banknote, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface QuotationSummaryProps {
@@ -38,7 +38,7 @@ export function QuotationSummary({
             <div key={index} className="flex justify-between items-center text-sm">
               <span className="text-zinc-400 font-medium">{item.label}</span>
               <span className="text-zinc-200 font-bold flex items-center">
-                <IndianRupee className="h-3 w-3 mr-1 opacity-60" />
+                <span className="text-[10px] mr-1 opacity-60">LKR</span>
                 {item.amount.toLocaleString()}
               </span>
             </div>
@@ -49,7 +49,7 @@ export function QuotationSummary({
           <span className="text-zinc-100 font-bold uppercase tracking-tight">Total Estimate</span>
           <div className="text-right">
             <span className="text-2xl font-black text-white flex items-center shadow-blue-500/20 drop-shadow-lg">
-              <IndianRupee className="h-5 w-5 mr-1 text-blue-400" />
+              <span className="text-sm mr-2 text-blue-400 opacity-80">LKR</span>
               {totalEstimate.toLocaleString()}
             </span>
           </div>
