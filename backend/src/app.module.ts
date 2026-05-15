@@ -18,6 +18,9 @@ import { ProjectsModule } from './projects/projects.module';
 import { AdminCustomersModule } from './admin-customers/admin-customers.module';
 import { AdminOrdersModule } from './admin-orders/admin-orders.module';
 import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
+import { MessagesModule } from './messages/messages.module';
+import { MailModule } from './mail/mail.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 
 @Module({
@@ -56,6 +59,9 @@ import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
     AdminCustomersModule,
     AdminOrdersModule,
     CloudinaryModule,
+    MessagesModule,
+    MailModule,
+    AnalyticsModule,
   ],
 
   controllers: [AppController],

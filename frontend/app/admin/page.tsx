@@ -14,8 +14,19 @@ import {
   ArrowRight,
   Activity,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from "recharts";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AdminOperationCards } from "@/components/admin/AdminOperationCards";
@@ -24,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
+import { analyticsApi } from "@/lib/api";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -105,12 +117,85 @@ const recentActivity: {
 export default function AdminPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const [stats, setStats] = useState<any>(null);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [activity, setActivity] = useState<any[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   useEffect(() => {
     if (!isLoading && user && user.role !== "admin") {
       router.replace("/dashboard");
     }
   }, [isLoading, router, user]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await analyticsApi.getDashboardData();
+        if (response.success && response.data) {
+          setStats(response.data.stats);
+          setChartData(response.data.chartData);
+          setActivity(response.data.activity);
+        }
+      } catch (error) {
+        console.error("Failed to fetch analytics", error);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    if (user?.role === "admin") {
+      fetchData();
+    }
+  }, [user]);
+
+  const liveAnalyticsCards = [
+    {
+      title: "Total Orders",
+      value: stats?.totalOrders || "0",
+      trend: "+12%",
+      icon: ClipboardList,
+      color: "from-blue-500/20 to-blue-600/10",
+      iconColor: "text-blue-400",
+      trendUp: true,
+    },
+    {
+      title: "Revenue",
+      value: `Rs. ${stats?.totalRevenue?.toLocaleString() || "0"}`,
+      trend: "+8%",
+      icon: DollarSign,
+      color: "from-emerald-500/20 to-emerald-600/10",
+      iconColor: "text-emerald-400",
+      trendUp: true,
+    },
+    {
+      title: "Customers",
+      value: stats?.totalCustomers || "0",
+      trend: "+5%",
+      icon: Users,
+      color: "from-violet-500/20 to-violet-600/10",
+      iconColor: "text-violet-400",
+      trendUp: true,
+    },
+    {
+      title: "Quotations",
+      value: stats?.pendingQuotations || "0",
+      trend: "Pending",
+      icon: FileText,
+      color: "from-amber-500/20 to-amber-600/10",
+      iconColor: "text-amber-400",
+      trendUp: false,
+    },
+    {
+      title: "Service",
+      value: stats?.activeServiceRequests || "0",
+      trend: "Active",
+      icon: Wrench,
+      color: "from-cyan-500/20 to-cyan-600/10",
+      iconColor: "text-cyan-400",
+      trendUp: false,
+    },
+  ];
 
   if (isLoading || (user && user.role !== "admin")) {
     return (
@@ -148,9 +233,9 @@ export default function AdminPage() {
         {/* 3. Statistics Cards */}
         <motion.div
           variants={itemVariants}
-          className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
+          className="grid gap-4 grid-cols-2 md:grid-cols-5"
         >
-          {analyticsCards.map((card) => (
+          {liveAnalyticsCards.map((card) => (
             <Card
               key={card.title}
               className="relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-zinc-700 transition-colors"
@@ -164,19 +249,19 @@ export default function AdminPage() {
                     <card.icon className={`h-5 w-5 ${card.iconColor}`} />
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">
+                    <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">
                       {card.title}
                     </p>
                     <div className="flex items-baseline gap-2 mt-1">
-                      <p className="text-2xl font-bold text-zinc-100">
+                      <p className="text-xl font-bold text-zinc-100">
                         {card.value}
                       </p>
                       {card.trend && (
                         <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                             card.trendUp
                               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-red-500/10 text-red-400 border border-red-500/20"
+                              : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                           }`}
                         >
                           {card.trend}
@@ -192,25 +277,65 @@ export default function AdminPage() {
 
         {/* Charts placeholder + Quick links */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Chart placeholder */}
+          {/* Chart Section */}
           <motion.div variants={itemVariants} className="lg:col-span-2">
-            <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-zinc-100">
-                  Orders Overview
-                </CardTitle>
+            <Card className="bg-zinc-900/50 border-zinc-800 backdrop-blur-xl h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div>
+                  <CardTitle className="text-lg text-zinc-100 font-semibold">
+                    Order Trends
+                  </CardTitle>
+                  <p className="text-xs text-zinc-500">Order volume over the last 6 months</p>
+                </div>
+                <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-blue-400" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="h-16 w-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
-                    <TrendingUp className="h-8 w-8 text-zinc-500" />
-                  </div>
-                  <p className="text-zinc-400 text-sm">
-                    Charts will appear here once order data is available
-                  </p>
-                  <p className="text-zinc-500 text-xs mt-1">
-                    Connect the backend to start tracking analytics
-                  </p>
+                <div className="h-[280px] w-full mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="#71717a" 
+                        fontSize={12} 
+                        tickLine={false} 
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        stroke="#71717a" 
+                        fontSize={12} 
+                        tickLine={false} 
+                        axisLine={false}
+                        tickFormatter={(value) => `${value}`}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#18181b', 
+                          border: '1px solid #27272a',
+                          borderRadius: '8px',
+                          color: '#f4f4f5'
+                        }}
+                        itemStyle={{ color: '#3b82f6' }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="orders" 
+                        stroke="#3b82f6" 
+                        strokeWidth={3}
+                        fillOpacity={1} 
+                        fill="url(#colorOrders)" 
+                        animationDuration={2000}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -254,33 +379,39 @@ export default function AdminPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recentActivity.length === 0 ? (
+              {activity.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <div className="h-12 w-12 rounded-full bg-zinc-800 flex items-center justify-center mb-3">
                     <AlertTriangle className="h-6 w-6 text-zinc-500" />
                   </div>
                   <p className="text-zinc-400 text-sm">No recent activity</p>
-                  <p className="text-zinc-500 text-xs mt-1">
-                    Activity will appear as customers place orders
-                  </p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {recentActivity.map((activity, index) => (
-                    <div key={activity.id}>
-                      <div className="flex items-center justify-between py-2">
+                <div className="space-y-4">
+                  {activity.map((item, index) => (
+                    <div key={item.id} className="group">
+                      <div className="flex items-center justify-between py-1">
                         <div className="flex items-center gap-3">
-                          <div className="h-2 w-2 rounded-full bg-blue-400" />
-                          <p className="text-sm text-zinc-300">
-                            {activity.message}
-                          </p>
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                            item.type === 'order' ? 'bg-blue-500/10 text-blue-400' : 'bg-cyan-500/10 text-cyan-400'
+                          }`}>
+                            {item.type === 'order' ? <ClipboardList className="h-4 w-4" /> : <Wrench className="h-4 w-4" />}
+                          </div>
+                          <div>
+                            <p className="text-sm text-zinc-300 group-hover:text-zinc-100 transition-colors">
+                              {item.message}
+                            </p>
+                            <span className="text-[10px] text-zinc-500">
+                              {item.time}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-xs text-zinc-500">
-                          {activity.time}
-                        </span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ArrowRight className="h-4 w-4 text-zinc-500" />
+                        </Button>
                       </div>
-                      {index < recentActivity.length - 1 && (
-                        <Separator className="bg-zinc-800/50" />
+                      {index < activity.length - 1 && (
+                        <Separator className="bg-zinc-800/50 mt-3" />
                       )}
                     </div>
                   ))}

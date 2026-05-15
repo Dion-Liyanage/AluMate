@@ -21,13 +21,31 @@ const itemVariants = {
 };
 
 const productTypes = [
-  { name: "Window", emoji: "🪟", description: "Sliding, casement, fixed & louvre windows" },
-  { name: "Door", emoji: "🚪", description: "Entrance, sliding, folding & French doors" },
-  { name: "Pantry", emoji: "🍽️", description: "Kitchen pantries & modular storage units" },
-  { name: "Cupboard", emoji: "🗄️", description: "Kitchen, wardrobe & storage cupboards" },
-  { name: "Partition", emoji: "🧱", description: "Office, bathroom & room partitions" },
-  { name: "Railing", emoji: "🏗️", description: "Balcony, staircase & boundary railings" },
-  { name: "Other", emoji: "✨", description: "Custom aluminium fabrication work" },
+  { 
+    name: "Window", 
+    image: "https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/window-neon.png",
+    description: "Sliding, casement, fixed & louvre windows" 
+  },
+  { 
+    name: "Door", 
+    image: "https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/door-neon.png",
+    description: "Entrance, sliding, folding & French doors" 
+  },
+  { 
+    name: "Pantry", 
+    image: "https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/pantry-neon.png",
+    description: "Kitchen pantries & modular storage units" 
+  },
+  { 
+    name: "Cupboard", 
+    image: "https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/cupboard-neon.png",
+    description: "Kitchen, wardrobe & storage cupboards" 
+  },
+  { 
+    name: "Ceiling", 
+    image: "https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/ceiling-neon.png",
+    description: "Suspended & decorative aluminium ceilings" 
+  },
 ];
 
 export default function DesignPage() {
@@ -47,8 +65,10 @@ export default function DesignPage() {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <h2 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
-            <PenTool className="h-6 w-6 text-violet-400" />
+          <h2 className="text-3xl font-bold text-zinc-100 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-violet-500/30 border border-violet-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)] relative group">
+              <PenTool className="h-6 w-6 text-violet-100 relative z-10" />
+            </div>
             Select Product Type
           </h2>
           <p className="mt-1 text-zinc-400">
@@ -66,18 +86,42 @@ export default function DesignPage() {
             >
               <Card
                 onClick={() => handleSelect(type.name)}
-                className="h-full relative overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group hover:shadow-[0_0_20px_rgba(139,92,246,0.1)]"
+                className="h-full relative overflow-hidden bg-zinc-950 border-zinc-800 hover:border-violet-500/50 transition-all duration-500 cursor-pointer group hover:shadow-[0_0_30px_rgba(139,92,246,0.2)]"
               >
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
-                <CardContent className="relative p-6 min-h-[180px] flex flex-col">
-                  <div className="text-4xl mb-3">{type.emoji}</div>
-                  <h3 className="text-lg font-semibold text-zinc-100 group-hover:text-violet-300 transition-colors">
-                    {type.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-zinc-500">{type.description}</p>
-                  <div className="mt-auto pt-3 flex items-center gap-1 text-sm text-zinc-500 group-hover:text-violet-400 transition-colors">
-                    Start Designing
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                {/* Background Image with Tint */}
+                <div className="absolute inset-0 z-0">
+                  <img 
+                    src={type.image} 
+                    alt={type.name}
+                    className="h-full w-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 via-zinc-950/90 to-zinc-950" />
+                  
+                  {/* Neon Accent Line */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </div>
+
+                {/* Shimmer Wave Effect */}
+                <div className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(139,92,246,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                </div>
+
+                <CardContent className="relative z-20 p-5 min-h-[160px] flex flex-col justify-end">
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-bold text-zinc-100 group-hover:text-violet-300 transition-colors tracking-tight">
+                      {type.name}
+                    </h3>
+                    <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed font-medium group-hover:text-zinc-300 transition-colors">
+                      {type.description}
+                    </p>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-zinc-800/50 flex items-center gap-2 text-[10px] text-violet-400/70 group-hover:text-violet-400 transition-all uppercase font-black tracking-[0.2em]">
+                    <span className="relative">
+                      Start Designing
+                      <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-violet-400 transition-all duration-300 group-hover:w-full" />
+                    </span>
+                    <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-2" />
                   </div>
                 </CardContent>
               </Card>

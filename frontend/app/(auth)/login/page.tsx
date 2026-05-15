@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 
 interface LoginFormData {
@@ -77,7 +78,14 @@ function LoginForm() {
       <Card className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 shadow-[0_0_50px_rgba(161,161,170,0.1)]">
         <CardHeader className="space-y-1 pb-4">
           <div className="flex items-center justify-center mb-2">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-zinc-400 via-zinc-300 to-zinc-500 shadow-[0_0_20px_rgba(161,161,170,0.3)]" />
+            <div className="relative h-12 w-12 overflow-hidden rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+              <Image
+                src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png"
+                alt="AluMate Logo"
+                fill
+                className="object-cover"
+              />
+            </div>
           </div>
           <h1 className="text-2xl font-bold text-center bg-gradient-to-r from-zinc-100 to-zinc-300 bg-clip-text text-transparent">
             Welcome Back

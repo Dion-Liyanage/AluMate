@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
+import { MailService } from '../mail/mail.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    private mailService: MailService,
+    private usersService: UsersService,
   ) {}
 
   private generateOrderId(): string {
@@ -44,7 +48,21 @@ export class OrdersService {
   async create(orderData: Partial<Order>): Promise<OrderDocument> {
     const orderId = this.generateOrderId();
     const newOrder = new this.orderModel({ ...orderData, orderId });
-    return newOrder.save();
+    const savedOrder = await newOrder.save();
+
+    // Send Confirmation Email
+    try {
+      const user = await this.usersService.findById(orderData.customerId.toString());
+      if (user) {
+        this.mailService.sendOrderConfirmation(user.email, savedOrder.productType, savedOrder.orderId).catch(err => {
+          console.error('Failed to send order confirmation email:', err);
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching user for email confirmation:', err);
+    }
+
+    return savedOrder;
   }
 
   async update(

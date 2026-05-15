@@ -8,12 +8,14 @@ import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -34,6 +36,11 @@ export class AuthService {
       email: registerDto.email,
       password: hashedPassword,
       phone: registerDto.phone,
+    });
+
+    // Send Welcome Email (Don't await it to avoid slowing down registration)
+    this.mailService.sendWelcomeEmail(newUser.email, newUser.firstName).catch(err => {
+      console.error('Failed to send welcome email:', err);
     });
 
     return {

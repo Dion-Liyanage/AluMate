@@ -486,27 +486,18 @@ export const profileApi = {
 // ---------- Admin Analytics API ----------
 
 export const analyticsApi = {
-  getOverview: async () => {
-    const res = await apiClient.get<
-      ApiResponse<{
+  getDashboardData: async () => {
+    const res = await apiClient.get<ApiResponse<{
+      stats: {
         totalOrders: number;
         totalRevenue: number;
-        activeCustomers: number;
+        totalCustomers: number;
         pendingQuotations: number;
-        lowStockItems: number;
-        serviceRequests: number;
-      }>
-    >("/admin/analytics/overview");
-    return res.data;
-  },
-
-  getOrdersData: async () => {
-    const res = await apiClient.get<ApiResponse>("/admin/analytics/orders");
-    return res.data;
-  },
-
-  getRevenueData: async () => {
-    const res = await apiClient.get<ApiResponse>("/admin/analytics/revenue");
+        activeServiceRequests: number;
+      };
+      chartData: { name: string; orders: number }[];
+      activity: { id: string; message: string; time: string; type: string }[];
+    }>>("/admin/analytics/dashboard");
     return res.data;
   },
 };

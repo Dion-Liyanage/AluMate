@@ -26,7 +26,7 @@ interface Design {
   isActive: boolean;
 }
 
-const categories = ["All", "Windows", "Doors", "Pantries", "Cupboards", "Partitions", "Railings", "Ceilings"];
+const categories = ["All", "Windows", "Doors", "Pantries", "Cupboards", "Ceilings"];
 
 const containerVariants = {
   hidden: { opacity: 0 },
