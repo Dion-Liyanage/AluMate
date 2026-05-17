@@ -21,9 +21,9 @@ export default function AuthLayout({
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center">
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="relative h-8 w-8 overflow-hidden rounded-lg shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+                <div className="relative h-[38px] w-[38px] overflow-hidden rounded-lg shadow-[0_0_15px_rgba(56,189,248,0.2)]">
                   <Image
-                    src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png"
+                    src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1779039150/AluMate_logo_cgyr93.png"
                     alt="AluMate Logo"
                     fill
                     className="object-cover"

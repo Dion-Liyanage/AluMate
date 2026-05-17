@@ -120,9 +120,9 @@ const adminMenuGroups: MenuGroup[] = [
 
 function Logo() {
   return (
-    <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-500 hover:scale-110">
+    <div className="relative h-[40px] w-[40px] shrink-0 overflow-hidden rounded-xl shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-500 hover:scale-110">
       <Image
-        src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png"
+        src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1779039150/AluMate_logo_cgyr93.png"
         alt="AluMate Logo"
         fill
         className="object-cover"
