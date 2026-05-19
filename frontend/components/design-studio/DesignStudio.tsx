@@ -61,6 +61,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
   const [hasSelection, setHasSelection] = useState(false);
   const [threeObjects, setThreeObjects] = useState<ThreeObject[]>([]);
   const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [panMode, setPanMode] = useState(false);
   const fabricRef = useRef<FabricCanvasHandle>(null);
 
   const components = useMemo(
@@ -78,9 +79,9 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
       if (obj.isGrid) return;
       objs.push({
         componentId: (obj.componentId as string) ?? "unknown",
-        label: (obj.componentLabel as string) ?? "",
-        x: (obj.left as number) ?? 0,
-        y: (obj.top as number) ?? 0,
+        label: obj.text ? (obj.text as string) : ((obj.componentLabel as string) ?? ""),
+        x: ((obj.left as number) ?? 0) + (((obj.strokeWidth as number) ?? 0) / 2) * ((obj.scaleX as number) ?? 1),
+        y: ((obj.top as number) ?? 0) + (((obj.strokeWidth as number) ?? 0) / 2) * ((obj.scaleY as number) ?? 1),
         width: ((obj.width as number) ?? 50) * ((obj.scaleX as number) ?? 1),
         height: ((obj.height as number) ?? 50) * ((obj.scaleY as number) ?? 1),
         fill: typeof obj.fill === "string" ? obj.fill : "#a3a3a3",
@@ -198,6 +199,8 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
             onSendToBack={() => fabricRef.current?.sendToBack()}
             onSave={handleSave}
             onOrder={handleOrder}
+            panMode={panMode}
+            onTogglePanMode={() => setPanMode((prev) => !prev)}
           />
         </div>
       )}
@@ -205,47 +208,37 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
       {/* Main area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Canvas area */}
-        <div className="flex flex-1 overflow-hidden bg-stone-100">
-          <AnimatePresence mode="wait">
-            {activeView === "2d" ? (
-              <motion.div
-                key="2d"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex flex-1 overflow-hidden"
-              >
-                {/* Component library sidebar */}
-                <div className="flex w-52 flex-shrink-0 flex-col overflow-hidden border-r border-stone-200 bg-stone-50">
-                  <ProductComponentLibrary
-                    components={components}
-                    onAddComponent={handleAddComponent}
-                  />
-                </div>
+        <div className="flex flex-1 overflow-hidden bg-stone-100 relative">
+          {/* 2D Design View (stays mounted, toggled visually) */}
+          <div
+            style={{ display: activeView === "2d" ? "flex" : "none" }}
+            className="flex flex-1 overflow-hidden"
+          >
+            {/* Component library sidebar */}
+            <div className="flex w-52 flex-shrink-0 flex-col overflow-hidden border-r border-stone-200 bg-stone-50">
+              <ProductComponentLibrary
+                components={components}
+                onAddComponent={handleAddComponent}
+              />
+            </div>
 
-                {/* Fabric canvas */}
-                <div className="relative flex-1 bg-white">
-                  <FabricCanvas
-                    ref={fabricRef}
-                    onSelectionChange={setHasSelection}
-                    onObjectModified={syncToThree}
-                  />
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="3d"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex-1 bg-white"
-              >
-                <ThreePreview objects={threeObjects} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+            {/* Fabric canvas */}
+            <div className="relative flex-1 bg-white">
+              <FabricCanvas
+                ref={fabricRef}
+                onSelectionChange={setHasSelection}
+                onObjectModified={syncToThree}
+                panMode={panMode}
+              />
+            </div>
+          </div>
+
+          {/* 3D Preview (conditionally rendered for WebGL lifecycle management) */}
+          {activeView === "3d" && (
+            <div className="flex-1 bg-white">
+              <ThreePreview objects={threeObjects} />
+            </div>
+          )}
         </div>
 
         {/* Quotation Configuration Panel */}

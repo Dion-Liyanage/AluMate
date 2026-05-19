@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   BringToFront,
   SendToBack,
+  Hand,
 } from "lucide-react";
 
 interface DesignToolbarProps {
@@ -25,6 +26,8 @@ interface DesignToolbarProps {
   onSendToBack: () => void;
   onSave: () => void;
   onOrder: () => void;
+  panMode: boolean;
+  onTogglePanMode: () => void;
 }
 
 export default function DesignToolbar({
@@ -39,6 +42,8 @@ export default function DesignToolbar({
   onSendToBack,
   onSave,
   onOrder,
+  panMode,
+  onTogglePanMode,
 }: DesignToolbarProps) {
   const btnBase =
     "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-all";
@@ -102,6 +107,13 @@ export default function DesignToolbar({
       </button>
       <button onClick={onClear} className={`${btnBase} ${btnDefault}`} title="Clear canvas">
         <XCircle className="h-3.5 w-3.5" /> Clear
+      </button>
+      <button
+        onClick={onTogglePanMode}
+        className={`${btnBase} ${panMode ? btnAccent : btnDefault}`}
+        title={panMode ? "Disable drag pan (Lock canvas)" : "Enable drag pan (Unlock canvas)"}
+      >
+        <Hand className="h-3.5 w-3.5" /> {panMode ? "Pan Active" : "Pan Canvas"}
       </button>
 
       <div className="flex-1" />
