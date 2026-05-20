@@ -1,12 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PenTool, ArrowRight, PlusCircle, Clock } from "lucide-react";
+import { PenTool, ArrowRight, PlusCircle } from "lucide-react";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -21,12 +19,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
-// Mock saved designs
-const savedDesigns = [
-  { id: "1", name: "Modern Kitchen Cupboard", type: "Cupboard", date: "2 days ago", thumbnail: "🗄️", status: "Draft" },
-  { id: "2", name: "Living Room Partition", type: "Partition", date: "1 week ago", thumbnail: "🧱", status: "Ready to Order" },
-  { id: "3", name: "Balcony Sliding Door", type: "Door", date: "2 weeks ago", thumbnail: "🚪", status: "Draft" },
-];
+
 
 export default function DesignGatewayPage() {
   return (
@@ -81,56 +74,7 @@ export default function DesignGatewayPage() {
           </Link>
         </motion.div>
 
-        {/* Recent Drafts Section */}
-        <motion.div variants={itemVariants} className="pt-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold text-zinc-100 flex items-center gap-2">
-              <Clock className="h-5 w-5 text-zinc-400" />
-              Recent Drafts & Saved Designs
-            </h3>
-            <Link href="/dashboard/design/saved" className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1">
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {savedDesigns.map((design, i) => (
-              <motion.div
-                key={design.id}
-                variants={itemVariants}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
-              >
-                <Card className="relative bg-linear-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden">
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_3s_linear_infinite]" />
-                  <div className="relative h-32 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800 text-5xl">
-                    {design.thumbnail}
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                       <h4 className="font-semibold text-zinc-100 group-hover:text-violet-300 transition-colors line-clamp-1">
-                        {design.name}
-                      </h4>
-                      <Badge variant="outline" className="bg-zinc-900/50 text-xs border-zinc-700">
-                        {design.status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="text-xs text-zinc-500 flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        Edited {design.date}
-                      </span>
-                      <span className="text-sm text-zinc-500 group-hover:text-violet-400 transition-colors flex items-center gap-1">
-                        Edit
-                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        
 
       </motion.div>
     </DashboardLayout>

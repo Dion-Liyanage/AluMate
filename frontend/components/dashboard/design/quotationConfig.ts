@@ -81,10 +81,7 @@ export const colorOptions: ColorOption[] = [
   { value: "black", label: "Black", hex: "#18181b" },
   { value: "white", label: "White", hex: "#fafafa" },
   { value: "silver", label: "Silver", hex: "#a1a1aa" },
-  { value: "champagne-gold", label: "Champagne Gold", hex: "#c9a96e" },
-  { value: "wood-finish", label: "Wood Finish", hex: "#8B6914" },
-  { value: "bronze", label: "Bronze", hex: "#8B7355" },
-  { value: "custom", label: "Custom Color", hex: "#6366f1", isCustom: true },
+  { value: "wood-finish", label: "Wood Finish", hex: "#5C3A21" },
 ];
 
 // ---------- Accessories by Product Type ----------
