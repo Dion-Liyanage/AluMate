@@ -49,6 +49,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
   const [activeDesign, setActiveDesign] = useState<Design | null>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     designCode: "",
     title: "",
@@ -128,7 +129,13 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
           {designs.map((design) => (
             <Card
               key={design._id}
-              className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]"
+              onMouseEnter={() => setHoveredCardId(design._id)}
+              onMouseLeave={() => setHoveredCardId(null)}
+              className={`relative bg-gradient-to-br from-zinc-900 to-zinc-950 transition-all duration-300 group overflow-hidden ${
+                hoveredCardId === design._id
+                  ? "border-sky-500 shadow-[0_0_25px_rgba(56,189,248,0.2)]"
+                  : "border-zinc-800 hover:border-sky-500 hover:shadow-[0_0_25px_rgba(56,189,248,0.15)]"
+              }`}
             >
               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
               <div className="relative h-64 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
@@ -144,15 +151,22 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                   <LayoutGrid className="h-10 w-10 text-zinc-600" />
                 )}
               </div>
-              <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
+              <CardContent className="relative pt-0 px-4 pb-4 -mt-3">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-semibold text-zinc-100 line-clamp-1">{design.title}</h3>
                   <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest shrink-0">{design.designCode}</span>
                 </div>
 
 
-                <div className="flex items-center justify-between mt-4 -mb-1">
-                  <Badge variant="outline" className="bg-sky-500/10 text-sky-300 border-sky-500/20 capitalize group-hover:bg-sky-500/20 group-hover:border-sky-500/40 transition-colors">
+                <div className="flex items-center justify-between mt-4">
+                  <Badge 
+                    variant="outline" 
+                    className={`bg-sky-500/10 text-sky-300 border-sky-500/20 capitalize transition-colors ${
+                      hoveredCardId === design._id
+                        ? "bg-sky-500/20 border-sky-500/40"
+                        : "group-hover:bg-sky-500/20 group-hover:border-sky-500/40"
+                    }`}
+                  >
                     {design.category}
                   </Badge>
 
@@ -161,7 +175,11 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-zinc-400 group-hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
+                        className={`h-8 w-8 transition-colors hover:bg-sky-500/10 ${
+                          hoveredCardId === design._id
+                            ? "text-sky-400"
+                            : "text-zinc-400 group-hover:text-sky-400"
+                        }`}
                         title="View Details"
                       >
                         <Eye className="h-4 w-4" />
@@ -180,7 +198,11 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-zinc-400 group-hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
+                          className={`h-8 w-8 transition-colors hover:bg-zinc-800 ${
+                            hoveredCardId === design._id
+                              ? "text-zinc-100"
+                              : "text-zinc-400 group-hover:text-zinc-100"
+                          }`}
                           onClick={() => openEditDialog(design)}
                           title="Edit Design"
                         >
@@ -327,7 +349,11 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-zinc-400 group-hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                      className={`h-8 w-8 transition-colors hover:bg-red-400/10 ${
+                        hoveredCardId === design._id
+                          ? "text-red-400"
+                          : "text-zinc-400 group-hover:text-red-400"
+                      }`}
                       onClick={() => handleDelete(design._id)}
                       disabled={isDeleting === design._id}
                       title="Delete Design"

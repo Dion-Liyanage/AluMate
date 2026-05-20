@@ -40,6 +40,7 @@ export default function SavedDesignsPage() {
   const router = useRouter();
   const [savedDesigns, setSavedDesigns] = useState<SavedDesign[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
 
   const loadSavedDesigns = () => setSavedDesigns(getSavedDesigns());
 
@@ -131,7 +132,16 @@ export default function SavedDesignsPage() {
                 variants={itemVariants}
                 transition={{ delay: index * 0.05, duration: 0.35 }}
               >
-                <Card className="relative overflow-hidden border-zinc-800 bg-linear-to-br from-zinc-900 to-zinc-950 transition-all hover:border-violet-500/40 hover:shadow-[0_0_24px_rgba(139,92,246,0.12)] group">
+                <Card 
+                  onMouseEnter={() => setHoveredCardId(design.id)}
+                  onMouseLeave={() => setHoveredCardId(null)}
+                  className={`relative overflow-hidden bg-linear-to-br from-zinc-900 to-zinc-950 transition-all duration-300 group ${
+                    hoveredCardId === design.id
+                      ? "border-violet-500 shadow-[0_0_24px_rgba(139,92,246,0.22)]"
+                      : "border-zinc-800 hover:border-violet-500/40 hover:shadow-[0_0_24px_rgba(139,92,246,0.12)]"
+                  }`}
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
                   <div className="block w-full text-left">
                     <div className="relative h-28 border-b border-zinc-800 bg-zinc-900 flex items-center justify-center overflow-hidden">
                       {design.previewImage ? (
@@ -182,7 +192,11 @@ export default function SavedDesignsPage() {
                     <button
                       type="button"
                       onClick={() => handleOpen(design)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-violet-500/30 bg-violet-500/10 px-2.5 py-1.5 text-xs font-semibold text-violet-200 transition-colors hover:bg-violet-500/20"
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 hover:bg-violet-500/20 ${
+                        hoveredCardId === design.id
+                          ? "border-violet-500 bg-violet-500/20 text-violet-100 shadow-[0_0_10px_rgba(139,92,246,0.3)]"
+                          : "border-violet-500/30 bg-violet-500/10 text-violet-200"
+                      }`}
                     >
                       <PencilLine className="h-3.5 w-3.5" />
                       Edit
@@ -190,14 +204,22 @@ export default function SavedDesignsPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(design.id)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-xs font-semibold text-zinc-400 transition-colors hover:border-rose-500/40 hover:text-rose-300"
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 hover:border-rose-500/40 hover:text-rose-300 hover:bg-rose-500/10 ${
+                        hoveredCardId === design.id
+                          ? "border-zinc-700 bg-zinc-900 text-zinc-300"
+                          : "border-zinc-700 bg-zinc-900 text-zinc-400"
+                      }`}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Delete
                     </button>
                     <Link
                       href={`/dashboard/design/quote/${design.id}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-emerald-600/30 bg-emerald-600/10 px-2.5 py-1.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-600/20"
+                      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 hover:bg-emerald-600/20 ${
+                        hoveredCardId === design.id
+                          ? "border-emerald-500 bg-emerald-600/20 text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                          : "border-emerald-600/30 bg-emerald-600/10 text-emerald-200"
+                      }`}
                     >
                       <ArrowRight className="h-3.5 w-3.5" />
                       Order
