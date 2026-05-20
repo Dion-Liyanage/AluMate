@@ -5,6 +5,7 @@ import * as fabric from "fabric";
 
 export interface FabricCanvasHandle {
   getCanvas: () => fabric.Canvas | null;
+  loadFromJSON: (json: string) => Promise<void>;
   addComponent: (opts: {
     width: number;
     height: number;
@@ -35,6 +36,7 @@ export interface FabricCanvasHandle {
 interface FabricCanvasProps {
   onSelectionChange?: (hasSelection: boolean) => void;
   onObjectModified?: () => void;
+  onReady?: () => void;
   panMode?: boolean;
 }
 
@@ -45,7 +47,7 @@ const FABRIC_CUSTOM_PROPS = ["componentId", "componentLabel"];
 type AnyObj = any;
 
 const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
-  ({ onSelectionChange, onObjectModified, panMode = false }, ref) => {
+  ({ onSelectionChange, onObjectModified, onReady, panMode = false }, ref) => {
     const canvasElRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = useRef<fabric.Canvas | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -311,6 +313,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
 
       drawGrid(canvas);
       saveHistory();
+      onReady?.();
 
       // Snap-to-grid or snap-to-component on moving
       canvas.on("object:moving", (e: AnyObj) => {
@@ -737,6 +740,23 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
 
     useImperativeHandle(ref, () => ({
       getCanvas: () => canvasRef.current,
+
+      loadFromJSON: async (json) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        isUndoRedoRef.current = true;
+        try {
+          await canvas.loadFromJSON(JSON.parse(json));
+          drawGrid(canvas);
+          canvas.renderAll();
+          historyRef.current = [json];
+          historyIndexRef.current = 0;
+          onObjectModified?.();
+        } finally {
+          isUndoRedoRef.current = false;
+        }
+      },
 
       addComponent: (opts) => {
         const canvas = canvasRef.current;

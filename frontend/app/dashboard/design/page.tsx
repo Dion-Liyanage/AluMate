@@ -55,8 +55,8 @@ export default function DesignGatewayPage() {
         <motion.div variants={itemVariants} className="w-full">
           {/* Start New */}
           <Link href="/dashboard/design/new" className="block group">
-            <div className="relative h-full rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/10 p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] overflow-hidden">
-              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+            <div className="relative h-full rounded-2xl border border-violet-500/30 bg-linear-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/10 p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] overflow-hidden">
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_3s_linear_infinite]" />
               <div className="absolute top-1/2 -translate-y-1/2 right-0 p-6 opacity-20 group-hover:opacity-40 transition-opacity">
                  <PlusCircle className="w-48 h-48 text-violet-300" />
               </div>
@@ -88,7 +88,7 @@ export default function DesignGatewayPage() {
               <Clock className="h-5 w-5 text-zinc-400" />
               Recent Drafts & Saved Designs
             </h3>
-            <Link href="/dashboard/designs/saved" className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1">
+            <Link href="/dashboard/design/saved" className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors flex items-center gap-1">
               View all
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -101,8 +101,8 @@ export default function DesignGatewayPage() {
                 variants={itemVariants}
                 transition={{ delay: i * 0.1, duration: 0.4 }}
               >
-                <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden">
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                <Card className="relative bg-linear-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden">
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_3s_linear_infinite]" />
                   <div className="relative h-32 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800 text-5xl">
                     {design.thumbnail}
                   </div>

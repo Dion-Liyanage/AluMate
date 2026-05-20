@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PenTool, ArrowRight } from "lucide-react";
+import { PenTool, ArrowRight, Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,16 +65,26 @@ export default function DesignPage() {
         className="space-y-6"
       >
         {/* Header */}
-        <motion.div variants={itemVariants}>
-          <h2 className="text-3xl font-bold text-zinc-100 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-violet-500/30 border border-violet-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)] relative group">
-              <PenTool className="h-6 w-6 text-violet-100 relative z-10" />
-            </div>
-            Select Product Type
-          </h2>
-          <p className="mt-1 text-zinc-400">
-            Choose the type of aluminium product you want to design.
-          </p>
+        <motion.div variants={itemVariants} className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-bold text-zinc-100 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-violet-500/30 border border-violet-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)] relative group">
+                <PenTool className="h-6 w-6 text-violet-100 relative z-10" />
+              </div>
+              Select Product Type
+            </h2>
+            <p className="mt-1 text-zinc-400">
+              Choose the type of aluminium product you want to design.
+            </p>
+          </div>
+
+          <Link
+            href="/dashboard/design/saved"
+            className="inline-flex items-center gap-2 rounded-xl border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-200 transition-all hover:bg-violet-500/20 hover:text-white hover:border-violet-400/60"
+          >
+            <Bookmark className="h-4 w-4" />
+            Saved Designs
+          </Link>
         </motion.div>
 
         {/* Product Type Grid */}
@@ -95,18 +106,18 @@ export default function DesignPage() {
                     alt={type.name}
                     className="h-full w-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 via-zinc-950/90 to-zinc-950" />
+                  <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-zinc-950/90 to-zinc-950" />
                   
                   {/* Neon Accent Line */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-violet-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-transparent via-violet-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
 
                 {/* Shimmer Wave Effect */}
                 <div className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(139,92,246,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(139,92,246,0.05)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_3s_linear_infinite]" />
                 </div>
 
-                <CardContent className="relative z-20 p-5 min-h-[160px] flex flex-col justify-end">
+                <CardContent className="relative z-20 min-h-40 flex flex-col justify-end p-5">
                   <div className="space-y-1">
                     <h3 className="text-xl font-bold text-zinc-100 group-hover:text-violet-300 transition-colors tracking-tight">
                       {type.name}
@@ -119,7 +130,7 @@ export default function DesignPage() {
                   <div className="mt-4 pt-4 border-t border-zinc-800/50 flex items-center gap-2 text-[10px] text-violet-400/70 group-hover:text-violet-400 transition-all uppercase font-black tracking-[0.2em]">
                     <span className="relative">
                       Start Designing
-                      <div className="absolute -bottom-1 left-0 w-0 h-[1px] bg-violet-400 transition-all duration-300 group-hover:w-full" />
+                      <div className="absolute -bottom-1 left-0 w-0 h-px bg-violet-400 transition-all duration-300 group-hover:w-full" />
                     </span>
                     <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-2" />
                   </div>

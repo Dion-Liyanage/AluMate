@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Loader2, SlidersHorizontal, X, PenTool } from "lucide-react";
+import { ArrowLeft, Loader2, SlidersHorizontal, X, PenTool, Bookmark } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { toast } from "sonner";
 
 import { aluminiumComponents, AluminiumComponent } from "./aluminiumComponents";
 import ProductComponentLibrary from "./ProductComponentLibrary";
@@ -12,6 +13,23 @@ import ViewToggle from "./ViewToggle";
 import DesignToolbar from "./DesignToolbar";
 import type { FabricCanvasHandle } from "./FabricCanvas";
 import { QuotationConfigPanel } from "@/components/dashboard/design/QuotationConfigPanel";
+import {
+  createDefaultDesignName,
+  getSavedDesignById,
+  upsertSavedDesign,
+} from "@/lib/saved-designs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 // Dynamic imports to avoid SSR issues with canvas/WebGL
 const FabricCanvas = dynamic(() => import("./FabricCanvas"), {
@@ -45,6 +63,7 @@ interface ThreeObject {
 
 interface DesignStudioProps {
   productType: string;
+  savedDesignId?: string;
 }
 
 const productLabels: Record<string, string> = {
@@ -56,13 +75,19 @@ const productLabels: Record<string, string> = {
   other: "Other",
 };
 
-export default function DesignStudio({ productType }: DesignStudioProps) {
+export default function DesignStudio({ productType, savedDesignId }: DesignStudioProps) {
   const [activeView, setActiveView] = useState<"2d" | "3d">("2d");
   const [hasSelection, setHasSelection] = useState(false);
   const [threeObjects, setThreeObjects] = useState<ThreeObject[]>([]);
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [panMode, setPanMode] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
+  const [currentSavedDesignId, setCurrentSavedDesignId] = useState<string | null>(savedDesignId ?? null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [designName, setDesignName] = useState(createDefaultDesignName(productType));
+  const [designDescription, setDesignDescription] = useState("");
   const fabricRef = useRef<FabricCanvasHandle>(null);
+  const initialSavedDesignLoadedRef = useRef<string | null>(null);
 
   const components = useMemo(
     () => aluminiumComponents[productType] ?? aluminiumComponents.other,
@@ -168,21 +193,70 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
     []
   );
 
-  const handleSave = useCallback(() => {
-    const json = fabricRef.current?.toJSON();
-    const preview = fabricRef.current?.toDataURL();
-    if (json) {
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `design-${productType}-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-    // Future: send to backend API
-    console.log("Design saved", { json: json?.length, preview: preview?.length });
-  }, [productType]);
+    const handleConfirmSave = useCallback(async () => {
+      // Try to capture a preview image without the grid by toggling grid off briefly.
+      const canvasHandle = fabricRef.current;
+
+      // Read JSON first (independent of grid visibility)
+      const json = canvasHandle?.toJSON();
+
+      let preview = "";
+      try {
+        if (canvasHandle && typeof canvasHandle.toggleGrid === "function") {
+          // Toggle grid off, capture, then toggle back
+          canvasHandle.toggleGrid();
+          // allow canvas to re-render
+          await new Promise((r) => setTimeout(r, 40));
+          preview = canvasHandle.toDataURL() ?? "";
+          // restore grid
+          canvasHandle.toggleGrid();
+          // let render complete
+          await new Promise((r) => setTimeout(r, 20));
+        } else {
+          preview = canvasHandle?.toDataURL() ?? "";
+        }
+      } catch (err) {
+        // fallback to default
+        preview = canvasHandle?.toDataURL() ?? "";
+      }
+
+      if (json) {
+        const savedDesign = upsertSavedDesign({
+          id: currentSavedDesignId ?? undefined,
+          name: designName.trim() || createDefaultDesignName(productType),
+          productType,
+          designJson: json,
+          previewImage: preview ?? "",
+          description: designDescription.trim() || undefined,
+        });
+
+        setCurrentSavedDesignId(savedDesign.id);
+        setShowSaveModal(false);
+        setIsDirty(false);
+        toast.success("Design saved to Saved Designs");
+      }
+
+      console.log("Design saved", { json: json?.length, preview: preview?.length });
+    }, [currentSavedDesignId, productType, designName, designDescription]);
+
+  const handleSaveClick = useCallback(() => {
+    setShowSaveModal(true);
+  }, []);
+
+  useEffect(() => {
+    if (!canvasReady) return;
+    if (!savedDesignId) return;
+    if (initialSavedDesignLoadedRef.current === savedDesignId) return;
+
+    const savedDesign = getSavedDesignById(savedDesignId);
+    if (!savedDesign) return;
+
+    fabricRef.current?.loadFromJSON(savedDesign.designJson);
+    setCurrentSavedDesignId(savedDesign.id);
+    setDesignName(savedDesign.name);
+    setDesignDescription(savedDesign.description ?? "");
+    initialSavedDesignLoadedRef.current = savedDesignId;
+  }, [canvasReady, savedDesignId]);
 
   const handleViewToggle = useCallback(
     (view: "2d" | "3d") => {
@@ -216,24 +290,14 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
         <div className="flex items-center gap-3">
           <ViewToggle activeView={activeView} onToggle={handleViewToggle} />
 
-          {/* Quotation Config Toggle */}
-          <button
-            onClick={() => setShowConfigPanel(!showConfigPanel)}
-            className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
-              showConfigPanel
-                ? "bg-violet-600 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]"
-                : "bg-stone-200 text-stone-700 hover:bg-stone-300"
-            }`}
+          {/* Saved Designs Link */}
+          <Link
+            href="/dashboard/design/saved"
+            className="inline-flex items-center gap-2 rounded-xl border border-violet-600/40 bg-transparent px-4 py-2 text-sm font-semibold text-violet-600 hover:bg-violet-50/50 hover:border-violet-600 transition-all duration-200"
           >
-            {showConfigPanel ? (
-              <X className="h-4 w-4" />
-            ) : (
-              <SlidersHorizontal className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">
-              {showConfigPanel ? "Hide Config" : "Configure & Quote"}
-            </span>
-          </button>
+            <Bookmark className="h-4 w-4 text-violet-500" />
+            <span className="hidden sm:inline">Saved Designs</span>
+          </Link>
         </div>
       </div>
 
@@ -250,7 +314,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
             onToggleGrid={() => fabricRef.current?.toggleGrid()}
             onBringToFront={() => fabricRef.current?.bringToFront()}
             onSendToBack={() => fabricRef.current?.sendToBack()}
-            onSave={handleSave}
+            onSave={handleSaveClick}
             panMode={panMode}
             onTogglePanMode={() => setPanMode((prev) => !prev)}
           />
@@ -280,6 +344,7 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
                 ref={fabricRef}
                 onSelectionChange={setHasSelection}
                 onObjectModified={syncToThree}
+                onReady={() => setCanvasReady(true)}
                 panMode={panMode}
               />
             </div>
@@ -331,6 +396,56 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
           )}
         </AnimatePresence>
       </div>
+
+      <Dialog open={showSaveModal} onOpenChange={setShowSaveModal}>
+        <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-zinc-800 text-zinc-100 dark">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-zinc-100">Save Design</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Give your custom design a name and description to easily find it later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name" className="text-zinc-300">Design Name</Label>
+              <Input
+                id="name"
+                value={designName}
+                onChange={(e) => setDesignName(e.target.value)}
+                placeholder="e.g. Balcony Sliding Door"
+                className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-violet-500/50"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description" className="text-zinc-300">Description (Optional)</Label>
+              <Textarea
+                id="description"
+                value={designDescription}
+                onChange={(e) => setDesignDescription(e.target.value)}
+                placeholder="Describe your design, e.g. 3-panel door with standard lock..."
+                className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-violet-500/50 min-h-[100px] resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowSaveModal(false)}
+              className="border-zinc-800 text-zinc-300 hover:bg-zinc-900 hover:text-zinc-100"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmSave}
+              className="bg-violet-600 hover:bg-violet-500 text-white font-medium"
+            >
+              Save Design
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
