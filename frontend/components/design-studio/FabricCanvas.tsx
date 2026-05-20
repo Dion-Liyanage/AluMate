@@ -899,7 +899,33 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
       toDataURL: () => {
         const canvas = canvasRef.current;
         if (!canvas) return "";
-        return canvas.toDataURL({ format: "png", multiplier: 1 } as AnyObj);
+        
+        // Save current grid visibility and background
+        const wasGridVisible = gridVisibleRef.current;
+        const originalBg = canvas.backgroundColor;
+        
+        // Hide grid and set background to white
+        gridVisibleRef.current = false;
+        canvas.backgroundColor = "#ffffff";
+        
+        // Clean up grid lines from canvas objects if any
+        const gridObjects = canvas.getObjects().filter((o: AnyObj) => o.isGrid);
+        gridObjects.forEach((o) => canvas.remove(o));
+        
+        canvas.renderAll();
+        
+        // Capture image
+        const dataUrl = canvas.toDataURL({ format: "png", multiplier: 1 } as AnyObj);
+        
+        // Restore grid visibility and background
+        gridVisibleRef.current = wasGridVisible;
+        canvas.backgroundColor = originalBg;
+        if (canvasRef.current) {
+          drawGrid(canvasRef.current);
+          canvasRef.current.renderAll();
+        }
+        
+        return dataUrl;
       },
     }));
 

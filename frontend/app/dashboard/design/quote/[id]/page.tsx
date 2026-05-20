@@ -111,12 +111,12 @@ export default function SavedDesignQuotationPage() {
             >
               {/* Image/Preview */}
               <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden relative group/preview">
-                <div className="relative aspect-square sm:aspect-video lg:aspect-[16/10] bg-zinc-800/50 flex items-center justify-center">
+                <div className="relative aspect-square sm:aspect-video lg:aspect-[16/10] bg-white flex items-center justify-center">
                   {design.previewImage ? (
                     <img
                       src={design.previewImage}
                       alt={design.name}
-                      className="h-full w-full object-contain bg-zinc-950/40"
+                      className="h-full w-full object-contain bg-white"
                     />
                   ) : (
                     <div className="flex flex-col items-center gap-4 text-zinc-600">

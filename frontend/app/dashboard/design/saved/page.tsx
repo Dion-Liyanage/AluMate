@@ -143,19 +143,21 @@ export default function SavedDesignsPage() {
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite] pointer-events-none" />
                   <div className="block w-full text-left">
-                    <div className="relative h-28 border-b border-zinc-800 bg-zinc-900 flex items-center justify-center overflow-hidden">
+                    <div className="relative h-28 border-b border-zinc-800 bg-white flex items-center justify-center overflow-hidden">
                       {design.previewImage ? (
                         <img
                           src={design.previewImage}
                           alt={design.name}
-                          className="h-full w-full object-contain bg-zinc-950/40"
+                          className="h-full w-full object-contain bg-white"
                         />
                       ) : (
                         <div className="text-6xl text-violet-400/70">
                           {design.productType[0]?.toUpperCase()}
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent opacity-70" />
+                      {!design.previewImage && (
+                        <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent opacity-70" />
+                      )}
                     </div>
 
                     <CardContent className="p-3">
