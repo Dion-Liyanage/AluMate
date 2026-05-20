@@ -184,19 +184,6 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
     console.log("Design saved", { json: json?.length, preview: preview?.length });
   }, [productType]);
 
-  const handleOrder = useCallback(() => {
-    const json = fabricRef.current?.toJSON();
-    const preview = fabricRef.current?.toDataURL();
-    // Store in sessionStorage for the order page
-    if (json && preview) {
-      sessionStorage.setItem(
-        "design_order",
-        JSON.stringify({ designJson: json, previewImage: preview, productType })
-      );
-      window.location.href = "/dashboard/orders/new";
-    }
-  }, [productType]);
-
   const handleViewToggle = useCallback(
     (view: "2d" | "3d") => {
       if (view === "3d") syncToThree();
@@ -264,7 +251,6 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
             onBringToFront={() => fabricRef.current?.bringToFront()}
             onSendToBack={() => fabricRef.current?.sendToBack()}
             onSave={handleSave}
-            onOrder={handleOrder}
             panMode={panMode}
             onTogglePanMode={() => setPanMode((prev) => !prev)}
           />

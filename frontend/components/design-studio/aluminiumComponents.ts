@@ -80,7 +80,7 @@ export const aluminiumComponents: ProductComponents = {
       id: "aluminium-bar",
       name: "Aluminium Bar",
       icon: "➖",
-      fabricDefaults: { width: 160, height: 10, fill: "#a3a3a3", stroke: "#525252", strokeWidth: 2 },
+      fabricDefaults: { width: 200, height: 10, fill: "#a3a3a3", stroke: "#525252", strokeWidth: 2 },
     },
 
     {

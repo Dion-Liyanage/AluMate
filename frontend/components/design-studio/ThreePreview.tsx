@@ -20,6 +20,8 @@ interface ThreePreviewProps {
 }
 
 const SCALE = 0.01;
+const BAR_THICKNESS = 0.1;
+const BAR_DEPTH = 0.06;
 
 export default function ThreePreview({ objects }: ThreePreviewProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -165,8 +167,6 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
       if (obj.componentId === "frame") {
         // Hollow frame: 4 bars
         const frameGroup = new THREE.Group();
-        const thickness = 0.05; // 5cm frame thickness
-        const frameDepth = 0.06; // 6cm depth
         const frameColor = obj.fill === "transparent" ? "#a3a3a3" : obj.fill;
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(frameColor),
@@ -175,28 +175,28 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
         });
 
         // Top bar
-        const topGeom = new THREE.BoxGeometry(w, thickness, frameDepth);
+        const topGeom = new THREE.BoxGeometry(w, BAR_THICKNESS, BAR_DEPTH);
         const topBar = new THREE.Mesh(topGeom, material);
-        topBar.position.set(0, h / 2 - thickness / 2, 0);
+        topBar.position.set(0, h / 2 - BAR_THICKNESS / 2, 0);
         frameGroup.add(topBar);
 
         // Bottom bar
-        const bottomGeom = new THREE.BoxGeometry(w, thickness, frameDepth);
+        const bottomGeom = new THREE.BoxGeometry(w, BAR_THICKNESS, BAR_DEPTH);
         const bottomBar = new THREE.Mesh(bottomGeom, material);
-        bottomBar.position.set(0, -h / 2 + thickness / 2, 0);
+        bottomBar.position.set(0, -h / 2 + BAR_THICKNESS / 2, 0);
         frameGroup.add(bottomBar);
 
         // Left bar
-        const sideH = h - 2 * thickness;
-        const leftGeom = new THREE.BoxGeometry(thickness, sideH, frameDepth);
+        const sideH = h - 2 * BAR_THICKNESS;
+        const leftGeom = new THREE.BoxGeometry(BAR_THICKNESS, sideH, BAR_DEPTH);
         const leftBar = new THREE.Mesh(leftGeom, material);
-        leftBar.position.set(-w / 2 + thickness / 2, 0, 0);
+        leftBar.position.set(-w / 2 + BAR_THICKNESS / 2, 0, 0);
         frameGroup.add(leftBar);
 
         // Right bar
-        const rightGeom = new THREE.BoxGeometry(thickness, sideH, frameDepth);
+        const rightGeom = new THREE.BoxGeometry(BAR_THICKNESS, sideH, BAR_DEPTH);
         const rightBar = new THREE.Mesh(rightGeom, material);
-        rightBar.position.set(w / 2 - thickness / 2, 0, 0);
+        rightBar.position.set(w / 2 - BAR_THICKNESS / 2, 0, 0);
         frameGroup.add(rightBar);
 
         mesh = frameGroup;
@@ -226,7 +226,7 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
         obj.componentId === "vertical-bar" ||
         obj.componentId === "bar"
       ) {
-        const geometry = new THREE.BoxGeometry(w, h, 0.06);
+        const geometry = new THREE.BoxGeometry(w, BAR_THICKNESS, BAR_DEPTH);
         const material = new THREE.MeshStandardMaterial({
           color: new THREE.Color(obj.fill),
           metalness: 0.8,
@@ -308,44 +308,7 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
         hingeGroup.add(barrel);
         mesh = hingeGroup;
       } else if (obj.componentId === "label-text") {
-        // Draw Text to Canvas and create a CanvasTexture
-        const canvas = document.createElement("canvas");
-        canvas.width = 256;
-        canvas.height = 64;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // Rounded background placard
-          ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-          ctx.beginPath();
-          if (ctx.roundRect) {
-            ctx.roundRect(0, 0, canvas.width, canvas.height, 8);
-          } else {
-            ctx.rect(0, 0, canvas.width, canvas.height);
-          }
-          ctx.fill();
-          ctx.lineWidth = 3;
-          ctx.strokeStyle = "#0ea5e9";
-          ctx.stroke();
-
-          // Render Label Text
-          ctx.font = "bold 22px sans-serif";
-          ctx.fillStyle = "#0f172a";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(obj.label || "Label", canvas.width / 2, canvas.height / 2);
-        }
-
-        const texture = new THREE.CanvasTexture(canvas);
-        const planeGeom = new THREE.PlaneGeometry(w, Math.max(0.05, w * 0.25));
-        const planeMat = new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: true,
-          side: THREE.DoubleSide,
-        });
-
-        mesh = new THREE.Mesh(planeGeom, planeMat);
-        mesh.position.z = 0.035; // Float slightly forward
+        return;
       } else {
         // Fallback standard box
         const depth = Math.max(w, h) * 0.1;

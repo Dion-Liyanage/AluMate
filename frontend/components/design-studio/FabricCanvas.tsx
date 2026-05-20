@@ -592,6 +592,15 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
             mb: true,
             mtr: false,
           });
+        } else if (obj.componentId === "hinge") {
+          obj.set({
+            lockRotation: true,
+            cornerSize: 6,
+            touchCornerSize: 12,
+          });
+          obj.setControlsVisibility({
+            mtr: false,
+          });
         } else {
           obj.set({
             lockRotation: true,

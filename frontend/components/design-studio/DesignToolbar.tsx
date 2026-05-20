@@ -8,7 +8,6 @@ import {
   XCircle,
   Grid3X3,
   Save,
-  ShoppingCart,
   BringToFront,
   SendToBack,
   Hand,
@@ -25,7 +24,6 @@ interface DesignToolbarProps {
   onBringToFront: () => void;
   onSendToBack: () => void;
   onSave: () => void;
-  onOrder: () => void;
   panMode: boolean;
   onTogglePanMode: () => void;
 }
@@ -41,7 +39,6 @@ export default function DesignToolbar({
   onBringToFront,
   onSendToBack,
   onSave,
-  onOrder,
   panMode,
   onTogglePanMode,
 }: DesignToolbarProps) {
@@ -120,9 +117,6 @@ export default function DesignToolbar({
 
       <button onClick={onSave} className={`${btnBase} ${btnAccent}`} title="Save design">
         <Save className="h-3.5 w-3.5" /> Save
-      </button>
-      <button onClick={onOrder} className={`${btnBase} ${btnAccent}`} title="Continue to order">
-        <ShoppingCart className="h-3.5 w-3.5" /> Order
       </button>
     </div>
   );
