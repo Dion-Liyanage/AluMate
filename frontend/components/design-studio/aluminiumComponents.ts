@@ -82,12 +82,7 @@ export const aluminiumComponents: ProductComponents = {
       icon: "➖",
       fabricDefaults: { width: 160, height: 10, fill: "#a3a3a3", stroke: "#525252", strokeWidth: 2 },
     },
-    {
-      id: "lock",
-      name: "Lock",
-      icon: "🔒",
-      fabricDefaults: { width: 20, height: 40, fill: "#3f3f46", stroke: "#18181b", strokeWidth: 1, rx: 4, ry: 4 },
-    },
+
     {
       id: "handle",
       name: "Handle",

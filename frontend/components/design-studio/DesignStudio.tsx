@@ -74,20 +74,86 @@ export default function DesignStudio({ productType }: DesignStudioProps) {
     if (!canvas) return;
 
     const objs: ThreeObject[] = [];
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    canvas.getObjects().forEach((obj: any) => {
-      if (obj.isGrid) return;
-      objs.push({
-        componentId: (obj.componentId as string) ?? "unknown",
-        label: obj.text ? (obj.text as string) : ((obj.componentLabel as string) ?? ""),
-        x: ((obj.left as number) ?? 0) + (((obj.strokeWidth as number) ?? 0) / 2) * ((obj.scaleX as number) ?? 1),
-        y: ((obj.top as number) ?? 0) + (((obj.strokeWidth as number) ?? 0) / 2) * ((obj.scaleY as number) ?? 1),
+    const collectRenderableObjects = (obj: any) => {
+      if (!obj || obj.isGrid) return;
+
+      const childObjects = typeof obj.getObjects === "function" ? obj.getObjects() : [];
+
+      // Groups/active selections can contain real components; always flatten them.
+      if (Array.isArray(childObjects) && childObjects.length > 0) {
+        childObjects.forEach((child: any) => collectRenderableObjects(child));
+        return;
+      }
+
+      const rawComponentId = typeof obj.componentId === "string" ? obj.componentId : "";
+      let componentId = rawComponentId;
+
+      if (!componentId) {
+        const type = typeof obj.type === "string" ? obj.type : "";
+        const fill = typeof obj.fill === "string" ? obj.fill : "";
+        const stroke = typeof obj.stroke === "string" ? obj.stroke : "";
+        const strokeWidth = (obj.strokeWidth as number) ?? 0;
+
+        if (type === "textbox" || type === "text" || obj.text) {
+          componentId = "label-text";
+        } else if (
+          fill === "transparent" &&
+          strokeWidth >= 4 &&
+          (stroke === "#52525b" || stroke === "rgb(82,82,91)")
+        ) {
+          componentId = "frame";
+        } else if (fill.includes("191,219,254") || fill === "#bfdbfe") {
+          componentId = "glass-panel";
+        } else {
+          componentId = "board-panel";
+        }
+      }
+
+      let bounds = {
+        left: (obj.left as number) ?? 0,
+        top: (obj.top as number) ?? 0,
         width: ((obj.width as number) ?? 50) * ((obj.scaleX as number) ?? 1),
         height: ((obj.height as number) ?? 50) * ((obj.scaleY as number) ?? 1),
+      };
+
+      // Use transformed corner coordinates so duplicated/grouped children keep correct world position.
+      if (typeof obj.getCoords === "function") {
+        const coords = obj.getCoords();
+        if (Array.isArray(coords) && coords.length > 0) {
+          const xs = coords.map((p: { x: number }) => p.x);
+          const ys = coords.map((p: { y: number }) => p.y);
+          const minX = Math.min(...xs);
+          const maxX = Math.max(...xs);
+          const minY = Math.min(...ys);
+          const maxY = Math.max(...ys);
+
+          bounds = {
+            left: minX,
+            top: minY,
+            width: Math.max(1, maxX - minX),
+            height: Math.max(1, maxY - minY),
+          };
+        }
+      } else if (typeof obj.getBoundingRect === "function") {
+        bounds = obj.getBoundingRect();
+      }
+
+      objs.push({
+        componentId,
+        label: obj.text ? (obj.text as string) : ((obj.componentLabel as string) ?? ""),
+        x: (bounds.left as number) ?? 0,
+        y: (bounds.top as number) ?? 0,
+        width: Math.max(1, (bounds.width as number) ?? 50),
+        height: Math.max(1, (bounds.height as number) ?? 50),
         fill: typeof obj.fill === "string" ? obj.fill : "#a3a3a3",
         opacity: (obj.opacity as number) ?? 1,
       });
-    });
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    canvas.getObjects().forEach((obj: any) => collectRenderableObjects(obj));
     setThreeObjects(objs);
   }, []);
 

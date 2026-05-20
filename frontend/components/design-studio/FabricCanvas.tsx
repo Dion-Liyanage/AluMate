@@ -39,6 +39,7 @@ interface FabricCanvasProps {
 }
 
 const GRID_SIZE = 20;
+const FABRIC_CUSTOM_PROPS = ["componentId", "componentLabel"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObj = any;
@@ -73,7 +74,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
       if (isUndoRedoRef.current) return;
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const json = JSON.stringify((canvas as AnyObj).toJSON(["componentId", "componentLabel"]));
+      const json = JSON.stringify((canvas as AnyObj).toJSON(FABRIC_CUSTOM_PROPS));
       const history = historyRef.current;
       const idx = historyIndexRef.current;
       historyRef.current = history.slice(0, idx + 1);
@@ -161,27 +162,55 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
       onObjectModified?.();
     }, [saveHistory, onObjectModified]);
 
+    const materializeClone = useCallback((canvas: fabric.Canvas, cloned: fabric.FabricObject) => {
+      const activeSelectionClass = (fabric as AnyObj).ActiveSelection;
+      const isActiveSelection =
+        (cloned as AnyObj).type === "activeSelection" ||
+        (cloned as AnyObj).type === "ActiveSelection" ||
+        (typeof activeSelectionClass === "function" && cloned instanceof activeSelectionClass);
+
+      if (!isActiveSelection) {
+        canvas.add(cloned);
+        canvas.setActiveObject(cloned);
+        return;
+      }
+
+      (cloned as AnyObj).canvas = canvas;
+      const pastedObjects: fabric.FabricObject[] = [];
+      (cloned as AnyObj).forEachObject((obj: fabric.FabricObject) => {
+        obj.set({ evented: true });
+        obj.setCoords();
+        canvas.add(obj);
+        pastedObjects.push(obj);
+      });
+
+      if (typeof activeSelectionClass === "function" && pastedObjects.length > 0) {
+        const newSelection = new activeSelectionClass(pastedObjects, { canvas });
+        canvas.setActiveObject(newSelection);
+      }
+    }, []);
+
     const duplicateSelected = useCallback(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const active = canvas.getActiveObject();
       if (!active) return;
-      active.clone().then((cloned: fabric.FabricObject) => {
-        cloned.set({ left: (cloned.left ?? 0) + 20, top: (cloned.top ?? 0) + 20 });
-        canvas.add(cloned);
-        canvas.setActiveObject(cloned);
-        canvas.renderAll();
+      active.clone(FABRIC_CUSTOM_PROPS).then((cloned: fabric.FabricObject) => {
+        cloned.set({ left: (cloned.left ?? 0) + 20, top: (cloned.top ?? 0) + 20, evented: true });
+
+        materializeClone(canvas, cloned);
+        canvas.requestRenderAll();
         saveHistory();
         onObjectModified?.();
       });
-    }, [saveHistory, onObjectModified]);
+    }, [materializeClone, saveHistory, onObjectModified]);
 
     const copySelected = useCallback(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const active = canvas.getActiveObject();
       if (!active) return;
-      active.clone().then((cloned) => {
+      active.clone(FABRIC_CUSTOM_PROPS).then((cloned) => {
         clipboardRef.current = cloned;
       });
     }, []);
@@ -189,7 +218,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
     const pasteSelected = useCallback(() => {
       const canvas = canvasRef.current;
       if (!canvas || !clipboardRef.current) return;
-      clipboardRef.current.clone().then((cloned) => {
+      clipboardRef.current.clone(FABRIC_CUSTOM_PROPS).then((cloned) => {
         canvas.discardActiveObject();
 
         const mousePos = lastMousePosRef.current;
@@ -219,20 +248,19 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
           evented: true,
         });
 
-        canvas.add(cloned);
-        canvas.setActiveObject(cloned);
+        materializeClone(canvas, cloned);
         canvas.requestRenderAll();
         saveHistory();
         onObjectModified?.();
       });
-    }, [saveHistory, onObjectModified]);
+    }, [materializeClone, saveHistory, onObjectModified]);
 
     const cutSelected = useCallback(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const active = canvas.getActiveObject();
       if (!active) return;
-      active.clone().then((cloned) => {
+      active.clone(FABRIC_CUSTOM_PROPS).then((cloned) => {
         clipboardRef.current = cloned;
         const objs = canvas.getActiveObjects();
         objs.forEach((o) => canvas.remove(o));
@@ -256,6 +284,15 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
           cornerSize: 12,
           touchCornerSize: 24,
         });
+
+        const currentCustomProps = (fabric as AnyObj).FabricObject.customProperties;
+        const mergedCustomProps = Array.from(
+          new Set([
+            ...(Array.isArray(currentCustomProps) ? currentCustomProps : []),
+            ...FABRIC_CUSTOM_PROPS,
+          ])
+        );
+        (fabric as AnyObj).FabricObject.customProperties = mergedCustomProps;
       }
 
       const container = containerRef.current;
@@ -827,7 +864,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
       toJSON: () => {
         const canvas = canvasRef.current;
         if (!canvas) return "{}";
-        return JSON.stringify((canvas as AnyObj).toJSON(["componentId", "componentLabel"]));
+        return JSON.stringify((canvas as AnyObj).toJSON(FABRIC_CUSTOM_PROPS));
       },
 
       toDataURL: () => {
