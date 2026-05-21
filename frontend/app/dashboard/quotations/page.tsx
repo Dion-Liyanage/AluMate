@@ -423,21 +423,23 @@ export default function QuotationsPage() {
 
         {/* Quotation Details Dialog */}
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-            <DialogHeader className="border-b border-zinc-800 pb-4 mb-6 sticky top-0 bg-zinc-950 z-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <DialogTitle className="text-2xl font-bold text-zinc-100">Quotation Details</DialogTitle>
-                  <DialogDescription className="text-zinc-400">
-                    Order ID: {selectedQuotation?.orderId}
-                  </DialogDescription>
+          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-2xl max-h-[90vh] overflow-hidden p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="flex max-h-[90vh] flex-col">
+              <DialogHeader className="shrink-0 border-b border-zinc-800 px-6 py-5 bg-zinc-950">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <DialogTitle className="text-2xl font-bold text-zinc-100">Quotation Details</DialogTitle>
+                    <DialogDescription className="text-zinc-400">
+                      Order ID: {selectedQuotation?.orderId}
+                    </DialogDescription>
+                  </div>
+                  <QuotationStatusBadge status={selectedQuotation?.status || ""} />
                 </div>
-                <QuotationStatusBadge status={selectedQuotation?.status || ""} />
-              </div>
-            </DialogHeader>
+              </DialogHeader>
 
-            {selectedQuotation && (
-              <div className="space-y-8">
+              {selectedQuotation && (
+                <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
+                  <div className="space-y-8">
                 {/* Product Info */}
                 <section>
                   <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">Product Information</h4>
@@ -599,8 +601,10 @@ export default function QuotationsPage() {
                     </Button>
                   )}
                 </div>
-              </div>
-            )}
+                  </div>
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </motion.div>

@@ -126,7 +126,7 @@ function ConfigSection({
                     size="sm"
                     className={`gap-1.5 transition-all ${
                       isValid 
-                        ? "bg-violet-600/20 text-violet-300 border border-violet-500/30 hover:bg-violet-600/30" 
+                        ? "bg-zinc-950/90 text-violet-300 border border-violet-500/30 shadow-[0_0_14px_rgba(139,92,246,0.12)] hover:bg-violet-500/10 hover:border-violet-400/50 hover:text-violet-200" 
                         : "bg-zinc-800 text-zinc-500 border-zinc-700 opacity-50"
                     }`}
                   >
@@ -171,7 +171,9 @@ export function QuotationConfigPanel({
 
   // Validation & Completion logic
   const { sectionValidations, sectionCompletions } = useMemo(() => {
-    const requiredFields = productMeasurements[productType] || productMeasurements.other;
+    const requiredFields = (productMeasurements[productType] || productMeasurements.other).filter(
+      (field) => field.key !== "panelCount"
+    );
     const measurementsValid = requiredFields.every((f) => {
       const val = config.measurements[f.key];
       if (f.type === "dimension") {
