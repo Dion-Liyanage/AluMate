@@ -187,7 +187,8 @@ export class AdminOrdersController {
 
     // Send email notification to customer
     try {
-      const user = await this.usersService.findById(order.customerId.toString());
+      const customerId = (order.customerId as any)?._id?.toString() || order.customerId?.toString();
+      const user = await this.usersService.findById(customerId);
       if (user) {
         this.mailService.sendQuotationReady(
           user.email,

@@ -75,7 +75,8 @@ export class OrdersController {
     const order = await this.ordersService.findById(id);
     
     // Security check: ensure user owns the order
-    if (order && order.customerId.toString() !== userId) {
+    const customerId = (order?.customerId as any)?._id?.toString() || order?.customerId?.toString();
+    if (order && customerId !== userId) {
       return { success: false, message: 'Unauthorized' };
     }
     
@@ -90,7 +91,8 @@ export class OrdersController {
     const userId = req.user.id;
     const order = await this.ordersService.findById(id);
 
-    if (!order || order.customerId.toString() !== userId) {
+    const customerId = (order?.customerId as any)?._id?.toString() || order?.customerId?.toString();
+    if (!order || customerId !== userId) {
       return { success: false, message: 'Unauthorized' };
     }
 
@@ -114,7 +116,8 @@ export class OrdersController {
     const userId = req.user.id;
     const order = await this.ordersService.findById(id);
 
-    if (!order || order.customerId.toString() !== userId) {
+    const customerId = (order?.customerId as any)?._id?.toString() || order?.customerId?.toString();
+    if (!order || customerId !== userId) {
       return { success: false, message: 'Unauthorized' };
     }
 

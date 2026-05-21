@@ -19,14 +19,13 @@ import {
   Legend
 } from "recharts";
 import { 
-  TrendingUp, 
   Users, 
   ShoppingCart, 
   DollarSign, 
   Calendar,
-  Download,
   Filter,
-  RefreshCw
+  RefreshCw,
+  CheckSquare
 } from "lucide-react";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -89,15 +88,11 @@ export default function AnalyticsPage() {
               <Calendar className="h-4 w-4 mr-2" />
               Last 6 Months
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Download className="h-4 w-4 mr-2" />
-              Export Report
-            </Button>
           </div>
         </div>
 
         {/* Top Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <MetricCard 
             title="Total Revenue" 
             value={`Rs. ${data?.stats.totalRevenue.toLocaleString()}`} 
@@ -106,9 +101,9 @@ export default function AnalyticsPage() {
             color="text-emerald-400"
           />
           <MetricCard 
-            title="Total Orders" 
-            value={data?.stats.totalOrders} 
-            icon={ShoppingCart} 
+            title="Completed Orders" 
+            value={data?.stats.completedOrders} 
+            icon={CheckSquare} 
             trend="+8.2%" 
             color="text-blue-400"
           />
@@ -118,13 +113,6 @@ export default function AnalyticsPage() {
             icon={Users} 
             trend="+4.1%" 
             color="text-violet-400"
-          />
-          <MetricCard 
-            title="Avg. Project Value" 
-            value={`Rs. ${Math.round(data?.stats.totalRevenue / (data?.stats.totalOrders || 1)).toLocaleString()}`} 
-            icon={TrendingUp} 
-            trend="+2.4%" 
-            color="text-amber-400"
           />
         </div>
 

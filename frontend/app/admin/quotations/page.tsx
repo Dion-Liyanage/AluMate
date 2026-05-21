@@ -571,14 +571,8 @@ export default function AdminQuotationsPage() {
                       </h4>
                       <div className="bg-zinc-900/30 rounded-xl p-4 border border-zinc-800/50">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-zinc-400">Estimated Total</span>
-                          <span className="text-lg font-bold text-emerald-400">
-                            {formatLKR(selectedOrder.estimatedPrice || 0)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center mt-2">
-                          <span className="text-xs text-zinc-500">Cost Range</span>
-                          <span className="text-sm text-zinc-300">
+                          <span className="text-sm text-zinc-400">Cost Range</span>
+                          <span className="text-sm font-medium text-zinc-300">
                             {formatLKR((selectedOrder.estimatedPrice || 0) * 0.9)} — {formatLKR((selectedOrder.estimatedPrice || 0) * 1.15)}
                           </span>
                         </div>

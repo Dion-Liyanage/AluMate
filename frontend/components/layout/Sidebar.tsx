@@ -10,7 +10,6 @@ import {
   ClipboardList,
   FileText,
   Wrench,
-  User,
   Users,
   BarChart3,
   Megaphone,
@@ -112,7 +111,6 @@ const adminMenuGroups: MenuGroup[] = [
     title: "More",
     items: [
       { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-      { href: "/profile", icon: User, label: "Profile" },
     ],
   },
 ];
