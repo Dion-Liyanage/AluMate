@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ExternalLink, Star, X, Search, MapPin, Calendar } from "lucide-react";
+import { ArrowLeft, ExternalLink, X, Search, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -107,18 +107,6 @@ function ProjectCard({ project }: { project: DisplayProject }) {
 
         <CardContent className="p-4 relative flex-grow flex flex-col justify-between">
           <div className="relative pt-4">
-            <div className="flex items-center gap-2 mb-2">
-               <div className="flex items-center">
-                 {[...Array(5)].map((_, i) => (
-                   <Star
-                     key={i}
-                     className={`h-3 w-3 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`}
-                   />
-                 ))}
-               </div>
-               <span className="text-xs font-medium text-zinc-300">{project.rating}</span>
-               <span className="text-[10px] text-zinc-500">({project.reviewCount})</span>
-            </div>
             <h3 className="mb-3 text-lg font-semibold text-white group-hover:text-zinc-300 transition-colors flex items-start justify-between">
               <span className="line-clamp-2">{project.title}</span>
               <ExternalLink className="h-4 w-4 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1 ml-2" />
@@ -152,12 +140,6 @@ function ProjectCard({ project }: { project: DisplayProject }) {
                  <h2 className="text-3xl font-bold text-white">{project.title}</h2>
                  <div className="flex items-center gap-2 mt-2">
                     <span className="px-2 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400 mb-1">{project.category}</span>
-                    <div className="flex items-center ml-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`h-5 w-5 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
-                      ))}
-                    </div>
-                    <span className="text-zinc-300 font-medium">{project.rating}</span>
                  </div>
               </div>
             </div>
@@ -180,30 +162,6 @@ function ProjectCard({ project }: { project: DisplayProject }) {
                   )}
                 </div>
               </div>
-
-              <h3 className="text-lg font-semibold text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Customer Feedback</h3>
-              <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {project.feedbacks && project.feedbacks.length > 0 ? (
-                  project.feedbacks.map((fb, i) => (
-                    <div key={i} className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-zinc-200">{fb.name}</span>
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, j) => (
-                            <Star key={j} className={`h-3 w-3 ${j < fb.rating ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-zinc-400 text-sm italic">"{fb.comment}"</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10">
-                    <p className="text-zinc-500 italic text-sm">No detailed feedback available yet for this project.</p>
-                  </div>
-                )}
-              </div>
-
               {/* Image Gallery */}
               {allImages.length > 0 && (
                 <div className="mt-6 space-y-4 max-h-[28rem] overflow-y-auto pr-2 custom-scrollbar">
