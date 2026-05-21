@@ -30,10 +30,12 @@ export const productMeasurements: Record<string, MeasurementField[]> = {
   cupboard: [
     { key: "width", label: "Total Width", type: "dimension", min: 1, max: 20 },
     { key: "height", label: "Total Height", type: "dimension", min: 2, max: 15 },
+    { key: "depth", label: "Total Depth", type: "dimension", min: 1, max: 5 },
   ],
   pantry: [
     { key: "width", label: "Total Width", type: "dimension", min: 2, max: 30 },
     { key: "height", label: "Total Height", type: "dimension", min: 2, max: 15 },
+    { key: "depth", label: "Total Depth", type: "dimension", min: 1, max: 5 },
   ],
   ceiling: [
     { key: "width", label: "Total Width", type: "dimension", min: 5, max: 100 },
@@ -286,8 +288,9 @@ export function calculateEstimate(config: {
   // 2. Calculate dimensions
   const w = getRoundedFeet(measurements.width || measurements.length || 0);
   const h = getRoundedFeet(measurements.height || 0);
+  const d = getRoundedFeet(measurements.depth || 0);
   const area = (w || 1) * (h || 1);
-  const perimeter = (w + h) * 2; // Estimated linear feet for material cost
+  const perimeter = d > 0 ? (w + h + d) * 4 : (w + h) * 2; // Include depth in 3D structures (pantry/cupboard)
 
   // 3. Calculate costs
   // Material: perimeter (linear ft) * price/ft

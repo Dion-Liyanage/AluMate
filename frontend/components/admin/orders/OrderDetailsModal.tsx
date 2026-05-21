@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 
 import { adminOrdersApi, designsApi } from "@/lib/api";
+import { formatMeasurement } from "@/lib/utils";
 
 interface OrderDetailsModalProps {
   order: (Order & { _id?: string }) | null;
@@ -240,9 +241,9 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
                 <div className="bg-zinc-900/30 rounded-xl p-4 border border-zinc-800/50">
                   <div className="grid grid-cols-2 gap-4">
                     {Object.entries(order.measurements).map(([key, value]) => (
-                      <div key={key} className="flex justify-between items-center border-b border-zinc-800/30 pb-2 last:border-0 last:pb-0">
+                      <div key={key} className="relative flex items-center border-b border-zinc-800/30 pb-2 last:border-0 last:pb-0 h-7">
                         <span className="text-xs text-zinc-400 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                        <span className="text-sm font-bold text-zinc-200">{value as string}</span>
+                        <span className="absolute left-1/2 -translate-x-1/2 text-sm font-bold text-zinc-200">{formatMeasurement(value)}</span>
                       </div>
                     ))}
                   </div>

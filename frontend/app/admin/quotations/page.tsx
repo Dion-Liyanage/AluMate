@@ -25,6 +25,7 @@ import { adminOrdersApi, designsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { animate } from "framer-motion";
+import { formatMeasurement } from "@/lib/utils";
 
 const QUOTATION_STATUSES = ["quotation_pending", "quotation_sent"];
 
@@ -100,6 +101,17 @@ export default function AdminQuotationsPage() {
   const [finalTotalCost, setFinalTotalCost] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
+
+  // Automatically calculate finalTotalCost when finalMaterialCost or finalLaborCost changes
+  useEffect(() => {
+    const mat = parseFloat(finalMaterialCost) || 0;
+    const lab = parseFloat(finalLaborCost) || 0;
+    if (finalMaterialCost || finalLaborCost) {
+      setFinalTotalCost((mat + lab).toString());
+    } else {
+      setFinalTotalCost("");
+    }
+  }, [finalMaterialCost, finalLaborCost]);
 
   useEffect(() => {
     fetchQuotations();
@@ -375,7 +387,7 @@ export default function AdminQuotationsPage() {
 
         {/* Details Drawer / Dialog */}
         <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-3xl max-h-[92vh] overflow-hidden p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-[600px] max-h-[92vh] overflow-hidden p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
             <div className="flex max-h-[92vh] flex-col">
               <DialogHeader className="shrink-0 border-b border-zinc-800 px-6 py-5 bg-zinc-950">
                 <div className="flex items-center justify-between gap-4">
@@ -398,7 +410,7 @@ export default function AdminQuotationsPage() {
                         <Package className="h-3.5 w-3.5" />
                         Order Information
                       </h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
                           <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Product Type</p>
                           <p className="text-sm text-zinc-100 font-bold capitalize">{selectedOrder.productType}</p>
@@ -449,15 +461,15 @@ export default function AdminQuotationsPage() {
                             <Package className="h-4 w-4 text-blue-400" />
                             Design Details
                           </h4>
-                          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start">
+                          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col sm:flex-row gap-3 items-start">
                             {(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl) && (
-                              <div className="w-full md:w-1/3 h-32 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                              <div className="w-full sm:w-28 h-28 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
                                 <img
                                   src={(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl).startsWith('/')
                                     ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl}`
                                     : (resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl)}
                                   alt={resolvedDesign.title || "Design"}
-                                  className="max-h-28 object-contain rounded-md"
+                                  className="max-h-24 object-contain rounded-md"
                                 />
                               </div>
                             )}
@@ -485,11 +497,11 @@ export default function AdminQuotationsPage() {
                         Measurements
                       </h4>
                       <div className="bg-zinc-900/30 rounded-xl p-4 border border-zinc-800/50">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3">
                           {Object.entries(selectedOrder.measurements).map(([key, value]) => (
-                            <div key={key} className="flex justify-between items-center border-b border-zinc-800/30 pb-2 last:border-0 last:pb-0">
+                            <div key={key} className="relative flex items-center border-b border-zinc-800/30 pb-2 last:border-0 last:pb-0 h-7">
                               <span className="text-xs text-zinc-400 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                              <span className="text-sm font-bold text-zinc-200">{value as string}</span>
+                              <span className="absolute left-1/2 -translate-x-1/2 text-sm font-bold text-zinc-200">{formatMeasurement(value)}</span>
                             </div>
                           ))}
                         </div>
@@ -559,9 +571,9 @@ export default function AdminQuotationsPage() {
                           <Send className="h-3.5 w-3.5" />
                           Prepare Final Quotation
                         </h4>
-                        <div className="bg-violet-500/5 rounded-xl p-5 border border-violet-500/20 space-y-5">
+                        <div className="bg-violet-500/5 rounded-xl p-4 border border-violet-500/20 space-y-4">
                           {/* Cost Inputs */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div className="space-y-2">
                               <label className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Material Cost (LKR)</label>
                               <Input
@@ -640,8 +652,8 @@ export default function AdminQuotationsPage() {
                           <CheckCircle2 className="h-3.5 w-3.5" />
                           Final Quotation (Sent)
                         </h4>
-                        <div className="bg-blue-500/5 rounded-xl p-5 border border-blue-500/20 space-y-4">
-                          <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-blue-500/5 rounded-xl p-4 border border-blue-500/20 space-y-4">
+                          <div className="grid grid-cols-3 gap-3">
                             <div>
                               <p className="text-[10px] text-zinc-500 uppercase font-bold">Material</p>
                               <p className="text-sm font-bold text-zinc-200">{formatLKR(selectedOrder.finalMaterialCost || 0)}</p>
