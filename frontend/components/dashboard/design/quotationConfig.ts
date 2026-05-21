@@ -191,7 +191,6 @@ export const profileDatabase: Record<string, AluminiumProfile> = {
 // ---------- Live Estimation Logic ----------
 
 export interface EstimationResult {
-  recommendedProfile: AluminiumProfile;
   materialCost: number;
   laborCost: number;
   total: number;
@@ -268,6 +267,19 @@ export function recommendProfile(config: {
 
 /**
  * Generate a rough estimation based on selected configuration.
+ *
+ * Pricing tiers:
+ *   Window (per sq.ft based on area):
+ *     - Area ≤ 28 sq.ft (4×7):  Material 2,750 | Labor 250
+ *     - Area ≤ 63 sq.ft (7×9):  Material 4,500 | Labor 300
+ *     - Area > 63 sq.ft:        Material 7,500 | Labor 750
+ *   Door (flat rate, all sizes):
+ *     - Material 25,000 | Labor 3,000
+ *   Pantry / Cupboard (per cubic foot, all-inclusive):
+ *     - 14,000 per cu.ft
+ *   Color surcharge:
+ *     - Black / White / Silver: no surcharge
+ *     - Wood Finish: +30% on total
  */
 export function calculateEstimate(config: {
   productType: string;
@@ -278,30 +290,83 @@ export function calculateEstimate(config: {
   color: string;
   accessories: string[];
 }): EstimationResult {
-  const { productType, measurements, accessories } = config;
+  const { productType, measurements, color } = config;
 
-  // 1. Get recommendation
-  const { profile, explanation } = recommendProfile(config);
-
-  // 2. Calculate dimensions
   const w = getRoundedFeet(measurements.width || measurements.length || 0);
   const h = getRoundedFeet(measurements.height || 0);
   const d = getRoundedFeet(measurements.depth || 0);
-  const area = (w || 1) * (h || 1);
-  const perimeter = d > 0 ? (w + h + d) * 4 : (w + h) * 2; // Include depth in 3D structures (pantry/cupboard)
 
-  // 3. Calculate costs
-  // Material: perimeter (linear ft) * price/ft
-  const materialCost = Math.round(perimeter * profile.pricePerFt);
+  let materialCost = 0;
+  let laborCost = 0;
+  let explanation: string[] = [];
 
-  // Labor: Area (sq.ft) * Labor Rate
-  const laborCost = Math.round(area * profile.laborRatePerSqFt);
+  if (productType === "window") {
+    const area = (w || 1) * (h || 1);
+
+    if (area <= 28) {
+      // Tier 1: up to 4×7 (28 sq.ft)
+      materialCost = area * 2750;
+      laborCost = area * 250;
+      explanation = [
+        `Window area: ${area} sq.ft (${w}' × ${h}')`,
+        "Standard tier pricing (up to 4×7)",
+        "Material: LKR 2,750/sq.ft — Labor: LKR 250/sq.ft",
+      ];
+    } else if (area <= 63) {
+      // Tier 2: above 4×7 up to 7×9 (63 sq.ft)
+      materialCost = area * 4500;
+      laborCost = area * 300;
+      explanation = [
+        `Window area: ${area} sq.ft (${w}' × ${h}')`,
+        "Medium tier pricing (up to 7×9)",
+        "Material: LKR 4,500/sq.ft — Labor: LKR 300/sq.ft",
+      ];
+    } else {
+      // Tier 3: above 7×9
+      materialCost = area * 7500;
+      laborCost = area * 750;
+      explanation = [
+        `Window area: ${area} sq.ft (${w}' × ${h}')`,
+        "Large tier pricing (above 7×9)",
+        "Material: LKR 7,500/sq.ft — Labor: LKR 750/sq.ft",
+      ];
+    }
+  } else if (productType === "door") {
+    materialCost = 25000;
+    laborCost = 3000;
+    explanation = [
+      "Flat rate pricing for all door sizes",
+      "Material: LKR 25,000 — Labor: LKR 3,000",
+    ];
+  } else if (productType === "pantry" || productType === "cupboard") {
+    const volume = (w || 1) * (h || 1) * (d || 1);
+    materialCost = volume * 14000;
+    laborCost = 0;
+    explanation = [
+      `${productType === "pantry" ? "Pantry" : "Cupboard"} volume: ${volume} cu.ft (${w}' × ${h}' × ${d}')`,
+      "Rate: LKR 14,000 per cubic foot (all-inclusive)",
+    ];
+  } else if (productType === "ceiling") {
+    const area = (w || 1) * (h || 1);
+    materialCost = area * 2750;
+    laborCost = area * 250;
+    explanation = [
+      `Ceiling area: ${area} sq.ft (${w}' × ${h}')`,
+      "Standard ceiling rate applied",
+    ];
+  }
+
+  // Color surcharge: wood finish adds 30% to total
+  if (color === "wood-finish") {
+    materialCost = Math.round(materialCost * 1.3);
+    laborCost = Math.round(laborCost * 1.3);
+    explanation.push("Wood finish selected — 30% surcharge applied");
+  }
 
   return {
-    recommendedProfile: profile,
     materialCost,
     laborCost,
     total: materialCost + laborCost,
-    explanation
+    explanation,
   };
 }

@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateEstimate, EstimationResult } from "./quotationConfig";
-import { Calculator, AlertTriangle, TrendingUp, Sparkles, RefreshCcw, History, Tag, Package } from "lucide-react";
+import { Calculator, AlertTriangle, TrendingUp, Sparkles, RefreshCcw, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface LiveEstimatePanelProps {
@@ -119,65 +119,19 @@ export function LiveEstimatePanel({
             )}
 
             <div className="space-y-4">
-              {/* Profile info */}
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500 flex items-center gap-1.5">
-                  <Tag className="h-3 w-3" />
-                  Labor Rate
-                </span>
-                <span className="text-sm font-medium text-violet-300">
-                  {formatLKR(lastGeneratedEstimate?.recommendedProfile.laborRatePerSqFt || 0)} / sqft
-                </span>
-              </div>
-
-              <div className="h-px bg-zinc-800" />
-
-              {/* Material Details */}
-              <div className="space-y-3.5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
-                      <Package className="h-3 w-3" />
-                      Profile
-                    </span>
-                    <div>
-                      <p className="text-sm font-medium text-zinc-200 leading-tight">
-                        {lastGeneratedEstimate?.recommendedProfile.name}
-                      </p>
-                      <p className="text-[11px] text-zinc-500">
-                        {lastGeneratedEstimate?.recommendedProfile.thickness} Thickness
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
-                      <Sparkles className="h-3 w-3" />
-                      Finish
-                    </span>
-                    <div>
-                      <p className="text-sm font-medium text-zinc-200 capitalize leading-tight">
-                        {color.replace("-", " ")}
-                      </p>
-                      <p className="text-[11px] text-zinc-500 capitalize">
-                        {strength} Duty
-                      </p>
-                    </div>
-                  </div>
+              {/* Pricing Details */}
+              {lastGeneratedEstimate?.explanation && lastGeneratedEstimate.explanation.length > 0 && (
+                <div className="bg-zinc-800/30 rounded-lg p-2.5 border border-zinc-800/50">
+                  <ul className="space-y-1.5">
+                    {lastGeneratedEstimate.explanation.map((exp, i) => (
+                      <li key={i} className="text-[10px] text-zinc-400 flex items-start gap-1.5 leading-normal">
+                        <div className="h-1 w-1 rounded-full bg-violet-500/50 mt-1.5 shrink-0" />
+                        {exp}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                {lastGeneratedEstimate?.explanation && lastGeneratedEstimate.explanation.length > 0 && (
-                  <div className="bg-zinc-800/30 rounded-lg p-2.5 border border-zinc-800/50">
-                    <ul className="space-y-1.5">
-                      {lastGeneratedEstimate.explanation.map((exp, i) => (
-                        <li key={i} className="text-[10px] text-zinc-400 flex items-start gap-1.5 leading-normal">
-                          <div className="h-1 w-1 rounded-full bg-violet-500/50 mt-1.5 shrink-0" />
-                          {exp}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+              )}
 
               <div className="h-px bg-zinc-800" />
 
