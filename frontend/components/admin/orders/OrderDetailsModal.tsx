@@ -17,8 +17,10 @@ import {
   CheckCircle2,
   Hammer,
   Truck,
-  Ruler
+  Ruler,
+  Eye
 } from "lucide-react";
+import Link from "next/link";
 import { 
   Table, 
   TableBody, 
@@ -143,35 +145,6 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
             </p>
           </div>
 
-          {/* Progress Tracker Card */}
-          <div className="bg-zinc-900/40 border border-zinc-800/50 p-5 rounded-2xl space-y-5 relative overflow-hidden group">
-            <h4 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
-              <Info className="h-4 w-4 text-blue-400" />
-              Order Progress
-            </h4>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between items-end">
-                <span className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest">
-                  {order.status.replace('_', ' ')}
-                </span>
-                <span className="text-blue-400 font-bold text-sm">{order.progress}%</span>
-              </div>
-              <div className="h-1.5 w-full bg-zinc-800/50 rounded-full overflow-hidden border border-white/5">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${order.progress}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className={`h-full rounded-full ${
-                    order.progress < 100 
-                      ? "bg-gradient-to-r from-blue-600 to-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.4)]" 
-                      : "bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]"
-                  }`}
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Key Attributes */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-zinc-900/30 border border-zinc-900/50 p-4 rounded-xl space-y-2 hover:bg-zinc-900/50 transition-colors">
@@ -198,10 +171,22 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
             <>
               <Separator className="bg-zinc-900" />
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200 flex items-center gap-2">
-                  <Package className="h-4 w-4 text-blue-400" />
-                  Design Details
-                </h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200 flex items-center gap-2">
+                    <Package className="h-4 w-4 text-blue-400" />
+                    Design Details
+                  </h4>
+                  <Link href={`/dashboard/catalogue/${resolvedDesign._id}`} target="_blank" rel="noopener noreferrer">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-medium"
+                    >
+                      <Eye className="h-3.5 w-3.5 mr-1 text-blue-400" />
+                      View Design
+                    </Button>
+                  </Link>
+                </div>
                 <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start">
                   {(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl) && (
                     <div className="w-full md:w-1/3 h-32 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">

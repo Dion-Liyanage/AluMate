@@ -86,6 +86,7 @@ export default function DesignStudio({ productType, savedDesignId }: DesignStudi
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [designName, setDesignName] = useState(createDefaultDesignName(productType));
   const [designDescription, setDesignDescription] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
   const fabricRef = useRef<FabricCanvasHandle>(null);
   const initialSavedDesignLoadedRef = useRef<string | null>(null);
 
@@ -189,9 +190,15 @@ export default function DesignStudio({ productType, savedDesignId }: DesignStudi
         label: comp.name,
         componentId: comp.id,
       });
+      setIsDirty(true);
     },
     []
   );
+
+  const handleCanvasModified = useCallback(() => {
+    syncToThree();
+    setIsDirty(true);
+  }, [syncToThree]);
 
     const handleConfirmSave = useCallback(async () => {
       // Try to capture a preview image without the grid by toggling grid off briefly.
@@ -343,7 +350,7 @@ export default function DesignStudio({ productType, savedDesignId }: DesignStudi
               <FabricCanvas
                 ref={fabricRef}
                 onSelectionChange={setHasSelection}
-                onObjectModified={syncToThree}
+                onObjectModified={handleCanvasModified}
                 onReady={() => setCanvasReady(true)}
                 panMode={panMode}
               />
@@ -411,7 +418,10 @@ export default function DesignStudio({ productType, savedDesignId }: DesignStudi
               <Input
                 id="name"
                 value={designName}
-                onChange={(e) => setDesignName(e.target.value)}
+                onChange={(e) => {
+                  setDesignName(e.target.value);
+                  setIsDirty(true);
+                }}
                 placeholder="e.g. Balcony Sliding Door"
                 className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-violet-500/50"
               />
@@ -421,7 +431,10 @@ export default function DesignStudio({ productType, savedDesignId }: DesignStudi
               <Textarea
                 id="description"
                 value={designDescription}
-                onChange={(e) => setDesignDescription(e.target.value)}
+                onChange={(e) => {
+                  setDesignDescription(e.target.value);
+                  setIsDirty(true);
+                }}
                 placeholder="Describe your design, e.g. 3-panel door with standard lock..."
                 className="bg-zinc-900/50 border-zinc-800 text-zinc-100 focus-visible:ring-violet-500/50 min-h-[100px] resize-none"
               />

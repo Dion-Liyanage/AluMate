@@ -7,6 +7,7 @@ import {
   Clock, CheckCircle2, Send, Search, Filter, Download, Package
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import Link from "next/link";
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
@@ -492,10 +493,22 @@ export default function QuotationsPage() {
                 {resolvedDesign && (
                   <>
                     <section className="space-y-4">
-                      <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
-                        <Package className="h-4 w-4 text-blue-400" />
-                        Design Details
-                      </h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                          <Package className="h-4 w-4 text-blue-400" />
+                          Design Details
+                        </h4>
+                        <Link href={`/dashboard/catalogue/${resolvedDesign._id}`} target="_blank" rel="noopener noreferrer">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-medium"
+                          >
+                            <Eye className="h-3.5 w-3.5 mr-1 text-blue-400" />
+                            View Design
+                          </Button>
+                        </Link>
+                      </div>
                       <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start">
                         {(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl) && (
                           <div className="w-full md:w-1/3 h-32 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">

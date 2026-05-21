@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/sheet";
 import { OrderStatusBadge, OrderStatus } from "./OrderStatusBadge";
 import { Separator } from "@/components/ui/separator";
-import { FileDown, Ruler, Package, Info } from "lucide-react";
+import { FileDown, Ruler, Package, Info, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { designsApi } from "@/lib/api";
 import { formatMeasurement } from "@/lib/utils";
@@ -103,7 +104,24 @@ export function OrderDetailsDrawer({ order, isOpen, onClose }: OrderDetailsDrawe
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8 pb-24">
           {/* Design Details Card */}
           {resolvedDesign ? (
-            <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                  <Package className="h-4 w-4 text-blue-400" />
+                  Design Details
+                </h4>
+                <Link href={`/dashboard/catalogue/${resolvedDesign._id}`} target="_blank" rel="noopener noreferrer">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-medium"
+                  >
+                    <Eye className="h-3.5 w-3.5 mr-1 text-blue-400" />
+                    View Design
+                  </Button>
+                </Link>
+              </div>
+              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start">
               {designImage && (
                 <div className="w-full sm:w-1/3 h-32 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
                   <img
@@ -127,6 +145,7 @@ export function OrderDetailsDrawer({ order, isOpen, onClose }: OrderDetailsDrawe
                 <p className="text-xs text-zinc-400 line-clamp-3">{resolvedDesign.description}</p>
               </div>
             </div>
+          </div>
           ) : designImage ? (
             <div className="rounded-xl border border-zinc-800/50 overflow-hidden bg-zinc-900/40 p-4 flex items-center justify-center">
               <img
