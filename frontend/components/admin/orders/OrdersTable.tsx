@@ -35,6 +35,7 @@ import { OrderDetailsModal } from "./OrderDetailsModal";
 
 export interface Order {
   id: string;
+  _id?: string;
   customerName: string;
   productType: string;
   designType: 'Custom' | 'Catalogue';
@@ -42,6 +43,21 @@ export interface Order {
   status: AdminOrderStatus;
   progress: number;
   date: string;
+  finalMaterialCost?: number;
+  finalLaborCost?: number;
+  finalTotalCost?: number;
+  quotationPdfUrl?: string;
+  measurements?: Record<string, any>;
+  color?: string;
+  accessories?: string[];
+  estimatedPrice?: number;
+  strengthCategory?: string;
+  environment?: string;
+  purpose?: string;
+  notes?: { message: string; createdBy?: string }[];
+  catalogueDesignId?: any;
+  recommendedMaterials?: any[];
+  laborCalculation?: any;
 }
 
 interface OrdersTableProps {

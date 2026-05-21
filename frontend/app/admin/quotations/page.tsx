@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { adminOrdersApi } from "@/lib/api";
+import { adminOrdersApi, designsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { animate } from "framer-motion";
@@ -88,6 +88,7 @@ export default function AdminQuotationsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [designs, setDesigns] = useState<any[]>([]);
 
   // Drawer state
   const [selectedOrder, setSelectedOrder] = useState<QuotationOrder | null>(null);
@@ -100,7 +101,21 @@ export default function AdminQuotationsPage() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
 
-  useEffect(() => { fetchQuotations(); }, []);
+  useEffect(() => {
+    fetchQuotations();
+    loadDesigns();
+  }, []);
+
+  const loadDesigns = async () => {
+    try {
+      const res = await designsApi.getAll();
+      if (res.success && res.data) {
+        setDesigns(res.data);
+      }
+    } catch (e) {
+      console.error("Failed to load designs:", e);
+    }
+  };
 
   const fetchQuotations = async () => {
     setIsLoading(true);
@@ -187,6 +202,12 @@ export default function AdminQuotationsPage() {
     }
     return 'Unknown Customer';
   };
+
+  const resolvedDesign = selectedOrder
+    ? (typeof selectedOrder.catalogueDesignId === 'object' && selectedOrder.catalogueDesignId !== null
+      ? selectedOrder.catalogueDesignId
+      : (selectedOrder.catalogueDesignId ? designs.find(d => d._id === selectedOrder.catalogueDesignId) : null))
+    : null;
 
   const filtered = quotations.filter(q => {
     const matchesSearch =
@@ -388,13 +409,26 @@ export default function AdminQuotationsPage() {
                             {selectedOrder.designType === 'catalogue' ? 'Catalogue' : 'Custom Design'}
                           </p>
                         </div>
-                        {selectedOrder.catalogueDesignId && (
+                        {resolvedDesign ? (
+                          <>
+                            <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                              <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Design Code</p>
+                              <p className="text-sm text-zinc-100 font-bold font-mono">
+                                {resolvedDesign.designCode || resolvedDesign._id}
+                              </p>
+                            </div>
+                            <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                              <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Design Name</p>
+                              <p className="text-sm text-zinc-100 font-bold">
+                                {resolvedDesign.title || 'Catalogue Design'}
+                              </p>
+                            </div>
+                          </>
+                        ) : selectedOrder.catalogueDesignId && (
                           <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
                             <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Design ID</p>
                             <p className="text-sm text-zinc-100 font-bold font-mono">
-                              {typeof selectedOrder.catalogueDesignId === 'object'
-                                ? (selectedOrder.catalogueDesignId.designCode || selectedOrder.catalogueDesignId._id)
-                                : selectedOrder.catalogueDesignId}
+                              {typeof selectedOrder.catalogueDesignId === 'string' ? selectedOrder.catalogueDesignId : selectedOrder.catalogueDesignId._id}
                             </p>
                           </div>
                         )}
@@ -407,17 +441,37 @@ export default function AdminQuotationsPage() {
 
                     <Separator className="bg-zinc-800/50" />
 
-                    {/* Design Image Placeholder */}
-                    {selectedOrder.catalogueDesignId && typeof selectedOrder.catalogueDesignId === 'object' && selectedOrder.catalogueDesignId.imageUrl && (
+                    {/* Design Details (Image, Code, Name, Description) */}
+                    {resolvedDesign && (
                       <>
-                        <section>
-                          <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4">Design Image</h4>
-                          <div className="rounded-xl border border-zinc-800/50 overflow-hidden bg-white max-h-60 flex items-center justify-center">
-                            <img
-                              src={selectedOrder.catalogueDesignId.imageUrl}
-                              alt="Design"
-                              className="max-h-60 object-contain"
-                            />
+                        <section className="space-y-4">
+                          <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                            <Package className="h-4 w-4 text-blue-400" />
+                            Design Details
+                          </h4>
+                          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start">
+                            {(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl) && (
+                              <div className="w-full md:w-1/3 h-32 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                                <img
+                                  src={(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl).startsWith('/')
+                                    ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl}`
+                                    : (resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl)}
+                                  alt={resolvedDesign.title || "Design"}
+                                  className="max-h-28 object-contain rounded-md"
+                                />
+                              </div>
+                            )}
+                            <div className="space-y-2 flex-1">
+                              <div className="flex items-center gap-2">
+                                {resolvedDesign.designCode && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded border border-blue-500/30 text-blue-400 bg-blue-500/10 font-mono tracking-wider font-bold">
+                                    {resolvedDesign.designCode}
+                                  </span>
+                                )}
+                                <h5 className="text-sm font-bold text-zinc-200">{resolvedDesign.title}</h5>
+                              </div>
+                              <p className="text-xs text-zinc-400 line-clamp-3">{resolvedDesign.description}</p>
+                            </div>
                           </div>
                         </section>
                         <Separator className="bg-zinc-800/50" />

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   FileText, Eye, Check, X, Calendar, Banknote, Loader2,
-  Clock, CheckCircle2, Send, Search, Filter, Download
+  Clock, CheckCircle2, Send, Search, Filter, Download, Package
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { 
@@ -20,7 +20,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle 
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { ordersApi } from "@/lib/api";
+import { ordersApi, designsApi } from "@/lib/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { animate } from "framer-motion";
@@ -119,10 +119,23 @@ export default function QuotationsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedQuotation, setSelectedQuotation] = useState<QuotationOrder | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [designs, setDesigns] = useState<any[]>([]);
 
   useEffect(() => {
     fetchQuotations();
+    loadDesigns();
   }, []);
+
+  const loadDesigns = async () => {
+    try {
+      const res = await designsApi.getAll();
+      if (res.success && res.data) {
+        setDesigns(res.data);
+      }
+    } catch (e) {
+      console.error("Failed to load designs:", e);
+    }
+  };
 
   const fetchQuotations = async () => {
     setIsLoading(true);
@@ -179,6 +192,12 @@ export default function QuotationsPage() {
     pending: quotations.filter(q => q.status === 'quotation_pending').length,
     sent: quotations.filter(q => q.status === 'quotation_sent').length,
   };
+
+  const resolvedDesign = selectedQuotation
+    ? (typeof selectedQuotation.catalogueDesignId === 'object' && selectedQuotation.catalogueDesignId !== null
+      ? selectedQuotation.catalogueDesignId
+      : (selectedQuotation.catalogueDesignId ? designs.find(d => d._id === selectedQuotation.catalogueDesignId) : null))
+    : null;
 
   const filteredQuotations = quotations.filter(q => {
     const matchesSearch = 
@@ -440,28 +459,70 @@ export default function QuotationsPage() {
                         {selectedQuotation.designType === 'catalogue' ? 'Catalogue Selection' : 'Custom Design'}
                       </p>
                     </div>
-                    {selectedQuotation.catalogueDesignId && (
-                      <div className="md:col-span-2 bg-blue-500/5 p-4 rounded-xl border border-blue-500/20 shadow-[inset_0_0_20px_rgba(59,130,246,0.05)]">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div>
-                            <p className="text-[10px] text-blue-400 uppercase font-black tracking-widest mb-1">Selected Design</p>
-                            <p className="text-sm text-zinc-100 font-bold">{selectedQuotation.catalogueDesignId.title || "Standard Design"}</p>
-                          </div>
-                          {selectedQuotation.catalogueDesignId.designCode && (
-                            <div className="bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20 text-right">
-                              <p className="text-[9px] text-blue-400 uppercase font-black mb-0.5">Design Number</p>
-                              <p className="text-xs font-mono font-bold text-blue-300 tracking-tighter">
-                                {selectedQuotation.catalogueDesignId.designCode}
-                              </p>
-                            </div>
-                          )}
+                    {resolvedDesign ? (
+                      <>
+                        <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                          <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Design Code</p>
+                          <p className="text-sm text-zinc-100 font-bold font-mono">
+                            {resolvedDesign.designCode || resolvedDesign._id}
+                          </p>
                         </div>
+                        <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                          <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Design Name</p>
+                          <p className="text-sm text-zinc-100 font-bold">
+                            {resolvedDesign.title || 'Catalogue Design'}
+                          </p>
+                        </div>
+                      </>
+                    ) : selectedQuotation.catalogueDesignId && (
+                      <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                        <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Design ID</p>
+                        <p className="text-sm text-zinc-100 font-bold font-mono">
+                          {typeof selectedQuotation.catalogueDesignId === 'string' ? selectedQuotation.catalogueDesignId : selectedQuotation.catalogueDesignId._id}
+                        </p>
                       </div>
                     )}
                   </div>
                 </section>
 
                 <Separator className="bg-zinc-800/50" />
+
+                {/* Design Details Card */}
+                {resolvedDesign && (
+                  <>
+                    <section className="space-y-4">
+                      <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
+                        <Package className="h-4 w-4 text-blue-400" />
+                        Design Details
+                      </h4>
+                      <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start">
+                        {(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl) && (
+                          <div className="w-full md:w-1/3 h-32 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                            <img
+                              src={(resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl).startsWith('/')
+                                ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl}`
+                                : (resolvedDesign.imageUrls?.[0] || resolvedDesign.imageUrl)}
+                              alt={resolvedDesign.title || "Design"}
+                              className="max-h-28 object-contain rounded-md"
+                            />
+                          </div>
+                        )}
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center gap-2">
+                            {resolvedDesign.designCode && (
+                              <span className="text-[10px] px-2 py-0.5 rounded border border-blue-500/30 text-blue-400 bg-blue-500/10 font-mono tracking-wider font-bold">
+                                {resolvedDesign.designCode}
+                              </span>
+                            )}
+                            <h5 className="text-sm font-bold text-zinc-200">{resolvedDesign.title}</h5>
+                          </div>
+                          <p className="text-xs text-zinc-400 line-clamp-3">{resolvedDesign.description}</p>
+                        </div>
+                      </div>
+                    </section>
+                    <Separator className="bg-zinc-800/50" />
+                  </>
+                )}
 
                 {/* Specifications */}
                 <section>

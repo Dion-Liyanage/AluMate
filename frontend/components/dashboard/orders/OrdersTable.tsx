@@ -24,7 +24,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ordersApi } from "@/lib/api";
 import { toast } from "sonner";
 
-interface Order {
+export interface Order {
   id: string;
   _id: string;
   productType: string;
@@ -33,6 +33,19 @@ interface Order {
   price: string;
   status: OrderStatus;
   progress: number;
+  finalMaterialCost?: number;
+  finalLaborCost?: number;
+  finalTotalCost?: number;
+  quotationPdfUrl?: string;
+  measurements?: Record<string, any>;
+  color?: string;
+  accessories?: string[];
+  estimatedPrice?: number;
+  strengthCategory?: string;
+  environment?: string;
+  purpose?: string;
+  notes?: { message: string }[];
+  catalogueDesignId?: any;
 }
 
 const INACTIVE_STATUSES: OrderStatus[] = ["completed", "cancelled"];
@@ -61,9 +74,26 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
           productType: o.productType,
           designType: o.designType === 'custom' ? 'Custom' : 'Catalogue',
           date: new Date(o.createdAt).toISOString().split('T')[0],
-          price: o.estimatedPrice ? `Rs. ${o.estimatedPrice.toLocaleString()}` : "Pending",
+          price: o.finalTotalCost 
+            ? `Rs. ${o.finalTotalCost.toLocaleString()}` 
+            : o.estimatedPrice 
+              ? `Rs. ${o.estimatedPrice.toLocaleString()}` 
+              : "Pending",
           status: o.status,
-          progress: o.progress
+          progress: o.progress,
+          finalMaterialCost: o.finalMaterialCost,
+          finalLaborCost: o.finalLaborCost,
+          finalTotalCost: o.finalTotalCost,
+          quotationPdfUrl: o.quotationPdfUrl,
+          measurements: o.measurements,
+          color: o.color,
+          accessories: o.accessories,
+          estimatedPrice: o.estimatedPrice,
+          strengthCategory: o.strengthCategory,
+          environment: o.environment,
+          purpose: o.purpose,
+          notes: o.notes,
+          catalogueDesignId: o.catalogueDesignId
         }));
         setOrders(mappedOrders);
       }

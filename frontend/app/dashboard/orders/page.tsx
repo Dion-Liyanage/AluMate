@@ -5,22 +5,12 @@ import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { OrdersOverviewCards } from "@/components/dashboard/orders/OrdersOverviewCards";
 import { OrdersSearchFilters } from "@/components/dashboard/orders/OrdersSearchFilters";
-import { OrdersTable } from "@/components/dashboard/orders/OrdersTable";
+import { OrdersTable, Order } from "@/components/dashboard/orders/OrdersTable";
 import { OrderDetailsDrawer } from "@/components/dashboard/orders/OrderDetailsDrawer";
 import { OrderStatus } from "@/components/dashboard/orders/OrderStatusBadge";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Plus } from "lucide-react";
 import Link from "next/link";
-
-interface Order {
-  id: string;
-  productType: string;
-  designType: "Custom" | "Catalogue";
-  date: string;
-  price: string;
-  status: OrderStatus;
-  progress: number;
-}
 
 const containerVariants = {
   hidden: { opacity: 0 },
