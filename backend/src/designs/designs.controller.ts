@@ -64,6 +64,7 @@ export class DesignsController {
       const uploadResult = await this.cloudinaryService.uploadFile(
         modelFile,
         'alumate/designs/models',
+        'raw',
       );
       modelUrl = uploadResult.secure_url;
     }
@@ -122,6 +123,7 @@ export class DesignsController {
       const uploadResult = await this.cloudinaryService.uploadFile(
         modelFile,
         'alumate/designs/models',
+        'raw',
       );
       modelUrl = uploadResult.secure_url;
     }
