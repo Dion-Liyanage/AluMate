@@ -195,20 +195,7 @@ export function LiveEstimatePanel({
                     {formatLKR(lastGeneratedEstimate?.laborCost || 0)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Estimated Installation</span>
-                  <span className="text-sm font-medium text-zinc-200">
-                    {formatLKR(lastGeneratedEstimate?.installationCost || 0)}
-                  </span>
-                </div>
-                {(lastGeneratedEstimate?.accessoriesCost || 0) > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-zinc-400">Accessories</span>
-                    <span className="text-sm font-medium text-zinc-200">
-                      {formatLKR(lastGeneratedEstimate?.accessoriesCost || 0)}
-                    </span>
-                  </div>
-                )}
+
               </div>
 
               <div className="h-px bg-zinc-800" />

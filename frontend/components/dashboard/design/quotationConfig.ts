@@ -194,8 +194,6 @@ export interface EstimationResult {
   recommendedProfile: AluminiumProfile;
   materialCost: number;
   laborCost: number;
-  installationCost: number;
-  accessoriesCost: number;
   total: number;
   explanation: string[];
 }
@@ -299,19 +297,11 @@ export function calculateEstimate(config: {
   // Labor: Area (sq.ft) * Labor Rate
   const laborCost = Math.round(area * profile.laborRatePerSqFt);
 
-  // Installation (15% of material - keeping this as a general rule)
-  const installationCost = Math.round(materialCost * 0.15);
-
-  // Accessories (flat rate 1500 LKR per accessory)
-  const accessoryCost = accessories.length * 1500;
-
   return {
     recommendedProfile: profile,
     materialCost,
     laborCost,
-    installationCost,
-    accessoriesCost: accessoryCost,
-    total: materialCost + laborCost + installationCost + accessoryCost,
+    total: materialCost + laborCost,
     explanation
   };
 }
