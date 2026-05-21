@@ -63,9 +63,7 @@ export function LiveEstimatePanel({
 
   const hasRequiredInput =
     Object.values(measurements).some((v) => !!v) &&
-    purpose &&
-    strength &&
-    color;
+    !!color;
 
   const handleCalculate = () => {
     setIsCalculated(true);

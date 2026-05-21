@@ -167,14 +167,29 @@ export const adminOrdersApi = {
   },
 
   generateQuotation: async (id: string, data?: {
-    recommendedMaterials?: any[];
-    laborCalculation?: any;
-    estimatedPrice?: number;
+    finalMaterialCost?: number;
+    finalLaborCost?: number;
+    finalTotalCost?: number;
     adminNotes?: string;
+    quotationPdf?: File;
   }) => {
+    const formData = new FormData();
+    if (data?.finalMaterialCost !== undefined) formData.append('finalMaterialCost', String(data.finalMaterialCost));
+    if (data?.finalLaborCost !== undefined) formData.append('finalLaborCost', String(data.finalLaborCost));
+    if (data?.finalTotalCost !== undefined) formData.append('finalTotalCost', String(data.finalTotalCost));
+    if (data?.adminNotes) formData.append('adminNotes', data.adminNotes);
+    if (data?.quotationPdf) formData.append('quotationPdf', data.quotationPdf);
+
     const res = await apiClient.post<ApiResponse<{ data: Order }>>(
       `/admin/orders/${id}/generate-quotation`,
-      data || {}
+      formData
+    );
+    return res.data;
+  },
+
+  cancel: async (id: string) => {
+    const res = await apiClient.patch<ApiResponse<{ data: Order }>>(
+      `/admin/orders/${id}/cancel`
     );
     return res.data;
   },

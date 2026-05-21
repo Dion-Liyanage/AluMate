@@ -18,6 +18,7 @@ import { MeasurementForm } from "./MeasurementForm";
 import { ColorSelector } from "./ColorSelector";
 import { calculateEstimate, productMeasurements } from "./quotationConfig";
 import { ordersApi } from "@/lib/api";
+import { LiveEstimatePanel } from "./LiveEstimatePanel";
 
 interface QuotationConfigPanelProps {
   productType: string;
@@ -43,8 +44,8 @@ interface QuotationState {
 
 const initialState: QuotationState = {
   measurements: {},
-  purpose: "",
-  strength: "",
+  purpose: "Standard Family Usage",
+  strength: "medium",
   color: "",
   customColor: "",
   accessories: [],
@@ -339,7 +340,18 @@ export function QuotationConfigPanel({
           </div>
         </ConfigSection>
 
-        {/* Live estimate removed */}
+        {/* Live Estimation */}
+        <div className="pt-4">
+          <LiveEstimatePanel
+            productType={productType}
+            measurements={config.measurements}
+            purpose={config.purpose}
+            environment=""
+            strength={config.strength}
+            color={config.color}
+            accessories={config.accessories}
+          />
+        </div>
       </div>
 
       {/* Sticky submit button */}

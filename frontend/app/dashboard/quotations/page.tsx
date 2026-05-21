@@ -3,59 +3,27 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
-  FileText,
-  Eye,
-  Check,
-  X,
-  MoreVertical,
-  Calendar,
-  Banknote,
-  Loader2,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Send
+  FileText, Eye, Check, X, Calendar, Banknote, Loader2,
+  Clock, CheckCircle2, Send, Search, Filter, Download
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle 
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { ordersApi } from "@/lib/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { animate } from "framer-motion";
-import { Search, Filter } from "lucide-react";
 
 // Quotation statuses (subset of Order statuses)
 const QUOTATION_STATUSES = ["quotation_pending", "quotation_sent"];
@@ -97,6 +65,15 @@ function QuotationStatusBadge({ status }: { status: string }) {
   );
 }
 
+function formatLKR(amount: number): string {
+  return new Intl.NumberFormat("en-LK", {
+    style: "currency",
+    currency: "LKR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 interface QuotationOrder {
   _id: string;
   orderId: string;
@@ -115,6 +92,11 @@ interface QuotationOrder {
   laborCalculation?: any;
   notes: any[];
   createdAt: string;
+  finalMaterialCost?: number;
+  finalLaborCost?: number;
+  finalTotalCost?: number;
+  quotationPdfUrl?: string;
+  quotationSentAt?: string;
 }
 
 const containerVariants = {
@@ -167,6 +149,7 @@ export default function QuotationsPage() {
       const response = await ordersApi.approve(id);
       if (response.success) {
         toast.success("Quotation approved! Your order is now confirmed.");
+        setIsDetailsOpen(false);
         fetchQuotations();
       } else {
         toast.error(response.message || "Failed to approve quotation");
@@ -181,6 +164,7 @@ export default function QuotationsPage() {
       const response = await ordersApi.cancel(id);
       if (response.success) {
         toast.success("Quotation request cancelled");
+        setIsDetailsOpen(false);
         fetchQuotations();
       } else {
         toast.error(response.message || "Failed to cancel request");
@@ -364,7 +348,9 @@ export default function QuotationsPage() {
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center text-emerald-400 font-bold text-[13px]">
                           <span className="text-[10px] mr-1 opacity-70">LKR</span>
-                          {q.estimatedPrice?.toLocaleString() || "Pending"}
+                          {q.status === 'quotation_sent' && q.finalTotalCost
+                            ? q.finalTotalCost.toLocaleString()
+                            : q.estimatedPrice?.toLocaleString() || "Pending"}
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
@@ -398,7 +384,7 @@ export default function QuotationsPage() {
                               onClick={() => handleApprove(q._id)}
                             >
                               <Check className="h-3.5 w-3.5 mr-1" />
-                              Approve
+                              Confirm Order
                             </Button>
                           ) : (
                             <Button
@@ -482,21 +468,15 @@ export default function QuotationsPage() {
                   <h4 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Specifications</h4>
                   <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                     <div>
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold">Purpose</p>
-                      <p className="text-sm text-zinc-200 capitalize">{selectedQuotation.purpose || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold">Environment</p>
-                      <p className="text-sm text-zinc-200 capitalize">{selectedQuotation.environment || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold">Strength</p>
-                      <p className="text-sm text-zinc-200 capitalize">{selectedQuotation.strengthCategory || 'Standard'}</p>
-                    </div>
-                    <div>
                       <p className="text-[10px] text-zinc-500 uppercase font-bold">Color / Finish</p>
                       <p className="text-sm text-zinc-200 capitalize">{selectedQuotation.color || 'Default'}</p>
                     </div>
+                    {selectedQuotation.strengthCategory && (
+                      <div>
+                        <p className="text-[10px] text-zinc-500 uppercase font-bold">Strength</p>
+                        <p className="text-sm text-zinc-200 capitalize">{selectedQuotation.strengthCategory}</p>
+                      </div>
+                    )}
                   </div>
                 </section>
 
@@ -517,53 +497,76 @@ export default function QuotationsPage() {
                   </div>
                 </section>
 
+                {/* Quotation Sent — Show Final Costs + PDF */}
                 {selectedQuotation.status === 'quotation_sent' && (
                   <>
                     <Separator className="bg-zinc-800/50" />
-                    {/* Financial Breakdown */}
                     <section>
-                      <h4 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Quotation Breakdown</h4>
+                      <h4 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-3">Final Quotation</h4>
                       
-                      {selectedQuotation.recommendedMaterials && selectedQuotation.recommendedMaterials.length > 0 && (
-                        <div className="space-y-3 mb-6">
-                          <p className="text-[10px] text-zinc-500 uppercase font-bold">Materials</p>
-                          <div className="space-y-2">
-                            {selectedQuotation.recommendedMaterials.map((m: any, idx: number) => (
-                              <div key={idx} className="flex justify-between items-center text-xs bg-zinc-900/40 p-2 rounded border border-zinc-800">
-                                <div>
-                                  <span className="text-zinc-200 font-medium">{m.profileName}</span>
-                                  <span className="text-zinc-500 ml-2">({m.thickness})</span>
-                                </div>
-                                <div className="text-emerald-400 font-bold">
-                                  LKR {m.materialCost.toLocaleString()}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between items-center p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
+                          <span className="text-xs text-zinc-400">Material Cost</span>
+                          <span className="text-sm font-bold text-zinc-200">{formatLKR(selectedQuotation.finalMaterialCost || 0)}</span>
                         </div>
-                      )}
-
-                      {selectedQuotation.laborCalculation && (
-                        <div className="flex justify-between items-center p-3 rounded-lg bg-zinc-900/40 border border-zinc-800 mb-6">
-                          <span className="text-xs text-zinc-400">Labor & Fabrication ({selectedQuotation.laborCalculation.areaSqFt} sq.ft)</span>
-                          <span className="text-emerald-400 font-bold text-sm">LKR {selectedQuotation.laborCalculation.laborCost.toLocaleString()}</span>
+                        <div className="flex justify-between items-center p-3 rounded-lg bg-zinc-900/40 border border-zinc-800">
+                          <span className="text-xs text-zinc-400">Labor Cost</span>
+                          <span className="text-sm font-bold text-zinc-200">{formatLKR(selectedQuotation.finalLaborCost || 0)}</span>
                         </div>
-                      )}
+                      </div>
 
                       <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-5 flex justify-between items-center">
                         <div>
-                          <p className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] mb-1">Total Estimated Price</p>
-                          <p className="text-2xl font-black text-emerald-400">LKR {selectedQuotation.estimatedPrice.toLocaleString()}</p>
+                          <p className="text-[10px] text-emerald-400 uppercase font-black tracking-[0.2em] mb-1">Total Cost</p>
+                          <p className="text-2xl font-black text-emerald-400">{formatLKR(selectedQuotation.finalTotalCost || 0)}</p>
                         </div>
-                        <Button 
-                          onClick={() => {
-                            handleApprove(selectedQuotation._id);
-                            setIsDetailsOpen(false);
-                          }}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6"
+                      </div>
+
+                      {/* PDF Download */}
+                      {selectedQuotation.quotationPdfUrl && (
+                        <a
+                          href={selectedQuotation.quotationPdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 mt-4 w-full py-3 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold text-sm hover:bg-blue-500/20 transition-colors"
                         >
-                          Approve Order
-                        </Button>
+                          <Download className="h-4 w-4" />
+                          Download Full Quotation PDF
+                        </a>
+                      )}
+
+                      {/* Confirm Button */}
+                      <Button 
+                        onClick={() => {
+                          handleApprove(selectedQuotation._id);
+                        }}
+                        className="w-full mt-4 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] text-sm"
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Confirm Order
+                      </Button>
+                    </section>
+                  </>
+                )}
+
+                {/* Pending Status — Show Estimated Only */}
+                {selectedQuotation.status === 'quotation_pending' && (
+                  <>
+                    <Separator className="bg-zinc-800/50" />
+                    <section>
+                      <h4 className="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-3">Estimated Cost</h4>
+                      <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-5">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-[10px] text-amber-400 uppercase font-black tracking-[0.2em] mb-1">Estimated Range</p>
+                            <p className="text-lg font-bold text-zinc-200">
+                              {formatLKR((selectedQuotation.estimatedPrice || 0) * 0.9)} — {formatLKR((selectedQuotation.estimatedPrice || 0) * 1.15)}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 mt-3">
+                          Your request is being reviewed by our fabrication experts. You will be notified once the final quotation is ready.
+                        </p>
                       </div>
                     </section>
                   </>
@@ -574,7 +577,7 @@ export default function QuotationsPage() {
                   <section className="bg-zinc-900/20 rounded-lg p-4 border border-zinc-800/30">
                     <p className="text-[10px] text-zinc-500 uppercase font-bold mb-2">Customer Notes</p>
                     {selectedQuotation.notes.map((n: any, idx: number) => (
-                      <p key={idx} className="text-sm text-zinc-400 italic">"{n.message}"</p>
+                      <p key={idx} className="text-sm text-zinc-400 italic">&quot;{n.message}&quot;</p>
                     ))}
                   </section>
                 )}
@@ -594,7 +597,6 @@ export default function QuotationsPage() {
                       className="border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400"
                       onClick={() => {
                         handleCancel(selectedQuotation._id);
-                        setIsDetailsOpen(false);
                       }}
                     >
                       Cancel Request
