@@ -42,11 +42,6 @@ const productTypes = [
     image: "https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/cupboard-neon.png",
     description: "Kitchen, wardrobe & storage cupboards" 
   },
-  { 
-    name: "Ceiling", 
-    image: "https://res.cloudinary.com/dcetlwlfb/image/upload/alumate/assets/ceiling-neon.png",
-    description: "Suspended & decorative aluminium ceilings" 
-  },
 ];
 
 export default function DesignPage() {

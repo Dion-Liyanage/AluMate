@@ -429,6 +429,7 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
         const top = obj.top ?? 0;
         const right = left + w;
         const bottom = top + h;
+        const isCube = obj.componentId === "cube";
 
         // Filter out grid lines and text labels
         const otherObjects = canvas.getObjects().filter(
@@ -497,6 +498,44 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
         });
 
         // Apply snaps or fallback to grid alignment
+        if (isCube) {
+          let targetSize: number | null = null;
+
+          if (corner === "mr" || corner === "tr" || corner === "br") {
+            const targetRight = snapX !== null ? snapX : Math.round(right / GRID_SIZE) * GRID_SIZE;
+            targetSize = targetRight - left;
+          } else if (corner === "ml" || corner === "tl" || corner === "bl") {
+            const targetLeft = snapX !== null ? snapX : Math.round(left / GRID_SIZE) * GRID_SIZE;
+            const currentRight = left + w;
+            targetSize = currentRight - targetLeft;
+            if (targetSize > 10) {
+              obj.set({ left: targetLeft });
+            }
+          }
+
+          if (corner === "mb" || corner === "bl" || corner === "br") {
+            const targetBottom = snapY !== null ? snapY : Math.round(bottom / GRID_SIZE) * GRID_SIZE;
+            const sizeFromY = targetBottom - top;
+            targetSize = targetSize === null ? sizeFromY : Math.max(targetSize, sizeFromY);
+          } else if (corner === "mt" || corner === "tl" || corner === "tr") {
+            const targetTop = snapY !== null ? snapY : Math.round(top / GRID_SIZE) * GRID_SIZE;
+            const currentBottom = top + h;
+            const sizeFromY = currentBottom - targetTop;
+            if (sizeFromY > 10) {
+              obj.set({ top: targetTop });
+            }
+            targetSize = targetSize === null ? sizeFromY : Math.max(targetSize, sizeFromY);
+          }
+
+          if (targetSize !== null && targetSize > 10) {
+            obj.set({
+              scaleX: targetSize / obj.width,
+              scaleY: targetSize / obj.height,
+            });
+          }
+          return;
+        }
+
         if (corner === "mr" || corner === "tr" || corner === "br") {
           const targetRight = snapX !== null ? snapX : Math.round(right / GRID_SIZE) * GRID_SIZE;
           const newW = targetRight - left;
@@ -602,6 +641,24 @@ const FabricCanvas = forwardRef<FabricCanvasHandle, FabricCanvasProps>(
             touchCornerSize: 12,
           });
           obj.setControlsVisibility({
+            mtr: false,
+          });
+        } else if (obj.componentId === "cube") {
+          obj.set({
+            lockRotation: true,
+            lockUniScaling: true,
+            cornerSize: 6,
+            touchCornerSize: 12,
+          });
+          obj.setControlsVisibility({
+            tl: true,
+            tr: true,
+            bl: true,
+            br: true,
+            ml: false,
+            mr: false,
+            mt: false,
+            mb: false,
             mtr: false,
           });
         } else {

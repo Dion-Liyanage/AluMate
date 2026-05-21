@@ -78,7 +78,6 @@ const customerMenuGroups: MenuGroup[] = [
     title: "More",
     items: [
       { href: "/dashboard/messages", icon: MessageSquare, label: "Chat With Us" },
-      { href: "/profile", icon: User, label: "Profile" },
     ],
   },
 ];

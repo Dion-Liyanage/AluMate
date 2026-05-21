@@ -220,6 +220,15 @@ export default function ThreePreview({ objects }: ThreePreviewProps) {
           metalness: 0.1,
         });
         mesh = new THREE.Mesh(geometry, material);
+      } else if (obj.componentId === "cube") {
+        const size = Math.max(w, h);
+        const geometry = new THREE.BoxGeometry(size, size, size);
+        const material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(obj.fill),
+          roughness: 0.45,
+          metalness: 0.15,
+        });
+        mesh = new THREE.Mesh(geometry, material);
       } else if (
         obj.componentId === "aluminium-bar" ||
         obj.componentId === "horizontal-bar" ||

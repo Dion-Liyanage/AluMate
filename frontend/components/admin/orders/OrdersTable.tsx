@@ -62,6 +62,7 @@ export interface Order {
 
 interface OrdersTableProps {
   orders: Order[];
+  isLoading?: boolean;
   onRefresh?: () => void;
 }
 

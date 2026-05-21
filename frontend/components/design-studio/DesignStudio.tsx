@@ -69,6 +69,7 @@ interface DesignStudioProps {
 const productLabels: Record<string, string> = {
   window: "Window",
   door: "Door",
+  pantry: "Pantry",
   cupboard: "Cupboard",
   partition: "Partition",
   railing: "Railing",

@@ -40,7 +40,7 @@ export function Design3DViewer({ modelUrl }: { modelUrl: string }) {
     <div className="w-full h-full bg-zinc-950/20 overflow-hidden relative group">
       <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 45 }}>
         <Suspense fallback={null}>
-          <Stage environment="city" intensity={0.5} contactShadow={true} shadowBias={-0.001} adjustCamera={true}>
+          <Stage environment="city" intensity={0.5} shadows={{ type: "contact", bias: -0.001 }} adjustCamera={true}>
             <Center>
               <Model modelPath={modelUrl} />
             </Center>
