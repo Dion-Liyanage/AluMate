@@ -129,6 +129,10 @@ export const ordersApi = {
     const res = await apiClient.patch<ApiResponse>(`/orders/${id}/approve`);
     return res.data;
   },
+  getStats: async () => {
+    const res = await apiClient.get<ApiResponse<any>>('/orders/stats');
+    return res.data;
+  },
 };
 
 // ---------- Admin Orders API ----------
@@ -171,6 +175,7 @@ export const adminOrdersApi = {
     finalLaborCost?: number;
     finalTotalCost?: number;
     adminNotes?: string;
+    expectedCompletionDate?: string;
     quotationPdf?: File;
   }) => {
     const formData = new FormData();
@@ -178,6 +183,7 @@ export const adminOrdersApi = {
     if (data?.finalLaborCost !== undefined) formData.append('finalLaborCost', String(data.finalLaborCost));
     if (data?.finalTotalCost !== undefined) formData.append('finalTotalCost', String(data.finalTotalCost));
     if (data?.adminNotes) formData.append('adminNotes', data.adminNotes);
+    if (data?.expectedCompletionDate) formData.append('expectedCompletionDate', data.expectedCompletionDate);
     if (data?.quotationPdf) formData.append('quotationPdf', data.quotationPdf);
 
     const res = await apiClient.post<ApiResponse<{ data: Order }>>(

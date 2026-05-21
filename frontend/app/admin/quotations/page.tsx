@@ -74,6 +74,7 @@ interface QuotationOrder {
   finalTotalCost?: number;
   quotationPdfUrl?: string;
   quotationSentAt?: string;
+  expectedCompletionDate?: string;
 }
 
 function formatLKR(amount: number): string {
@@ -100,6 +101,7 @@ export default function AdminQuotationsPage() {
   const [finalMaterialCost, setFinalMaterialCost] = useState("");
   const [finalLaborCost, setFinalLaborCost] = useState("");
   const [finalTotalCost, setFinalTotalCost] = useState("");
+  const [finalCompletionDate, setFinalCompletionDate] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
 
@@ -152,6 +154,7 @@ export default function AdminQuotationsPage() {
     setFinalMaterialCost(order.finalMaterialCost?.toString() || "");
     setFinalLaborCost(order.finalLaborCost?.toString() || "");
     setFinalTotalCost(order.finalTotalCost?.toString() || "");
+    setFinalCompletionDate(order.expectedCompletionDate ? format(new Date(order.expectedCompletionDate), 'yyyy-MM-dd') : "");
     setPdfFile(null);
     setIsDrawerOpen(true);
   };
@@ -174,6 +177,7 @@ export default function AdminQuotationsPage() {
         finalLaborCost: labCost,
         finalTotalCost: totCost,
         quotationPdf: pdfFile || undefined,
+        expectedCompletionDate: finalCompletionDate || undefined,
       });
       if (response.success) {
         toast.success("Quotation sent to customer!");
@@ -449,6 +453,12 @@ export default function AdminQuotationsPage() {
                           <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Customer</p>
                           <p className="text-sm text-zinc-100 font-bold">{getCustomerName(selectedOrder)}</p>
                         </div>
+                        {selectedOrder.expectedCompletionDate && (
+                          <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
+                            <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1">Expected Completion</p>
+                            <p className="text-sm text-zinc-100 font-bold">{format(new Date(selectedOrder.expectedCompletionDate), 'MMM d, yyyy')}</p>
+                          </div>
+                        )}
                       </div>
                     </section>
 
@@ -642,6 +652,17 @@ export default function AdminQuotationsPage() {
                             </div>
                           </div>
 
+                          {/* Expected Completion Date */}
+                          <div className="space-y-2">
+                            <label className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Expected Completion Date (Optional)</label>
+                            <Input
+                              type="date"
+                              value={finalCompletionDate}
+                              onChange={(e) => setFinalCompletionDate(e.target.value)}
+                              className="bg-zinc-900/80 border-zinc-700 text-zinc-100 placeholder:text-zinc-600"
+                            />
+                          </div>
+
                           {/* Send Button */}
                           <Button
                             onClick={handleSendQuotation}
@@ -695,6 +716,11 @@ export default function AdminQuotationsPage() {
                           {selectedOrder.quotationSentAt && (
                             <p className="text-[10px] text-zinc-500">
                               Sent on {format(new Date(selectedOrder.quotationSentAt), 'MMM dd, yyyy HH:mm')}
+                            </p>
+                          )}
+                          {selectedOrder.expectedCompletionDate && (
+                            <p className="text-[10px] text-zinc-500">
+                              Expected Completion: {format(new Date(selectedOrder.expectedCompletionDate), 'MMM dd, yyyy')}
                             </p>
                           )}
                         </div>

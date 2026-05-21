@@ -133,6 +133,9 @@ export class Order {
 
   @Prop()
   quotationSentAt: Date;
+
+  @Prop()
+  expectedCompletionDate: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

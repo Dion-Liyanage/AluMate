@@ -31,6 +31,26 @@ export class OrdersController {
     };
   }
 
+  @Get('stats')
+  async getMyStats(@Request() req) {
+    const customerId = req.user.id;
+    const orders = await this.ordersService.findAll({ customerId, limit: 1000 });
+
+    const stats = {
+      totalOrders: orders.length,
+      pendingOrders: orders.filter(o => o.status === 'quotation_pending').length,
+      quotationsSent: orders.filter(o => o.status === 'quotation_sent').length,
+      approved: orders.filter(o => o.status === 'approved').length,
+      inProduction: orders.filter(o => o.status === 'production').length,
+      completed: orders.filter(o => o.status === 'completed').length,
+    };
+
+    return {
+      success: true,
+      data: stats,
+    };
+  }
+
   @Post()
   async createOrder(@Body() body: any, @Request() req) {
     const customerId = req.user.id;

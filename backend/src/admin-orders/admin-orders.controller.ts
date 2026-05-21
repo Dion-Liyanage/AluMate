@@ -128,6 +128,7 @@ export class AdminOrdersController {
       finalLaborCost?: string;
       finalTotalCost?: string;
       adminNotes?: string;
+      expectedCompletionDate?: string;
     }
   ) {
     const order = await this.ordersService.findById(id);
@@ -171,6 +172,15 @@ export class AdminOrdersController {
         ...(order.notes || []),
         { message: body.adminNotes, createdBy: 'Admin', createdAt: new Date() },
       ];
+    }
+
+    // Expected completion date
+    if (body.expectedCompletionDate) {
+      try {
+        updateData.expectedCompletionDate = new Date(body.expectedCompletionDate);
+      } catch (err) {
+        console.warn('Invalid expectedCompletionDate provided', body.expectedCompletionDate);
+      }
     }
 
     const updatedOrder = await this.ordersService.update(id, updateData);
