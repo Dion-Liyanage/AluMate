@@ -603,7 +603,8 @@ export default function AdminQuotationsPage() {
                           </div>
                           {selectedOrder.quotationPdfUrl && (
                             <a
-                              href={selectedOrder.quotationPdfUrl}
+                              href={selectedOrder.quotationPdfUrl.includes('cloudinary.com') && !selectedOrder.quotationPdfUrl.includes('fl_attachment') ? selectedOrder.quotationPdfUrl.replace('/upload/', '/upload/fl_attachment/') : selectedOrder.quotationPdfUrl}
+                              download
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 underline"

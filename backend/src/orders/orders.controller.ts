@@ -59,7 +59,10 @@ export class OrdersController {
       return { success: false, message: 'Unauthorized' };
     }
     
-    return order;
+    return {
+      success: true,
+      data: { order }
+    };
   }
 
   @Patch(':id/approve')
@@ -75,10 +78,15 @@ export class OrdersController {
       return { success: false, message: 'No active quotation to approve' };
     }
 
-    return this.ordersService.update(id, { 
+    const updatedOrder = await this.ordersService.update(id, { 
       status: 'approved',
       progress: 25 
     });
+
+    return {
+      success: true,
+      data: updatedOrder
+    };
   }
 
   @Patch(':id/cancel')
@@ -96,6 +104,10 @@ export class OrdersController {
       return { success: false, message: 'Order cannot be cancelled at this stage' };
     }
 
-    return this.ordersService.update(id, { status: 'cancelled' });
+    const updatedOrder = await this.ordersService.update(id, { status: 'cancelled' });
+    return {
+      success: true,
+      data: updatedOrder
+    };
   }
 }

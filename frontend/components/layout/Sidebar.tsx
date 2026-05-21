@@ -63,8 +63,8 @@ const customerMenuGroups: MenuGroup[] = [
   {
     title: "Orders",
     items: [
-      { href: "/dashboard/orders", icon: ShoppingCart, label: "My Orders" },
       { href: "/dashboard/quotations", icon: FileText, label: "Quotations" },
+      { href: "/dashboard/orders", icon: ShoppingCart, label: "My Orders" },
     ],
   },
   {
@@ -90,8 +90,8 @@ const adminMenuGroups: MenuGroup[] = [
   {
     title: "Operations",
     items: [
-      { href: "/admin/orders", icon: ClipboardList, label: "Orders" },
       { href: "/admin/quotations", icon: FileText, label: "Quotations" },
+      { href: "/admin/orders", icon: ClipboardList, label: "Orders" },
       { href: "/admin/services", icon: Wrench, label: "Services" },
     ],
   },

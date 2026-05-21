@@ -525,7 +525,8 @@ export default function QuotationsPage() {
                       {/* PDF Download */}
                       {selectedQuotation.quotationPdfUrl && (
                         <a
-                          href={selectedQuotation.quotationPdfUrl}
+                          href={selectedQuotation.quotationPdfUrl.includes('cloudinary.com') && !selectedQuotation.quotationPdfUrl.includes('fl_attachment') ? selectedQuotation.quotationPdfUrl.replace('/upload/', '/upload/fl_attachment/') : selectedQuotation.quotationPdfUrl}
+                          download
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center justify-center gap-2 mt-4 w-full py-3 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold text-sm hover:bg-blue-500/20 transition-colors"
