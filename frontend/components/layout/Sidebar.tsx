@@ -19,7 +19,6 @@ import {
   MapPin,
   Hammer,
   FolderOpen,
-  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -73,12 +72,6 @@ const customerMenuGroups: MenuGroup[] = [
       { href: "/dashboard/services/repairs", icon: Hammer, label: "Repairs" },
     ],
   },
-  {
-    title: "More",
-    items: [
-      { href: "/dashboard/messages", icon: MessageSquare, label: "Chat With Us" },
-    ],
-  },
 ];
 
 const adminMenuGroups: MenuGroup[] = [
@@ -104,7 +97,6 @@ const adminMenuGroups: MenuGroup[] = [
     title: "Management",
     items: [
       { href: "/admin/customers", icon: Users, label: "Customers" },
-      { href: "/admin/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
   {
