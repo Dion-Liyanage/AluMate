@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { 
   useGLTF, 
@@ -9,42 +9,21 @@ import {
   Stage,
   Center
 } from "@react-three/drei";
-import { Box } from "lucide-react";
+import { Box, Loader2 } from "lucide-react";
 
 interface ModelProps {
   modelPath: string;
   autoPlay?: boolean;
-  onError?: () => void;
 }
 
-function Model({ modelPath, autoPlay = true, onError }: ModelProps) {
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    // Validate the URL before attempting to load
-    if (!modelPath || (!modelPath.endsWith(".glb") && !modelPath.endsWith(".gltf") && !modelPath.includes("cloudinary"))) {
-      setHasError(true);
-      onError?.();
-    }
-  }, [modelPath, onError]);
-
-  if (hasError) return null;
-
-  return <ValidModel modelPath={modelPath} autoPlay={autoPlay} onError={onError} />;
-}
-
-function ValidModel({ modelPath, autoPlay = true, onError }: ModelProps) {
-  // Load the GLB file from Cloudinary URL or local path
-  let scene, animations;
-  try {
-    const gltf = useGLTF(modelPath);
-    scene = gltf.scene;
-    animations = gltf.animations;
-  } catch {
-    onError?.();
-    return null;
-  }
-
+// This component uses useGLTF which is a Suspense-based hook.
+// It will throw a Promise while loading (caught by <Suspense>),
+// and throw an Error on failure (caught by <ModelErrorBoundary>).
+// Do NOT wrap useGLTF in try/catch — that catches the Suspense Promise
+// and breaks loading on first visit.
+function Model({ modelPath, autoPlay = true }: ModelProps) {
+  const gltf = useGLTF(modelPath);
+  const { scene, animations } = gltf;
   const { actions, names } = useAnimations(animations || [], scene);
 
   useEffect(() => {
@@ -69,11 +48,17 @@ function ModelFallback() {
   );
 }
 
-function ErrorBoundaryFallback() {
-  return <ModelFallback />;
+function LoadingSpinner() {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900/50 text-zinc-400">
+      <Loader2 className="w-8 h-8 mb-3 opacity-40 animate-spin" />
+      <p className="text-xs font-medium opacity-60">Loading 3D model…</p>
+    </div>
+  );
 }
 
-// Simple error boundary component for catching render-time errors from useGLTF
+// Error boundary catches real errors from useGLTF (e.g. 404, corrupt file).
+// It does NOT catch the Suspense Promise throws — those are handled by <Suspense>.
 class ModelErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback: React.ReactNode },
   { hasError: boolean }
@@ -96,30 +81,31 @@ class ModelErrorBoundary extends React.Component<
 }
 
 export function Design3DViewer({ modelUrl }: { modelUrl: string }) {
-  const [loadError, setLoadError] = useState(false);
-
-  if (!modelUrl || loadError) {
+  // Basic URL validation before attempting to render the 3D canvas
+  if (!modelUrl) {
     return <ModelFallback />;
   }
 
   return (
     <div className="w-full h-full bg-zinc-950/20 overflow-hidden relative group">
       <ModelErrorBoundary fallback={<ModelFallback />}>
-        <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 45 }}>
-          <Suspense fallback={null}>
-            <Stage environment="city" intensity={0.5} shadows={{ type: "contact", bias: -0.001 }} adjustCamera={true}>
-              <Center>
-                <Model modelPath={modelUrl} onError={() => setLoadError(true)} />
-              </Center>
-            </Stage>
-            <OrbitControls 
-              enableZoom={false} 
-              autoRotate 
-              autoRotateSpeed={1.5} 
-              makeDefault 
-            />
-          </Suspense>
-        </Canvas>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 45 }}>
+            <Suspense fallback={null}>
+              <Stage environment="city" intensity={0.5} shadows={{ type: "contact", bias: -0.001 }} adjustCamera={true}>
+                <Center>
+                  <Model modelPath={modelUrl} />
+                </Center>
+              </Stage>
+              <OrbitControls 
+                enableZoom={false} 
+                autoRotate 
+                autoRotateSpeed={1.5} 
+                makeDefault 
+              />
+            </Suspense>
+          </Canvas>
+        </Suspense>
       </ModelErrorBoundary>
       
       <div className="absolute top-2.5 right-2.5 bg-sky-500/30 backdrop-blur-md border border-sky-500/40 text-sky-100 text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-widest pointer-events-none transition-all duration-300 group-hover:bg-sky-500/50 group-hover:shadow-[0_0_15px_rgba(14,165,233,0.4)] group-hover:border-sky-400/50 group-hover:scale-105 z-20">
