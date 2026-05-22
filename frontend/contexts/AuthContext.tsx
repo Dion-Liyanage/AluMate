@@ -24,6 +24,7 @@ interface AuthContextType {
     password: string;
   }) => Promise<void>;
   logout: () => void;
+  updateUser: (updatedUser: User) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -162,6 +163,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/login";
   }, []);
 
+  const updateUser = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem("alumate_user", JSON.stringify(updatedUser));
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -172,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        updateUser,
       }}
     >
       {children}

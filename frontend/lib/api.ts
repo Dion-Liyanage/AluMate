@@ -488,6 +488,7 @@ export const profileApi = {
   update: async (data: {
     firstName?: string;
     lastName?: string;
+    email?: string;
     phone?: string;
     address?: string;
   }) => {
