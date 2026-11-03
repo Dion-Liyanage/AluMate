@@ -47,6 +47,14 @@ export class UsersService {
       .exec();
   }
 
+  async findFirstActiveAdmin(): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({ role: 'admin', isActive: true })
+      .select('-password')
+      .sort({ createdAt: 1 })
+      .exec();
+  }
+
   async findWithFilter(
     filter: Record<string, any> = {},
   ): Promise<UserDocument[]> {

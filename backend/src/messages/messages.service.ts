@@ -21,11 +21,14 @@ export class MessagesService {
   }
 
   async findConversation(user1: string, user2: string): Promise<MessageDocument[]> {
+    const firstUserId = new Types.ObjectId(user1);
+    const secondUserId = new Types.ObjectId(user2);
+
     return this.messageModel
       .find({
         $or: [
-          { senderId: user1, receiverId: user2 },
-          { senderId: user2, receiverId: user1 },
+          { senderId: firstUserId, receiverId: secondUserId },
+          { senderId: secondUserId, receiverId: firstUserId },
         ],
       })
       .sort({ createdAt: 1 })

@@ -10,58 +10,121 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import apiClient from "@/lib/api";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+
+interface SupportAgent {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface ChatMessage {
+  _id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  createdAt: string;
+}
 
 export default function UserChatPage() {
   const { user } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [supportAgent, setSupportAgent] = useState<SupportAgent | null>(null);
+  const [supportError, setSupportError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Admin ID - In a real app, this might be fetched or constant
-  const ADMIN_ID = "65f1a2b3c4d5e6f7a8b9c0d1"; // Placeholder Admin ID
-
   useEffect(() => {
-    console.log("Chat effect running. User ID:", user?.id);
     if (!user?.id) return;
 
-    console.log("Attempting to connect to:", SOCKET_URL);
+    let isActive = true;
+
+    const loadSupportAgent = async () => {
+      try {
+        const response = await apiClient.get<SupportAgent>("/messages/support-agent");
+        if (isActive) {
+          setSupportAgent(response.data);
+        }
+      } catch {
+        if (isActive) {
+          setSupportError("Support chat is unavailable right now.");
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadSupportAgent();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !supportAgent) return;
+
     const newSocket = io(SOCKET_URL, {
       query: { userId: user.id },
       transports: ["websocket", "polling"], // Force try websocket first
     });
 
     newSocket.on("connect", () => {
-      console.log("✅ Connected to chat server with ID:", newSocket.id);
-      newSocket.emit("join_conversation", { otherUserId: ADMIN_ID });
+      setSocket(newSocket);
     });
 
     newSocket.on("connect_error", (err) => {
-      console.error("❌ Socket connection error:", err.message);
+      console.error("Socket connection error:", err.message);
     });
 
-    newSocket.on("conversation_history", (history) => {
-      setMessages(history);
-      setIsLoading(false);
-    });
-
-    newSocket.on("receive_message", (message) => {
+    newSocket.on("receive_message", (message: ChatMessage) => {
       setMessages((prev) => [...prev, message]);
     });
 
-    newSocket.on("message_sent", (message) => {
+    newSocket.on("message_sent", (message: ChatMessage) => {
       setMessages((prev) => [...prev, message]);
     });
-
-    setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
+      setSocket(null);
     };
-  }, [user?.id]);
+  }, [supportAgent, user?.id]);
+
+  useEffect(() => {
+    if (!supportAgent) return;
+
+    let isActive = true;
+    setIsLoading(true);
+
+    const loadHistory = async () => {
+      try {
+        const response = await apiClient.get<ChatMessage[]>(
+          `/messages/history/${supportAgent.id}`
+        );
+        if (isActive) {
+          setMessages(response.data);
+        }
+      } catch {
+        if (isActive) {
+          setSupportError("Unable to load your conversation.");
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadHistory();
+
+    return () => {
+      isActive = false;
+    };
+  }, [supportAgent]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -71,10 +134,10 @@ export default function UserChatPage() {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !socket) return;
+    if (!newMessage.trim() || !socket || !supportAgent) return;
 
     socket.emit("send_message", {
-      receiverId: ADMIN_ID,
+      receiverId: supportAgent.id,
       content: newMessage,
     });
     setNewMessage("");
@@ -91,7 +154,9 @@ export default function UserChatPage() {
                 <User className="h-5 w-5 text-zinc-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-200">AluMate Support</h3>
+                <h3 className="font-semibold text-zinc-200">
+                  {supportAgent ? `${supportAgent.firstName} ${supportAgent.lastName}` : "AluMate Support"}
+                </h3>
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-xs text-zinc-500">Always Online</span>
@@ -105,7 +170,12 @@ export default function UserChatPage() {
             ref={scrollRef}
             className="flex-1 overflow-y-auto p-4 space-y-4 bg-[radial-gradient(circle_at_center,rgba(39,39,42,0.1)_0,transparent_100%)]"
           >
-            {isLoading ? (
+            {supportError ? (
+              <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-3 text-center">
+                <MessageSquare className="h-8 w-8" />
+                <p>{supportError}</p>
+              </div>
+            ) : isLoading ? (
               <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-3">
                 <Loader2 className="h-8 w-8 animate-spin" />
                 <p>Loading your conversation...</p>
@@ -159,7 +229,7 @@ export default function UserChatPage() {
               />
               <Button 
                 type="submit" 
-                disabled={!newMessage.trim()}
+                disabled={!newMessage.trim() || !socket || !supportAgent}
                 className="bg-zinc-100 text-zinc-950 hover:bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)]"
               >
                 <Send className="h-4 w-4" />
