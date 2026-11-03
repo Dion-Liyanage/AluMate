@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, User, Clock, Loader2, MessageSquare } from "lucide-react";
+import { Send, User, Check, Loader2, MessageSquare } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -209,7 +209,9 @@ export default function UserChatPage() {
                     <div className={`text-[10px] mt-1 opacity-50 flex items-center gap-1 ${
                       msg.senderId === user?.id ? "justify-end text-zinc-900" : "justify-start text-zinc-400"
                     }`}>
-                      <Clock className="h-3 w-3" />
+                      {msg.senderId === user?.id && (
+                        <Check className="h-3 w-3" aria-label="Sent" />
+                      )}
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
