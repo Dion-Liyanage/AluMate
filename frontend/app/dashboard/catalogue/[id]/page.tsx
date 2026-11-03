@@ -248,9 +248,7 @@ export default function CatalogueDesignDetailPage() {
                   {!isAdmin && (
                     <div className="rounded-lg bg-sky-500/5 border border-sky-500/20 px-3 py-2.5">
                       <p className="text-[11px] leading-relaxed text-sky-400/80">
-                        <strong>Note:</strong> You can customize the measurements, color,
-                        accessories, and other options. The design structure cannot be
-                        modified.
+                        <strong>Note:</strong> You can customize the measurements and colours. The design structure cannot be modified.
                       </p>
                     </div>
                   )}

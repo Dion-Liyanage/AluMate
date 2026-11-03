@@ -232,9 +232,9 @@ export default function Home() {
                 onClick={() => scrollToSection("home")}
                 className="flex items-center gap-3 cursor-pointer group"
               >
-                <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.2)] transition-transform duration-300 group-hover:scale-110">
+                <div className="relative h-[50px] w-[50px] overflow-hidden rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.2)] transition-transform duration-300 group-hover:scale-110">
                   <Image
-                    src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png"
+                    src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1779039150/AluMate_logo_cgyr93.png"
                     alt="AluMate Logo"
                     fill
                     className="object-cover"

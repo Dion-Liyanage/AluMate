@@ -30,9 +30,10 @@ export interface Quotation {
   id: string;
   customerId: string;
   orderId?: string;
+  productType?: string;
   items: QuotationItem[];
   totalAmount: number;
-  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'pending' | 'pending_approval' | 'revision_requested' | 'approved' | 'declined' | 'expired';
   validUntil: Date;
   createdAt: Date;
 }

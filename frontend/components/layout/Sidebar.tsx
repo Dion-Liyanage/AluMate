@@ -10,7 +10,6 @@ import {
   ClipboardList,
   FileText,
   Wrench,
-  User,
   Users,
   BarChart3,
   Megaphone,
@@ -20,7 +19,6 @@ import {
   MapPin,
   Hammer,
   FolderOpen,
-  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -63,8 +61,8 @@ const customerMenuGroups: MenuGroup[] = [
   {
     title: "Orders",
     items: [
-      { href: "/dashboard/orders", icon: ShoppingCart, label: "My Orders" },
       { href: "/dashboard/quotations", icon: FileText, label: "Quotations" },
+      { href: "/dashboard/orders", icon: ShoppingCart, label: "My Orders" },
     ],
   },
   {
@@ -72,13 +70,6 @@ const customerMenuGroups: MenuGroup[] = [
     items: [
       { href: "/dashboard/services/on-site-visit", icon: MapPin, label: "On Site Visit" },
       { href: "/dashboard/services/repairs", icon: Hammer, label: "Repairs" },
-    ],
-  },
-  {
-    title: "More",
-    items: [
-      { href: "/dashboard/messages", icon: MessageSquare, label: "Chat With Us" },
-      { href: "/profile", icon: User, label: "Profile" },
     ],
   },
 ];
@@ -90,8 +81,8 @@ const adminMenuGroups: MenuGroup[] = [
   {
     title: "Operations",
     items: [
-      { href: "/admin/orders", icon: ClipboardList, label: "Orders" },
       { href: "/admin/quotations", icon: FileText, label: "Quotations" },
+      { href: "/admin/orders", icon: ClipboardList, label: "Orders" },
       { href: "/admin/services", icon: Wrench, label: "Services" },
     ],
   },
@@ -106,23 +97,21 @@ const adminMenuGroups: MenuGroup[] = [
     title: "Management",
     items: [
       { href: "/admin/customers", icon: Users, label: "Customers" },
-      { href: "/admin/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
   {
     title: "More",
     items: [
       { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-      { href: "/profile", icon: User, label: "Profile" },
     ],
   },
 ];
 
 function Logo() {
   return (
-    <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-500 hover:scale-110">
+    <div className="relative h-[40px] w-[40px] shrink-0 overflow-hidden rounded-xl shadow-[0_0_15px_rgba(56,189,248,0.2)] transition-all duration-500 hover:scale-110">
       <Image
-        src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1778802318/logo.png_vewfv3.png"
+        src="https://res.cloudinary.com/dcetlwlfb/image/upload/v1779039150/AluMate_logo_cgyr93.png"
         alt="AluMate Logo"
         fill
         className="object-cover"

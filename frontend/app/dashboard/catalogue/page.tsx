@@ -51,6 +51,7 @@ export default function CataloguePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [designs, setDesigns] = useState<Design[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth?.isLoading && isAdmin) {
@@ -154,7 +155,15 @@ export default function CataloguePage() {
                 transition={{ delay: i * 0.08, duration: 0.4 }}
               >
                 <Link href={`/dashboard/catalogue/${item._id}`} className="block">
-                  <Card className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 border-zinc-800 hover:border-sky-500/40 transition-all group overflow-hidden cursor-pointer hover:shadow-[0_0_20px_rgba(56,189,248,0.08)]">
+                  <Card 
+                    onMouseEnter={() => setHoveredCardId(item._id)}
+                    onMouseLeave={() => setHoveredCardId(null)}
+                    className={`relative bg-gradient-to-br from-zinc-900 to-zinc-950 transition-all duration-300 group overflow-hidden cursor-pointer ${
+                      hoveredCardId === item._id
+                        ? "border-sky-500 shadow-[0_0_25px_rgba(56,189,248,0.2)]"
+                        : "border-zinc-800 hover:border-sky-500 hover:shadow-[0_0_25px_rgba(56,189,248,0.15)]"
+                    }`}
+                  >
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.03)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]" />
                     <div className="relative h-64 bg-zinc-800/50 flex items-center justify-center border-b border-zinc-800">
                       {item.modelUrl ? (
@@ -169,7 +178,7 @@ export default function CataloguePage() {
                         <div className="text-zinc-600 text-sm">Design Preview</div>
                       )}
                     </div>
-                    <CardContent className="relative pt-0 px-4 pb-0 -mt-3">
+                    <CardContent className="relative pt-0 px-4 pb-4 -mt-3">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="font-semibold text-zinc-100 line-clamp-1">
                           {item.title}
@@ -177,16 +186,20 @@ export default function CataloguePage() {
                         <span className="text-[10px] font-bold text-sky-400/80 uppercase tracking-widest shrink-0">{item.designCode}</span>
                       </div>
 
-                      <div className="flex items-center justify-between mt-4 -mb-1">
+                      <div className="flex items-center justify-between mt-4">
                         <Badge
                           variant="outline"
                           className="bg-sky-500/10 text-sky-300 border-sky-500/20 capitalize group-hover:bg-sky-500/20 group-hover:border-sky-500/40 transition-colors"
                         >
                           {item.category}
                         </Badge>
-                        <span className="flex items-center gap-1 text-sm text-zinc-500 group-hover:text-sky-400 transition-colors">
+                        <span className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                          hoveredCardId === item._id
+                            ? "border-sky-500 bg-sky-500/10 text-sky-300 shadow-[0_0_12px_rgba(56,189,248,0.3)]"
+                            : "border-zinc-800 bg-zinc-900/50 text-zinc-400 group-hover:border-sky-500 group-hover:bg-sky-500/10 group-hover:text-sky-300 group-hover:shadow-[0_0_12px_rgba(56,189,248,0.3)]"
+                        }`}>
                           Use Design
-                          <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                         </span>
                       </div>
                     </CardContent>

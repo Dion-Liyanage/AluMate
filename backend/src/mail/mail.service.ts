@@ -72,4 +72,34 @@ export class MailService {
     `;
     return this.sendEmail(to, subject, html);
   }
+
+  /**
+   * Send Quotation Ready Notification
+   */
+  async sendQuotationReady(to: string, firstName: string, orderId: string, totalAmount: number) {
+    const subject = `Your Quotation is Ready — ${orderId}`;
+    const formattedAmount = new Intl.NumberFormat('en-LK', {
+      style: 'currency',
+      currency: 'LKR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(totalAmount);
+
+    const html = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #1a1a1a;">
+        <h1 style="color: #000; font-size: 24px;">Quotation Ready for Review 📋</h1>
+        <p>Hi ${firstName},</p>
+        <p>Great news! Our team has reviewed your order <strong>${orderId}</strong> and prepared your final quotation.</p>
+        <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h2 style="font-size: 18px; margin-top: 0;">Quotation Summary</h2>
+          <p style="font-size: 24px; font-weight: bold; color: #059669; margin: 8px 0;">${formattedAmount}</p>
+          <p style="color: #666; font-size: 14px; margin: 0;">A detailed PDF with the full breakdown has been attached to your dashboard.</p>
+        </div>
+        <p>Please log in to your AluMate dashboard to view the full quotation details, download the PDF, and confirm your order.</p>
+        <p>If you have any questions, feel free to reach out to us.</p>
+        <p>Best regards,<br>The AluMate Team</p>
+      </div>
+    `;
+    return this.sendEmail(to, subject, html);
+  }
 }

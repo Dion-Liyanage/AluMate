@@ -118,6 +118,24 @@ export class Order {
 
   @Prop({ type: [String] })
   accessories: string[];
+
+  @Prop()
+  finalMaterialCost: number;
+
+  @Prop()
+  finalLaborCost: number;
+
+  @Prop()
+  finalTotalCost: number;
+
+  @Prop()
+  quotationPdfUrl: string;
+
+  @Prop()
+  quotationSentAt: Date;
+
+  @Prop()
+  expectedCompletionDate: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

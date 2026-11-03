@@ -31,6 +31,26 @@ export class OrdersController {
     };
   }
 
+  @Get('stats')
+  async getMyStats(@Request() req) {
+    const customerId = req.user.id;
+    const orders = await this.ordersService.findAll({ customerId, limit: 1000 });
+
+    const stats = {
+      totalOrders: orders.length,
+      pendingOrders: orders.filter(o => o.status === 'quotation_pending').length,
+      quotationsSent: orders.filter(o => o.status === 'quotation_sent').length,
+      approved: orders.filter(o => o.status === 'approved').length,
+      inProduction: orders.filter(o => o.status === 'production').length,
+      completed: orders.filter(o => o.status === 'completed').length,
+    };
+
+    return {
+      success: true,
+      data: stats,
+    };
+  }
+
   @Post()
   async createOrder(@Body() body: any, @Request() req) {
     const customerId = req.user.id;
@@ -55,11 +75,15 @@ export class OrdersController {
     const order = await this.ordersService.findById(id);
     
     // Security check: ensure user owns the order
-    if (order && order.customerId.toString() !== userId) {
+    const customerId = (order?.customerId as any)?._id?.toString() || order?.customerId?.toString();
+    if (order && customerId !== userId) {
       return { success: false, message: 'Unauthorized' };
     }
     
-    return order;
+    return {
+      success: true,
+      data: { order }
+    };
   }
 
   @Patch(':id/approve')
@@ -67,7 +91,8 @@ export class OrdersController {
     const userId = req.user.id;
     const order = await this.ordersService.findById(id);
 
-    if (!order || order.customerId.toString() !== userId) {
+    const customerId = (order?.customerId as any)?._id?.toString() || order?.customerId?.toString();
+    if (!order || customerId !== userId) {
       return { success: false, message: 'Unauthorized' };
     }
 
@@ -75,10 +100,15 @@ export class OrdersController {
       return { success: false, message: 'No active quotation to approve' };
     }
 
-    return this.ordersService.update(id, { 
+    const updatedOrder = await this.ordersService.update(id, { 
       status: 'approved',
       progress: 25 
     });
+
+    return {
+      success: true,
+      data: updatedOrder
+    };
   }
 
   @Patch(':id/cancel')
@@ -86,7 +116,8 @@ export class OrdersController {
     const userId = req.user.id;
     const order = await this.ordersService.findById(id);
 
-    if (!order || order.customerId.toString() !== userId) {
+    const customerId = (order?.customerId as any)?._id?.toString() || order?.customerId?.toString();
+    if (!order || customerId !== userId) {
       return { success: false, message: 'Unauthorized' };
     }
 
@@ -96,6 +127,10 @@ export class OrdersController {
       return { success: false, message: 'Order cannot be cancelled at this stage' };
     }
 
-    return this.ordersService.update(id, { status: 'cancelled' });
+    const updatedOrder = await this.ordersService.update(id, { status: 'cancelled' });
+    return {
+      success: true,
+      data: updatedOrder
+    };
   }
 }

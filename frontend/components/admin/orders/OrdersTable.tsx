@@ -35,6 +35,7 @@ import { OrderDetailsModal } from "./OrderDetailsModal";
 
 export interface Order {
   id: string;
+  _id?: string;
   customerName: string;
   productType: string;
   designType: 'Custom' | 'Catalogue';
@@ -42,10 +43,26 @@ export interface Order {
   status: AdminOrderStatus;
   progress: number;
   date: string;
+  finalMaterialCost?: number;
+  finalLaborCost?: number;
+  finalTotalCost?: number;
+  quotationPdfUrl?: string;
+  measurements?: Record<string, any>;
+  color?: string;
+  accessories?: string[];
+  estimatedPrice?: number;
+  strengthCategory?: string;
+  environment?: string;
+  purpose?: string;
+  notes?: { message: string; createdBy?: string }[];
+  catalogueDesignId?: any;
+  recommendedMaterials?: any[];
+  laborCalculation?: any;
 }
 
 interface OrdersTableProps {
   orders: Order[];
+  isLoading?: boolean;
   onRefresh?: () => void;
 }
 
@@ -75,7 +92,6 @@ export function OrdersTable({ orders, onRefresh }: OrdersTableProps) {
               <TableHead className="text-zinc-400 font-bold text-center">Design</TableHead>
               <TableHead className="text-zinc-400 font-bold text-center">Quotation</TableHead>
               <TableHead className="text-zinc-400 font-bold text-center">Status</TableHead>
-              <TableHead className="text-zinc-400 font-bold w-[180px] text-center">Progress</TableHead>
               <TableHead className="text-zinc-400 font-bold text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -112,26 +128,6 @@ export function OrdersTable({ orders, onRefresh }: OrdersTableProps) {
                   <TableCell className="text-center">
                     <div className="flex justify-center">
                       <OrderStatusBadge status={order.status} />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[10px] font-bold px-1">
-                        <span className="text-zinc-500 uppercase tracking-tighter">Fabrication</span>
-                        <span className="text-emerald-400">{order.progress}%</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden border border-white/5 p-0.5">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${order.progress}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className={`h-full rounded-full ${
-                            order.status === 'completed' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' :
-                            order.status === 'cancelled' ? 'bg-red-500' :
-                            'bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                          }`}
-                        />
-                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">

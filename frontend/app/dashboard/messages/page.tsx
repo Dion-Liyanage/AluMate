@@ -61,7 +61,7 @@ export default function UserChatPage() {
     return () => {
       newSocket.disconnect();
     };
-  }, [user?._id]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {

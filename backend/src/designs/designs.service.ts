@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { existsSync, unlinkSync } from 'fs';
@@ -38,7 +38,18 @@ export class DesignsService {
 
   async create(createDesignDto: CreateDesignDto): Promise<Design> {
     const createdDesign = new this.designModel(createDesignDto);
-    return createdDesign.save();
+    try {
+      return await createdDesign.save();
+    } catch (err: any) {
+      // Handle duplicate key (unique constraint) errors gracefully
+      if (err?.code === 11000) {
+        // Find duplicate field name if available
+        const dupField = err?.keyValue ? Object.keys(err.keyValue)[0] : 'field';
+        throw new BadRequestException(`${dupField} already exists`);
+      }
+      // Re-throw as internal server error for anything else
+      throw new InternalServerErrorException('Failed to create design');
+    }
   }
 
   async findAll(category?: string): Promise<Design[]> {

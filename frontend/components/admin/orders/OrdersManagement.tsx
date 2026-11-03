@@ -47,10 +47,29 @@ export function OrdersManagement() {
           customerName: o.customerId?.firstName ? `${o.customerId.firstName} ${o.customerId.lastName}` : "Unknown Customer",
           productType: o.productType,
           designType: o.designType === 'custom' ? 'Custom' : 'Catalogue',
-          price: o.estimatedPrice ? `Rs. ${o.estimatedPrice.toLocaleString()}` : "Pending",
+          price: o.finalTotalCost 
+            ? `Rs. ${o.finalTotalCost.toLocaleString()}` 
+            : o.estimatedPrice 
+              ? `Rs. ${o.estimatedPrice.toLocaleString()}` 
+              : "Pending",
           status: o.status,
           progress: o.progress,
-          date: new Date(o.createdAt).toISOString().split('T')[0]
+          date: new Date(o.createdAt).toISOString().split('T')[0],
+          finalMaterialCost: o.finalMaterialCost,
+          finalLaborCost: o.finalLaborCost,
+          finalTotalCost: o.finalTotalCost,
+          quotationPdfUrl: o.quotationPdfUrl,
+          measurements: o.measurements,
+          color: o.color,
+          accessories: o.accessories,
+          estimatedPrice: o.estimatedPrice,
+          strengthCategory: o.strengthCategory,
+          environment: o.environment,
+          purpose: o.purpose,
+          notes: o.notes,
+          catalogueDesignId: o.catalogueDesignId,
+          recommendedMaterials: o.recommendedMaterials,
+          laborCalculation: o.laborCalculation
         }));
         
         // Filter by Tab (Design Type) if needed

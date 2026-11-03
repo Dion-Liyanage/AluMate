@@ -15,15 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 import { MeasurementForm } from "./MeasurementForm";
-import { PurposeSelector } from "./PurposeSelector";
-import { EnvironmentSelector } from "./EnvironmentSelector";
-import { StrengthSelector } from "./StrengthSelector";
 import { ColorSelector } from "./ColorSelector";
-import { AccessoriesSelector } from "./AccessoriesSelector";
-import { RecommendedMaterialsPanel } from "./RecommendedMaterialsPanel";
-import { LiveEstimatePanel } from "./LiveEstimatePanel";
 import { calculateEstimate, productMeasurements } from "./quotationConfig";
 import { ordersApi } from "@/lib/api";
+import { LiveEstimatePanel } from "./LiveEstimatePanel";
 
 interface QuotationConfigPanelProps {
   productType: string;
@@ -40,7 +35,6 @@ interface QuotationConfigPanelProps {
 interface QuotationState {
   measurements: Record<string, number | string>;
   purpose: string;
-  environment: string;
   strength: string;
   color: string;
   customColor: string;
@@ -50,9 +44,8 @@ interface QuotationState {
 
 const initialState: QuotationState = {
   measurements: {},
-  purpose: "",
-  environment: "",
-  strength: "",
+  purpose: "Standard Family Usage",
+  strength: "medium",
   color: "",
   customColor: "",
   accessories: [],
@@ -61,20 +54,12 @@ const initialState: QuotationState = {
 
 type SectionId =
   | "measurements"
-  | "purpose"
-  | "environment"
-  | "strength"
   | "color"
-  | "accessories"
   | "notes";
 
 const SECTIONS: { id: SectionId; title: string; isRequired: boolean }[] = [
   { id: "measurements", title: "📐 Measurements", isRequired: true },
-  { id: "purpose", title: "🎯 Purpose", isRequired: true },
-  { id: "environment", title: "🌍 Environment", isRequired: true },
-  { id: "strength", title: "🛡️ Strength", isRequired: true },
   { id: "color", title: "🎨 Color & Finish", isRequired: true },
-  { id: "accessories", title: "🔩 Accessories", isRequired: false },
   { id: "notes", title: "📝 Additional Notes", isRequired: false },
 ];
 
@@ -142,7 +127,7 @@ function ConfigSection({
                     size="sm"
                     className={`gap-1.5 transition-all ${
                       isValid 
-                        ? "bg-violet-600/20 text-violet-300 border border-violet-500/30 hover:bg-violet-600/30" 
+                        ? "bg-zinc-950/90 text-violet-300 border border-violet-500/30 shadow-[0_0_14px_rgba(139,92,246,0.12)] hover:bg-violet-500/10 hover:border-violet-400/50 hover:text-violet-200" 
                         : "bg-zinc-800 text-zinc-500 border-zinc-700 opacity-50"
                     }`}
                   >
@@ -187,7 +172,9 @@ export function QuotationConfigPanel({
 
   // Validation & Completion logic
   const { sectionValidations, sectionCompletions } = useMemo(() => {
-    const requiredFields = productMeasurements[productType] || productMeasurements.other;
+    const requiredFields = (productMeasurements[productType] || productMeasurements.other).filter(
+      (field) => field.key !== "panelCount"
+    );
     const measurementsValid = requiredFields.every((f) => {
       const val = config.measurements[f.key];
       if (f.type === "dimension") {
@@ -200,21 +187,13 @@ export function QuotationConfigPanel({
 
     const validations = {
       measurements: measurementsValid,
-      purpose: !!config.purpose,
-      environment: !!config.environment,
-      strength: !!config.strength,
-      color: !!config.color && (config.color !== "custom" || !!config.customColor),
-      accessories: true, // Optional always valid
-      notes: true, // Optional always valid
+      color: !!config.color,
+      notes: true,
     };
 
     const completions = {
       measurements: measurementsValid,
-      purpose: !!config.purpose,
-      environment: !!config.environment,
-      strength: !!config.strength,
-      color: !!config.color && (config.color !== "custom" || !!config.customColor),
-      accessories: config.accessories.length > 0,
+      color: !!config.color,
       notes: config.additionalNotes.trim().length > 0,
     };
 
@@ -228,12 +207,7 @@ export function QuotationConfigPanel({
     }
   };
 
-  const allRequiredValid = 
-    sectionValidations.measurements && 
-    sectionValidations.purpose && 
-    sectionValidations.environment && 
-    sectionValidations.strength && 
-    sectionValidations.color;
+  const allRequiredValid = sectionValidations.measurements && sectionValidations.color;
 
   const handleSubmit = async () => {
     if (!allRequiredValid || isSubmitting) return;
@@ -243,11 +217,11 @@ export function QuotationConfigPanel({
       const estimate = calculateEstimate({
         productType,
         measurements: config.measurements,
-        purpose: config.purpose,
-        environment: config.environment,
-        strength: config.strength,
-        color: config.color,
-        accessories: config.accessories,
+        purpose: config.purpose || "",
+        environment: "",
+        strength: config.strength || "",
+        color: config.color || "",
+        accessories: config.accessories || [],
       });
 
       await ordersApi.create({
@@ -256,9 +230,8 @@ export function QuotationConfigPanel({
         catalogueDesignId,
         measurements: config.measurements,
         purpose: config.purpose,
-        environment: config.environment,
         strengthCategory: config.strength,
-        color: config.color === "custom" ? config.customColor : config.color,
+        color: config.color,
         accessories: config.accessories,
         estimatedPrice: estimate.total,
         notes: config.additionalNotes ? [{ message: config.additionalNotes, createdBy: "Customer" }] : [],
@@ -323,51 +296,7 @@ export function QuotationConfigPanel({
           />
         </ConfigSection>
 
-        <ConfigSection 
-          title="🎯 Purpose" 
-          isOpen={activeSection === "purpose"}
-          onToggle={() => setActiveSection(activeSection === "purpose" ? "" as any : "purpose")}
-          isCompleted={sectionCompletions.purpose}
-          isValid={sectionValidations.purpose}
-          showNext={true}
-          onNext={() => handleNext("purpose")}
-        >
-          <PurposeSelector
-            productType={productType}
-            value={config.purpose}
-            onChange={(v) => updateConfig("purpose", v)}
-          />
-        </ConfigSection>
-
-        <ConfigSection 
-          title="🌍 Environment" 
-          isOpen={activeSection === "environment"}
-          onToggle={() => setActiveSection(activeSection === "environment" ? "" as any : "environment")}
-          isCompleted={sectionCompletions.environment}
-          isValid={sectionValidations.environment}
-          showNext={true}
-          onNext={() => handleNext("environment")}
-        >
-          <EnvironmentSelector
-            value={config.environment}
-            onChange={(v) => updateConfig("environment", v)}
-          />
-        </ConfigSection>
-
-        <ConfigSection 
-          title="🛡️ Strength" 
-          isOpen={activeSection === "strength"}
-          onToggle={() => setActiveSection(activeSection === "strength" ? "" as any : "strength")}
-          isCompleted={sectionCompletions.strength}
-          isValid={sectionValidations.strength}
-          showNext={true}
-          onNext={() => handleNext("strength")}
-        >
-          <StrengthSelector
-            value={config.strength}
-            onChange={(v) => updateConfig("strength", v)}
-          />
-        </ConfigSection>
+        {/* Purpose, Strength removed - keeping only Measurements, Color, Notes */}
 
         <ConfigSection 
           title="🎨 Color & Finish" 
@@ -386,49 +315,7 @@ export function QuotationConfigPanel({
           />
         </ConfigSection>
 
-        <ConfigSection 
-          title="🔩 Accessories" 
-          isOpen={activeSection === "accessories"}
-          onToggle={() => setActiveSection(activeSection === "accessories" ? "" as any : "accessories")}
-          isCompleted={sectionCompletions.accessories}
-          isValid={sectionValidations.accessories}
-          showNext={true}
-          onNext={() => handleNext("accessories")}
-        >
-          <AccessoriesSelector
-            productType={productType}
-            selected={config.accessories}
-            onChange={(v) => updateConfig("accessories", v)}
-          />
-        </ConfigSection>
-
-        {/* Recommended Materials (Appears when measurements and basic info are filled) */}
-        {(sectionValidations.measurements && sectionValidations.purpose) && (
-          <div className="px-5 py-6 bg-zinc-900/20 border-b border-zinc-800/50">
-            <RecommendedMaterialsPanel
-              profile={calculateEstimate({
-                productType,
-                measurements: config.measurements,
-                purpose: config.purpose,
-                environment: config.environment,
-                strength: config.strength,
-                color: config.color,
-                accessories: config.accessories,
-              }).recommendedProfile}
-              explanation={calculateEstimate({
-                productType,
-                measurements: config.measurements,
-                purpose: config.purpose,
-                environment: config.environment,
-                strength: config.strength,
-                color: config.color,
-                accessories: config.accessories,
-              }).explanation}
-              accessories={config.accessories}
-              strength={config.strength}
-            />
-          </div>
-        )}
+        {/* Recommended materials removed */}
 
         <ConfigSection 
           title="📝 Additional Notes" 
@@ -459,7 +346,7 @@ export function QuotationConfigPanel({
             productType={productType}
             measurements={config.measurements}
             purpose={config.purpose}
-            environment={config.environment}
+            environment=""
             strength={config.strength}
             color={config.color}
             accessories={config.accessories}
@@ -474,7 +361,7 @@ export function QuotationConfigPanel({
           disabled={!allRequiredValid || isSubmitting}
           className={`w-full py-3 text-sm font-semibold transition-all duration-300 ${
             allRequiredValid
-              ? "bg-gradient-to-r from-violet-600 to-sky-600 hover:from-violet-500 hover:to-sky-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.3)]"
+              ? "bg-linear-to-r from-violet-600 to-sky-600 hover:from-violet-500 hover:to-sky-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.3)]"
               : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
           }`}
         >

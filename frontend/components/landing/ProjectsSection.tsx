@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Star, X, MapPin, Calendar } from "lucide-react";
+import { ArrowRight, X, MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PROJECTS } from "@/constants/projects";
@@ -107,18 +107,7 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
         </div>
         <CardContent className="p-4 relative flex-grow flex flex-col justify-between">
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-               <div className="flex items-center">
-                 {[...Array(5)].map((_, i) => (
-                   <Star
-                     key={i}
-                     className={`h-4 w-4 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`}
-                   />
-                 ))}
-               </div>
-               <span className="text-sm font-medium text-zinc-300">{project.rating}</span>
-               <span className="text-xs text-zinc-500">({project.reviewCount})</span>
-            </div>
+
             <h3 className="mb-2 text-xl font-semibold text-zinc-100">
               {project.title}
             </h3>
@@ -151,12 +140,7 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
                  <h2 className="text-3xl font-bold text-white">{project.title}</h2>
                  <div className="flex items-center gap-2 mt-2">
                     <span className="px-2 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400 mb-1">{project.category}</span>
-                    <div className="flex items-center ml-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`h-5 w-5 ${i < Math.floor(project.rating) ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
-                      ))}
-                    </div>
-                    <span className="text-zinc-300 font-medium">{project.rating}</span>
+
                  </div>
               </div>
             </div>
@@ -179,30 +163,6 @@ function ProjectCard({ project, index }: { project: DisplayProject; index: numbe
                   )}
                 </div>
               </div>
-
-              <h3 className="text-lg font-semibold text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Customer Feedback</h3>
-              <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {project.feedbacks && project.feedbacks.length > 0 ? (
-                  project.feedbacks.map((fb, i) => (
-                    <div key={i} className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-zinc-200">{fb.name}</span>
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, j) => (
-                            <Star key={j} className={`h-3 w-3 ${j < fb.rating ? "text-yellow-500 fill-yellow-500" : "text-zinc-600"}`} />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-zinc-400 text-sm italic">"{fb.comment}"</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10">
-                    <p className="text-zinc-500 italic text-sm">No detailed feedback available yet for this project.</p>
-                  </div>
-                )}
-              </div>
-
               {/* Image Gallery */}
               {allImages.length > 0 && (
                 <div className="mt-6 space-y-4 max-h-[28rem] overflow-y-auto pr-2 custom-scrollbar">

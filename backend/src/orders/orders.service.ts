@@ -25,7 +25,8 @@ export class OrdersService {
       .find(otherFilters)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .populate('catalogueDesignId');
 
     if (populate) {
       query.populate('customerId', 'firstName lastName email phone');
@@ -35,13 +36,19 @@ export class OrdersService {
   }
 
   async findById(id: string): Promise<OrderDocument | null> {
-    return this.orderModel.findById(id).populate('quotationId').exec();
+    return this.orderModel
+      .findById(id)
+      .populate('quotationId')
+      .populate('catalogueDesignId')
+      .populate('customerId', 'firstName lastName email phone')
+      .exec();
   }
 
   async findByCustomerId(customerId: string): Promise<OrderDocument[]> {
     return this.orderModel
       .find({ customerId })
       .sort({ createdAt: -1 })
+      .populate('catalogueDesignId')
       .exec();
   }
 

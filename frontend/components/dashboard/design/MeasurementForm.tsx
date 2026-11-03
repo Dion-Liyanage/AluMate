@@ -38,6 +38,8 @@ export function MeasurementForm({ productType, values, onChange }: MeasurementFo
     onChange(key, result);
   };
 
+  const renderFields = fields.filter((f) => f.key !== "panelCount");
+
   return (
     <div className="space-y-4">
       <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
@@ -47,7 +49,7 @@ export function MeasurementForm({ productType, values, onChange }: MeasurementFo
         </span>
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {fields.map((field: MeasurementField) => {
+        {renderFields.map((field: MeasurementField) => {
           if (field.type === "dimension") {
             const dim = parseDimension(values[field.key]);
             return (

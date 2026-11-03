@@ -9,8 +9,9 @@ import DesignStudio from "@/components/design-studio/DesignStudio";
 function StudioContent() {
   const searchParams = useSearchParams();
   const productType = (searchParams.get("type") ?? "other").toLowerCase();
+  const savedDesignId = searchParams.get("savedDesignId") ?? undefined;
 
-  return <DesignStudio productType={productType} />;
+  return <DesignStudio productType={productType} savedDesignId={savedDesignId} />;
 }
 
 export default function StudioPage() {

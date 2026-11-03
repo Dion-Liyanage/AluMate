@@ -20,29 +20,33 @@ export class AnalyticsService {
     // Get stats in parallel for speed
     const [
       totalOrders,
+      completedOrdersCount,
       totalCustomers,
       pendingQuotations,
       activeServiceRequests,
-      acceptedQuotations,
       productCounts,
+      completedOrders,
     ] = await Promise.all([
       this.orderModel.countDocuments(),
+      this.orderModel.countDocuments({ status: 'completed' }),
       this.userModel.countDocuments({ role: 'customer' }),
       this.quotationModel.countDocuments({ status: 'sent' }),
       this.serviceRequestModel.countDocuments({ status: { $ne: 'Completed' } }),
-      this.quotationModel.find({ status: 'accepted' }),
       this.orderModel.aggregate([
         { $group: { _id: '$productType', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
-      ])
+      ]),
+      this.orderModel.find({ status: 'completed' }),
     ]);
 
-    // Calculate total revenue from accepted quotations
-    const totalRevenue = acceptedQuotations.reduce((sum, q) => sum + (q.totalAmount || 0), 0);
+    // Calculate total revenue from completed orders only
+    const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.finalTotalCost || o.estimatedPrice || 0), 0);
+    
     const productDistribution = productCounts.map(p => ({ name: p._id, value: p.count }));
 
     return {
       totalOrders,
+      completedOrders: completedOrdersCount,
       totalRevenue,
       totalCustomers,
       pendingQuotations,

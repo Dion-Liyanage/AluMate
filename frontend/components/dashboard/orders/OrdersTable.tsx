@@ -19,12 +19,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { OrderStatusBadge, OrderStatus } from "./OrderStatusBadge";
-import { OrderProgressTracker } from "./OrderProgressTracker";
 import { motion, AnimatePresence } from "framer-motion";
 import { ordersApi } from "@/lib/api";
 import { toast } from "sonner";
 
-interface Order {
+export interface Order {
   id: string;
   _id: string;
   productType: string;
@@ -33,6 +32,19 @@ interface Order {
   price: string;
   status: OrderStatus;
   progress: number;
+  finalMaterialCost?: number;
+  finalLaborCost?: number;
+  finalTotalCost?: number;
+  quotationPdfUrl?: string;
+  measurements?: Record<string, any>;
+  color?: string;
+  accessories?: string[];
+  estimatedPrice?: number;
+  strengthCategory?: string;
+  environment?: string;
+  purpose?: string;
+  notes?: { message: string }[];
+  catalogueDesignId?: any;
 }
 
 const INACTIVE_STATUSES: OrderStatus[] = ["completed", "cancelled"];
@@ -59,11 +71,28 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
           id: o.orderId,
           _id: o._id,
           productType: o.productType,
-          designType: o.designType === 'custom' ? 'Custom' : 'Catalogue',
+          designType: (o.designType === 'custom' ? 'Custom' : 'Catalogue') as "Custom" | "Catalogue",
           date: new Date(o.createdAt).toISOString().split('T')[0],
-          price: o.estimatedPrice ? `Rs. ${o.estimatedPrice.toLocaleString()}` : "Pending",
+          price: o.finalTotalCost 
+            ? `Rs. ${o.finalTotalCost.toLocaleString()}` 
+            : o.estimatedPrice 
+              ? `Rs. ${o.estimatedPrice.toLocaleString()}` 
+              : "Pending",
           status: o.status,
-          progress: o.progress
+          progress: o.progress,
+          finalMaterialCost: o.finalMaterialCost,
+          finalLaborCost: o.finalLaborCost,
+          finalTotalCost: o.finalTotalCost,
+          quotationPdfUrl: o.quotationPdfUrl,
+          measurements: o.measurements,
+          color: o.color,
+          accessories: o.accessories,
+          estimatedPrice: o.estimatedPrice,
+          strengthCategory: o.strengthCategory,
+          environment: o.environment,
+          purpose: o.purpose,
+          notes: o.notes,
+          catalogueDesignId: o.catalogueDesignId
         }));
         setOrders(mappedOrders);
       }
@@ -121,9 +150,6 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
         <div className="flex justify-center">
           <OrderStatusBadge status={order.status} />
         </div>
-      </TableCell>
-      <TableCell className="text-center">
-        <OrderProgressTracker progress={order.progress} status={order.status} />
       </TableCell>
       <TableCell className="text-center">
         <div className="flex items-center justify-center gap-2">
@@ -206,7 +232,6 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
                 <TableHead className="text-zinc-400 font-bold text-center">Date</TableHead>
                 <TableHead className="text-zinc-400 font-bold text-center">Estimated Price</TableHead>
                 <TableHead className="text-zinc-400 font-bold text-center">Status</TableHead>
-                <TableHead className="text-zinc-400 font-bold w-[180px] text-center">Progress</TableHead>
                 <TableHead className="text-zinc-400 font-bold text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -214,7 +239,7 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
               {activeOrders.map(renderRow)}
               {activeOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-32 text-center text-zinc-500">
+                  <TableCell colSpan={7} className="h-32 text-center text-zinc-500">
                     No active orders found.
                   </TableCell>
                 </TableRow>
@@ -235,7 +260,6 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
                 </div>
                 <OrderStatusBadge status={order.status} />
               </div>
-              <OrderProgressTracker progress={order.progress} status={order.status} />
               <div className="flex items-center justify-between pt-2">
                 <p className="text-lg font-bold text-zinc-100">{order.price}</p>
                 <div className="flex gap-2">
@@ -293,7 +317,6 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
                           <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Date</TableHead>
                           <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Price</TableHead>
                           <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Status</TableHead>
-                          <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider w-[180px] text-center">Progress</TableHead>
                           <TableHead className="text-zinc-500 font-bold text-xs uppercase tracking-wider text-center">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -314,7 +337,6 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
                           </div>
                           <OrderStatusBadge status={order.status} />
                         </div>
-                        <OrderProgressTracker progress={order.progress} status={order.status} />
                       </div>
                     ))}
                   </div>
