@@ -3,8 +3,18 @@
  * Uses axios with JWT token interceptors
  */
 
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import type { User, Order, Quotation, ServiceRequest, InventoryItem, Notification, Project } from "@/types";
+
+type BackendErrorPayload = {
+  message?: string | string[];
+  error?: string;
+};
+
+type EnhancedApiError = Error & {
+  response?: AxiosError<BackendErrorPayload>["response"];
+  status?: number;
+};
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
@@ -37,10 +47,10 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle 401 unauthorized
+// Response interceptor — handle 401 unauthorized and extract backend error messages
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  (error: AxiosError<BackendErrorPayload>) => {
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("alumate_token");
@@ -54,7 +64,19 @@ apiClient.interceptors.response.use(
         }
       }
     }
-    return Promise.reject(error);
+
+    // Extract the backend's error message so UI can display it meaningfully
+    const backendMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message;
+
+    const enhancedError: EnhancedApiError = new Error(
+      Array.isArray(backendMessage) ? backendMessage.join(", ") : backendMessage
+    );
+    enhancedError.response = error.response;
+    enhancedError.status = error.response?.status;
+    return Promise.reject(enhancedError);
   }
 );
 
