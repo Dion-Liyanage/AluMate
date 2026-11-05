@@ -19,6 +19,7 @@ import {
   Hammer,
   FolderOpen,
   MessageSquare,
+  Leaf,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -110,6 +111,7 @@ const adminMenuGroups: MenuGroup[] = [
     title: "More",
     items: [
       { href: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+      { href: "/admin/sustainability", icon: Leaf, label: "Sustainability" },
     ],
   },
 ];
