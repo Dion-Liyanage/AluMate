@@ -813,3 +813,42 @@ export const adminMaterialsApi = {
 };
 
 export default apiClient;
+
+// ---------- AI Assistant ----------
+
+export interface AiDesignRef {
+  id: string;
+  designCode: string;
+  title: string;
+  category?: string;
+  imageUrl?: string;
+}
+
+export interface AiChatMessage {
+  role: "user" | "assistant";
+  text: string;
+  imageUrl?: string;
+  designs: AiDesignRef[];
+  createdAt?: string;
+}
+
+export const aiChatApi = {
+  send: async (data: { message?: string; conversationId?: string; image?: Blob }) => {
+    const form = new FormData();
+    if (data.message) form.append("message", data.message);
+    if (data.conversationId) form.append("conversationId", data.conversationId);
+    if (data.image) form.append("image", data.image, "photo.jpg");
+    const res = await apiClient.post<ApiResponse<{ conversationId: string; reply: AiChatMessage }>>(
+      "/ai-chat/messages",
+      form,
+      { timeout: 90_000 },
+    );
+    return res.data;
+  },
+  getConversation: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<{ conversationId: string; messages: AiChatMessage[] }>>(
+      `/ai-chat/conversations/${id}`,
+    );
+    return res.data;
+  },
+};
