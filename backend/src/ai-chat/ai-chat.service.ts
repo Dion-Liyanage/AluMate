@@ -131,6 +131,40 @@ export class AiChatService {
     return this.toResponse(conversation);
   }
 
+  /**
+   * Past conversations, newest first. Logged-in customers get every chat on their
+   * account; anonymous visitors pass the ids their browser remembers (only chats
+   * not linked to any account are returned for those).
+   */
+  async listConversations(requester: Requester, guestIds: string[] = []) {
+    const ids = guestIds.filter((id) => isValidObjectId(id)).slice(0, 50);
+    const or: Record<string, unknown>[] = [];
+    if (requester.id) or.push({ user: new Types.ObjectId(requester.id) });
+    if (ids.length) or.push({ _id: { $in: ids.map((id) => new Types.ObjectId(id)) }, user: null });
+    if (!or.length) return [];
+
+    const conversations = await this.conversationModel
+      .find({ $or: or, 'messages.0': { $exists: true } })
+      .sort({ updatedAt: -1 })
+      .limit(30)
+      .lean()
+      .exec();
+
+    return conversations.map((c: any) => {
+      const firstUser = c.messages.find((m: AiMessage) => m.role === 'user');
+      const last = c.messages[c.messages.length - 1];
+      const title = firstUser?.text?.trim() || (firstUser?.imageUrl ? 'Photo enquiry' : 'Conversation');
+      return {
+        conversationId: c._id.toString(),
+        title: title.length > 60 ? `${title.slice(0, 57)}...` : title,
+        preview: (last?.text ?? '').replace(/[*#]/g, '').replace(/\s+/g, ' ').trim().slice(0, 90),
+        imageUrl: c.messages.find((m: AiMessage) => m.imageUrl)?.imageUrl,
+        messageCount: c.messages.length,
+        updatedAt: c.updatedAt,
+      };
+    });
+  }
+
   async sendMessage(
     input: { conversationId?: string; message?: string; image?: Express.Multer.File },
     requester: Requester,

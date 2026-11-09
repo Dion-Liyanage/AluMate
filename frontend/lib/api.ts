@@ -852,3 +852,22 @@ export const aiChatApi = {
     return res.data;
   },
 };
+
+export interface AiConversationSummary {
+  conversationId: string;
+  title: string;
+  preview: string;
+  imageUrl?: string;
+  messageCount: number;
+  updatedAt: string;
+}
+
+export const aiChatHistoryApi = {
+  /** Logged-in: the account's chats. Guests: pass the ids this browser remembers. */
+  list: async (guestIds: string[] = []) => {
+    const res = await apiClient.get<ApiResponse<AiConversationSummary[]>>("/ai-chat/conversations", {
+      params: guestIds.length ? { ids: guestIds.join(",") } : undefined,
+    });
+    return res.data;
+  },
+};

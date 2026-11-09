@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -52,6 +53,12 @@ export class AiChatController {
       this.requester(req),
     );
     return { success: true, data };
+  }
+
+  @Get('conversations')
+  async list(@Query('ids') ids: string | undefined, @Req() req: any) {
+    const guestIds = (ids ?? '').split(',').map((id) => id.trim()).filter(Boolean);
+    return { success: true, data: await this.aiChatService.listConversations(this.requester(req), guestIds) };
   }
 
   @Get('conversations/:id')

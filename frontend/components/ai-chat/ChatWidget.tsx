@@ -4,9 +4,10 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, ImagePlus, Loader2, RotateCcw, Send, Sparkles, X } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ArrowLeft, Bot, History, ImageIcon, ImagePlus, Loader2, MessageSquare, RotateCcw, Send, Sparkles, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { aiChatApi, type AiChatMessage } from "@/lib/api";
+import { aiChatApi, aiChatHistoryApi, type AiChatMessage, type AiConversationSummary } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /** Routes where the bubble would get in the way (admin area, auth forms, full-screen tools). */
@@ -27,6 +28,25 @@ const WELCOME: AiChatMessage = {
 
 const MAX_IMAGE_DIMENSION = 1280;
 const TEASER_DELAY_MS = 2500;
+/** Guests have no account, so the browser remembers which chats are theirs. */
+const GUEST_HISTORY_KEY = "alumate_ai_chat_history_guest";
+const GUEST_HISTORY_LIMIT = 20;
+
+function readGuestHistory(): string[] {
+  try {
+    const ids = JSON.parse(localStorage.getItem(GUEST_HISTORY_KEY) ?? "[]");
+    return Array.isArray(ids) ? ids.filter((id) => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function rememberGuestConversation(id: string) {
+  try {
+    const ids = [id, ...readGuestHistory().filter((x) => x !== id)].slice(0, GUEST_HISTORY_LIMIT);
+    localStorage.setItem(GUEST_HISTORY_KEY, JSON.stringify(ids));
+  } catch {}
+}
 
 /** Downscale to a JPEG so uploads are fast and use less of the free AI quota. */
 async function compressImage(file: File): Promise<Blob> {
@@ -123,6 +143,9 @@ export function ChatWidget() {
   const [error, setError] = useState<string | null>(null);
   const [showTeaser, setShowTeaser] = useState(false);
   const [everOpened, setEverOpened] = useState(false);
+  const [view, setView] = useState<"chat" | "history">("chat");
+  const [history, setHistory] = useState<AiConversationSummary[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -177,6 +200,8 @@ export function ChatWidget() {
   useEffect(() => {
     setConversationId(null);
     setMessages([]);
+    setView("chat");
+    setHistory([]);
   }, [user?.id]);
 
   useEffect(() => {
@@ -221,6 +246,7 @@ export function ChatWidget() {
         try {
           localStorage.setItem(storageKey, res.data.conversationId);
         } catch {}
+        if (!user?.id) rememberGuestConversation(res.data.conversationId);
         setMessages((prev) => [...prev, res.data!.reply]);
       }
     } catch (err) {
@@ -241,6 +267,39 @@ export function ChatWidget() {
     setConversationId(null);
     setMessages([]);
     setError(null);
+    setView("chat");
+  };
+
+  const openHistory = async () => {
+    setView("history");
+    setHistoryLoading(true);
+    try {
+      const res = await aiChatHistoryApi.list(user?.id ? [] : readGuestHistory());
+      setHistory(res.data ?? []);
+    } catch {
+      setHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const openConversation = async (id: string) => {
+    setView("chat");
+    setError(null);
+    if (id === conversationId) return;
+    setLoadingHistory(true);
+    try {
+      const res = await aiChatApi.getConversation(id);
+      setConversationId(id);
+      setMessages(res.data?.messages ?? []);
+      try {
+        localStorage.setItem(storageKey, id);
+      } catch {}
+    } catch {
+      setError("Couldn't open that chat. It may have been removed.");
+    } finally {
+      setLoadingHistory(false);
+    }
   };
 
   if (HIDDEN_PREFIXES.some((p) => pathname?.startsWith(p)) || user?.role === "admin") return null;
@@ -249,26 +308,84 @@ export function ChatWidget() {
 
   return (
     <>
+      {/* dim the page behind the chat so the card stands out; click it to close */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="ai-chat-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 z-55 bg-black/45 backdrop-blur-[2px]"
+            aria-hidden
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              boxShadow: [
+                "0 0 22px rgba(236,72,153,0.22), 0 0 60px rgba(139,92,246,0.12)",
+                "0 0 34px rgba(236,72,153,0.42), 0 0 80px rgba(139,92,246,0.22)",
+                "0 0 22px rgba(236,72,153,0.22), 0 0 60px rgba(139,92,246,0.12)",
+              ],
+            }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
-            transition={{ duration: 0.18 }}
-            className="fixed inset-x-3 bottom-24 top-20 z-60 flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/50 sm:inset-x-auto sm:right-6 sm:top-auto sm:h-150 sm:max-h-[calc(100vh-8rem)] sm:w-100"
+            transition={{ duration: 0.18, boxShadow: { duration: 2.4, repeat: Infinity, ease: "easeInOut" } }}
+            className="fixed inset-x-3 bottom-24 top-20 z-60 flex flex-col overflow-hidden rounded-2xl border border-violet-500/20 bg-zinc-950/75 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/10 backdrop-blur-2xl sm:inset-x-auto sm:right-6 sm:top-auto sm:h-150 sm:max-h-[calc(100vh-8rem)] sm:w-100"
             role="dialog"
             aria-label="AluMate AI assistant"
           >
+            {/* moving shimmer wave (same as the dashboard cards) */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.04)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%] animate-[shimmer_3s_linear_infinite]"
+            />
+            {/* neon light travelling around the outline (same as the icon) */}
+            <span aria-hidden className="ai-neon-border" />
+
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-zinc-800 bg-zinc-900/80 px-4 py-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-violet-600 to-sky-500 text-white">
-                <Sparkles className="h-5 w-5" />
+            <div className="relative flex items-center gap-3 border-b border-white/5 bg-zinc-950/30 px-4 py-3">
+              {/* same pink neon glass as the floating button */}
+              <div className="relative h-9 w-9 shrink-0">
+                <motion.span
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-1.5 rounded-full bg-gradient-to-br from-pink-500/60 via-fuchsia-500/40 to-pink-400/60 blur-lg"
+                  animate={{ opacity: [0.35, 0.85, 0.35], scale: [0.95, 1.08, 0.95] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div className="relative flex h-full w-full items-center justify-center rounded-full border border-white/15 bg-gradient-to-br from-pink-500/40 via-fuchsia-950/60 to-fuchsia-400/35 text-white shadow-[0_0_14px_rgba(236,72,153,0.55)] backdrop-blur-xl">
+                  <span aria-hidden className="ai-neon-border" />
+                  <Sparkles className="h-5 w-5 drop-shadow-[0_0_6px_rgba(249,168,212,0.9)]" />
+                </div>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-zinc-100">AluMate Assistant</p>
-                <p className="text-xs text-zinc-500">AI · answers may not be perfect</p>
+                <p className="text-sm font-semibold text-zinc-100">
+                  {view === "history" ? "Previous chats" : "AluMate Assistant"}
+                </p>
+                <p className="text-xs text-zinc-500">
+                  {view === "history" ? "Pick a chat to continue" : "AI · answers may not be perfect"}
+                </p>
               </div>
+              <button
+                onClick={() => (view === "history" ? setView("chat") : openHistory())}
+                className={cn(
+                  "rounded-md p-2 hover:bg-zinc-800 hover:text-zinc-100",
+                  view === "history" ? "bg-zinc-800/70 text-zinc-100" : "text-zinc-400",
+                )}
+                title={view === "history" ? "Back to chat" : "Previous chats"}
+                aria-label={view === "history" ? "Back to chat" : "Show previous chats"}
+              >
+                {view === "history" ? <ArrowLeft className="h-4 w-4" /> : <History className="h-4 w-4" />}
+              </button>
               <button
                 onClick={newChat}
                 className="rounded-md p-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
@@ -286,8 +403,66 @@ export function ChatWidget() {
               </button>
             </div>
 
+            {view === "history" ? (
+              <div className="relative flex-1 overflow-y-auto px-3 py-3">
+                {historyLoading ? (
+                  <div className="flex h-full items-center justify-center text-zinc-500">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  </div>
+                ) : history.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-zinc-500">
+                    <MessageSquare className="h-8 w-8 opacity-60" />
+                    <div>
+                      <p className="text-sm font-medium text-zinc-300">No previous chats yet</p>
+                      <p className="text-xs">Your conversations with the assistant will appear here.</p>
+                    </div>
+                    <button
+                      onClick={newChat}
+                      className="mt-1 rounded-full border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800"
+                    >
+                      Start a chat
+                    </button>
+                  </div>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {history.map((c) => (
+                      <li key={c.conversationId}>
+                        <button
+                          onClick={() => openConversation(c.conversationId)}
+                          className={cn(
+                            "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition",
+                            c.conversationId === conversationId
+                              ? "border-violet-500/40 bg-violet-500/10"
+                              : "border-white/5 bg-zinc-900/50 hover:border-white/15 hover:bg-zinc-800/60",
+                          )}
+                        >
+                          {c.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={c.imageUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                          ) : (
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-zinc-400">
+                              {c.title === "Photo enquiry" ? <ImageIcon className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline justify-between gap-2">
+                              <p className="truncate text-sm font-medium text-zinc-100">{c.title}</p>
+                              <span className="shrink-0 text-[10px] text-zinc-500">
+                                {formatDistanceToNow(new Date(c.updatedAt), { addSuffix: true })}
+                              </span>
+                            </div>
+                            <p className="truncate text-xs text-zinc-500">{c.preview}</p>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : (
+            <>
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+            <div ref={scrollRef} className="relative flex-1 space-y-4 overflow-y-auto px-4 py-4">
               {loadingHistory ? (
                 <div className="flex h-full items-center justify-center text-zinc-500">
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -315,7 +490,7 @@ export function ChatWidget() {
                             "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
                             m.role === "user"
                               ? "rounded-br-sm bg-linear-to-br from-violet-600 to-indigo-600 text-white"
-                              : "rounded-bl-sm bg-zinc-900 text-zinc-200 ring-1 ring-zinc-800",
+                              : "rounded-bl-sm bg-zinc-900/70 text-zinc-200 ring-1 ring-white/10 backdrop-blur-sm",
                           )}
                         >
                           {m.role === "assistant" ? <FormattedText text={m.text} /> : <p className="whitespace-pre-wrap">{m.text}</p>}
@@ -377,7 +552,7 @@ export function ChatWidget() {
             </div>
 
             {/* Composer */}
-            <div className="border-t border-zinc-800 bg-zinc-900/60 p-3">
+            <div className="relative border-t border-white/5 bg-zinc-950/30 p-3">
               {error && <p className="mb-2 rounded-md bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</p>}
               {image && (
                 <div className="relative mb-2 inline-block">
@@ -435,7 +610,7 @@ export function ChatWidget() {
                   rows={1}
                   maxLength={2000}
                   placeholder={image ? "Ask about this photo…" : "Ask about our products…"}
-                  className="max-h-28 min-h-10.5 flex-1 resize-none rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none"
+                  className="max-h-28 min-h-10.5 flex-1 resize-none rounded-lg border border-white/10 bg-zinc-950/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none"
                 />
                 <button
                   onClick={() => send()}
@@ -447,6 +622,8 @@ export function ChatWidget() {
                 </button>
               </div>
             </div>
+            </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -485,45 +662,65 @@ export function ChatWidget() {
         )}
       </AnimatePresence>
 
-      {/* Floating bubble */}
+      {/* Floating bubble — frosted glass with a white neon edge and pulsing halo */}
       <div className="fixed bottom-6 right-6 z-60">
+        {/* soft neon halo */}
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -inset-2 rounded-full bg-gradient-to-br from-pink-500/60 via-fuchsia-500/40 to-pink-400/60 blur-xl"
+          animate={open ? { opacity: 0.3, scale: 1 } : { opacity: [0.35, 0.85, 0.35], scale: [0.95, 1.08, 0.95] }}
+          transition={open ? { duration: 0.3 } : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        />
         {!everOpened && !open && (
-          <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-violet-500/40 [animation-duration:2.5s]" />
+          <span className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-pink-400/20 [animation-duration:2.5s]" />
         )}
         <motion.button
           onClick={toggleOpen}
           whileHover={{ scale: 1.07 }}
           whileTap={{ scale: 0.93 }}
-          className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-violet-600 via-indigo-600 to-sky-500 text-white shadow-lg shadow-violet-900/50 ring-1 ring-white/15 transition-shadow hover:shadow-violet-600/50"
+          className="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full p-[1.5px] shadow-[0_0_18px_rgba(236,72,153,0.6),0_0_42px_rgba(217,70,239,0.25)] transition-shadow hover:shadow-[0_0_26px_rgba(236,72,153,0.8),0_0_60px_rgba(217,70,239,0.4)]"
           aria-label={open ? "Close AI assistant" : "Open AI assistant"}
         >
-          <AnimatePresence mode="wait" initial={false}>
-            {open ? (
-              <motion.span
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <X className="h-6 w-6" />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="open"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Sparkles className="h-6 w-6 transition-transform group-hover:rotate-12" />
-              </motion.span>
-            )}
-          </AnimatePresence>
-          {!open && (
-            <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-zinc-950 bg-emerald-400" title="Online" />
-          )}
+          {/* light travelling around the edge */}
+          <motion.span
+            aria-hidden
+            className="absolute -inset-[40%] bg-[conic-gradient(from_0deg,rgba(217,70,239,0.25)_0deg,rgba(244,114,182,0.9)_50deg,rgba(255,255,255,0.95)_80deg,rgba(217,70,239,0.8)_120deg,rgba(236,72,153,0.25)_180deg,rgba(217,70,239,0.25)_360deg)]"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+          />
+          {/* frosted glass body */}
+          <span className="relative flex h-full w-full items-center justify-center rounded-full border border-white/15 bg-gradient-to-br from-pink-500/40 via-fuchsia-950/60 to-fuchsia-400/35 text-white backdrop-blur-xl">
+            <AnimatePresence mode="wait" initial={false}>
+              {open ? (
+                <motion.span
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <X className="h-6 w-6 drop-shadow-[0_0_6px_rgba(249,168,212,0.9)]" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="open"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Sparkles className="h-6 w-6 drop-shadow-[0_0_6px_rgba(249,168,212,0.9)] transition-transform group-hover:rotate-12" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </span>
         </motion.button>
+        {!open && (
+          <span
+            className="pointer-events-none absolute right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-zinc-950 bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"
+            title="Online"
+          />
+        )}
       </div>
     </>
   );
