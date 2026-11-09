@@ -17,6 +17,7 @@ import type {
   OpeningSystem,
   BomInput,
   BomResult,
+  CuttingPlan,
 } from "@/types";
 
 type BackendErrorPayload = {
@@ -110,6 +111,18 @@ export interface MaterialUsageInput {
   totalCost: number;
 }
 
+export interface PlanComparison {
+  orderNumber: string;
+  projectName: string;
+  recordedAt: string;
+  plannedScrapKg: number;
+  actualScrapKg: number;
+  extraScrapKg: number;
+  plannedWasteRate: number;
+  actualWasteRate: number;
+  difference: number;
+}
+
 export type FabricationMaterialUsageInput = Omit<MaterialUsageInput, "projectName">;
 
 export interface SustainabilityDashboardData {
@@ -120,7 +133,18 @@ export interface SustainabilityDashboardData {
     scrapWasteKg: number;
     costSaved: number;
     wasteRate: number;
+    efficiencyPct: number;
   };
+  planAccuracy: {
+    ordersWithPlan: number;
+    totalOrders: number;
+    plannedWasteRate: number;
+    actualWasteRate: number;
+    extraScrapKg: number;
+    highWasteMarginPct: number;
+  };
+  plannedVsActual: PlanComparison[];
+  highWasteOrders: PlanComparison[];
   materialDistribution: Array<{ name: string; value: number; color: string }>;
   monthlyWaste: Array<{ month: string; wasteRate: number }>;
   projects: Array<{
@@ -237,6 +261,10 @@ export const adminOrdersApi = {
     return res.data;
   },
 
+  getCuttingPlan: async (id: string) => {
+    const response = await apiClient.get<ApiResponse<CuttingPlan | null>>(`/admin/orders/${id}/cutting-plan`);
+    return response.data;
+  },
   completeFabrication: async (id: string, data: FabricationMaterialUsageInput) => {
     const res = await apiClient.post<ApiResponse>(
       `/admin/orders/${id}/complete-fabrication`,

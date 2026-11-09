@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  NotFoundException,
   Controller,
   Get,
   Post,
@@ -23,6 +24,7 @@ import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { SustainabilityService } from '../sustainability/sustainability.service';
 import { CompleteFabricationDto } from '../sustainability/dto/complete-fabrication.dto';
+import { planCuttingFromBom } from '../materials/cutting-optimizer';
 
 @Controller('admin/orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -145,6 +147,23 @@ export class AdminOrdersController {
     };
   }
 
+  /** Cutting plan for an order, built from the cut list saved when it was placed. */
+  @Get(':id/cutting-plan')
+  async getCuttingPlan(@Param('id') id: string) {
+    const order = await this.ordersService.findById(id);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    if (!order.bomSnapshot?.lines?.length) {
+      return {
+        success: true,
+        data: null,
+        message: 'This order has no saved cut list, so no cutting plan is available.',
+      };
+    }
+    return { success: true, data: planCuttingFromBom(order.bomSnapshot as any) };
+  }
+
   @Post(':id/complete-fabrication')
   async completeFabrication(
     @Param('id') id: string,
@@ -161,12 +180,27 @@ export class AdminOrdersController {
       throw new BadRequestException('Only orders in production can complete fabrication');
     }
 
+    // Keep what the optimiser planned alongside the actual figures (planned vs actual).
+    const plan = order.bomSnapshot?.lines?.length ? planCuttingFromBom(order.bomSnapshot as any) : null;
+    const planned = plan
+      ? {
+          bars: plan.totals.bars,
+          purchasedKg: plan.totals.purchasedKg,
+          usedKg: plan.totals.usedKg,
+          reusableOffcutsKg: plan.totals.reusableOffcutsKg,
+          scrapWasteKg: plan.totals.scrapWasteKg,
+          purchaseCost: plan.totals.purchaseCost,
+          wasteRatePct: plan.totals.wasteRatePct,
+        }
+      : undefined;
+
     const usage = await this.sustainabilityService.createForOrder(
       materialUsage,
       req.user.id,
       order._id.toString(),
       order.orderId,
       order.productType,
+      planned,
     );
 
     const updatedOrder = await this.ordersService.update(id, {

@@ -396,11 +396,11 @@ export default function AdminQuotationsPage() {
 
         {/* Details Drawer / Dialog */}
         <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-[600px] max-h-[92vh] overflow-hidden p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-            <div className="flex max-h-[92vh] flex-col">
-              <DialogHeader className="shrink-0 border-b border-zinc-800 px-6 py-5 bg-zinc-950">
+          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-[720px] max-h-[92vh] overflow-hidden p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="flex max-h-[92vh] min-w-0 flex-col">
+              <DialogHeader className="shrink-0 border-b border-zinc-800 px-4 py-5 sm:px-6 bg-zinc-950">
                 <div className="flex items-center justify-between gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <DialogTitle className="text-2xl font-bold text-zinc-100">Order Details</DialogTitle>
                     <DialogDescription className="text-zinc-400">
                       {selectedOrder?.orderId} — Review and prepare final quotation
@@ -411,7 +411,7 @@ export default function AdminQuotationsPage() {
               </DialogHeader>
 
               {selectedOrder && (
-                <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
+                <div className="custom-scrollbar min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6">
                   <div className="space-y-8">
                     {/* Order Info */}
                     <section>

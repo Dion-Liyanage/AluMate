@@ -18,6 +18,8 @@ import {
   Hammer,
   Truck,
   Ruler,
+  Scissors,
+  Loader2,
   Eye
 } from "lucide-react";
 import Link from "next/link";
@@ -34,6 +36,8 @@ import { Order } from "./OrdersTable";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { CompleteFabricationDialog } from "./CompleteFabricationDialog";
 import { BomPreview } from "@/components/materials/BomPreview";
+import { CuttingPlanView } from "./CuttingPlanView";
+import type { CuttingPlan } from "@/types";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -51,6 +55,35 @@ interface OrderDetailsModalProps {
 export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: OrderDetailsModalProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [designs, setDesigns] = useState<any[]>([]);
+  const [cuttingPlan, setCuttingPlan] = useState<CuttingPlan | null>(null);
+  const [isPlanLoading, setIsPlanLoading] = useState(false);
+
+  const orderDbId = order?._id;
+  const hasCutList = !!order?.bomSnapshot?.lines?.length;
+
+  // Cutting plan is built on the server from the cut list saved with the order.
+  useEffect(() => {
+    if (!isOpen || !orderDbId || !hasCutList) {
+      setCuttingPlan(null);
+      return;
+    }
+    let cancelled = false;
+    setIsPlanLoading(true);
+    adminOrdersApi
+      .getCuttingPlan(orderDbId)
+      .then((response) => {
+        if (!cancelled) setCuttingPlan(response.data ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setCuttingPlan(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsPlanLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, orderDbId, hasCutList]);
 
   useEffect(() => {
     const loadDesigns = async () => {
@@ -129,8 +162,8 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[95vh] max-w-2xl overflow-y-auto bg-[#0a0a0a] border-zinc-900 text-zinc-100 shadow-[0_0_50px_rgba(0,0,0,0.5)] p-0 gap-0">
-        <div className="p-8 space-y-8">
+      <DialogContent className="max-h-[95vh] sm:max-w-3xl overflow-y-auto overflow-x-hidden bg-[#0a0a0a] border-zinc-900 text-zinc-100 shadow-[0_0_50px_rgba(0,0,0,0.5)] p-0 gap-0">
+        <div className="min-w-0 space-y-8 p-5 sm:p-8">
           {/* Header Section */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -250,6 +283,25 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
                   Fabrication Cut List
                 </h4>
                 <BomPreview bom={order.bomSnapshot} />
+              </div>
+              <div className="space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200 flex items-center gap-2">
+                  <Scissors className="h-4 w-4 text-emerald-400" />
+                  Cutting Plan
+                  <span className="normal-case tracking-normal font-medium text-zinc-500">
+                    — how pieces are cut from stock bars
+                  </span>
+                </h4>
+                {isPlanLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Planning cuts...
+                  </div>
+                ) : cuttingPlan ? (
+                  <CuttingPlanView plan={cuttingPlan} />
+                ) : (
+                  <p className="text-xs text-zinc-500">Cutting plan unavailable.</p>
+                )}
               </div>
               <Separator className="bg-zinc-900" />
             </>
@@ -392,6 +444,7 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
                   orderId={order._id}
                   orderNumber={order.id}
                   productType={order.productType}
+                  plan={cuttingPlan}
                   onCompleted={() => {
                     onRefresh?.();
                     onOpenChange(false);

@@ -123,7 +123,7 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
                 <TableRow className="border-zinc-800 hover:bg-transparent">
                   <TableHead className="text-[10px] uppercase text-zinc-500">Profile to purchase</TableHead>
                   <TableHead className="text-right text-[10px] uppercase text-zinc-500">Total length</TableHead>
-                  <TableHead className="text-right text-[10px] uppercase text-zinc-500">Min. bars</TableHead>
+                  <TableHead className="text-right text-[10px] uppercase text-zinc-500">Bars to buy</TableHead>
                   <TableHead className="text-right text-[10px] uppercase text-zinc-500">Weight</TableHead>
                   <TableHead className="text-right text-[10px] uppercase text-zinc-500">Cost</TableHead>
                 </TableRow>
@@ -139,7 +139,7 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
                       {profile.totalLengthFt.toFixed(1)} ft
                     </TableCell>
                     <TableCell className="py-2 text-right text-xs text-zinc-200">
-                      {profile.minimumBars} × {profile.barLengthFt}ft
+                      {profile.barsNeeded ?? profile.minimumBars} × {profile.barLengthFt}ft
                     </TableCell>
                     <TableCell className="py-2 text-right text-xs text-zinc-400">{formatKg(profile.weightKg)}</TableCell>
                     <TableCell className="py-2 text-right text-xs text-zinc-200">{formatLKR(profile.cost)}</TableCell>
@@ -149,7 +149,8 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
             </Table>
           </div>
           <p className="text-[10px] italic text-zinc-500">
-            Min. bars assumes no cutting waste; the cutting optimiser (next phase) will plan exact bar usage.
+            Bars to buy are planned by the cutting optimiser, including saw-cut allowance
+            {bom.totals.plannedWasteRatePct !== undefined ? ` — planned scrap ${bom.totals.plannedWasteRatePct}% of purchased aluminium.` : "."}
           </p>
 
           <div className="space-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900/30 p-3 text-xs">

@@ -222,6 +222,8 @@ export interface BomProfileSummary {
   weightKg: number;
   cost: number;
   minimumBars: number;
+  /** Bars to purchase per the cutting optimiser (missing on cut lists saved before it existed). */
+  barsNeeded?: number;
   longestCutIn: number;
 }
 
@@ -245,6 +247,8 @@ export interface BomResult {
   totals: {
     totalLengthFt: number;
     aluminiumWeightKg: number;
+    barsNeeded?: number;
+    plannedWasteRatePct?: number;
     profileCost: number;
     glassCost: number;
     hardwareCost: number;
@@ -257,4 +261,54 @@ export interface BomResult {
   explanation: string[];
   warnings: string[];
   generatedAt: string;
+}
+
+// ---------- Cutting plan (optimiser) ----------
+
+export type LeftoverType = 'offcut' | 'scrap' | 'none';
+
+export interface PlannedCut {
+  component: string;
+  lengthIn: number;
+  isJoint?: boolean;
+}
+
+export interface PlannedBar {
+  index: number;
+  cuts: PlannedCut[];
+  usedIn: number;
+  kerfIn: number;
+  leftoverIn: number;
+  leftoverType: LeftoverType;
+}
+
+export interface ProfileCuttingPlan {
+  profileCode: string;
+  profileName: string;
+  barLengthIn: number;
+  bars: PlannedBar[];
+  barsNeeded: number;
+  pieces: number;
+  purchasedKg: number;
+  usedKg: number;
+  reusableOffcutsKg: number;
+  scrapWasteKg: number;
+  purchaseCost: number;
+}
+
+export interface CuttingPlan {
+  settings: { kerfIn: number; minReusableOffcutIn: number };
+  profiles: ProfileCuttingPlan[];
+  totals: {
+    bars: number;
+    pieces: number;
+    purchasedKg: number;
+    usedKg: number;
+    reusableOffcutsKg: number;
+    scrapWasteKg: number;
+    purchaseCost: number;
+    efficiencyPct: number;
+    wasteRatePct: number;
+  };
+  warnings: string[];
 }

@@ -3,6 +3,17 @@ import { HydratedDocument, Types } from 'mongoose';
 
 export type MaterialUsageDocument = HydratedDocument<MaterialUsage>;
 
+/** What the cutting optimiser planned for the order, saved when fabrication completes. */
+export interface PlannedMaterialUsage {
+  bars: number;
+  purchasedKg: number;
+  usedKg: number;
+  reusableOffcutsKg: number;
+  scrapWasteKg: number;
+  purchaseCost: number;
+  wasteRatePct: number;
+}
+
 @Schema({ timestamps: true })
 export class MaterialUsage {
   @Prop({ type: Types.ObjectId, ref: 'Order', unique: true, sparse: true })
@@ -37,6 +48,10 @@ export class MaterialUsage {
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   recordedBy: Types.ObjectId;
+
+  /** Planned figures from the cutting optimiser — absent for manual records. */
+  @Prop({ type: Object })
+  planned?: PlannedMaterialUsage;
 }
 
 export const MaterialUsageSchema = SchemaFactory.createForClass(MaterialUsage);

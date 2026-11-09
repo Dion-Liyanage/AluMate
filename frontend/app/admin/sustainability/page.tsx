@@ -14,10 +14,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Banknote, Leaf, Loader2, PackageCheck, Recycle, Trash2 } from "lucide-react";
+import { AlertTriangle, Banknote, Leaf, Loader2, PackageCheck, Recycle, Scissors, Trash2 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecordMaterialUsageDialog } from "@/components/admin/sustainability/RecordMaterialUsageDialog";
+import { PlannedVsActualChart } from "@/components/admin/sustainability/PlannedVsActualChart";
+import { HighWasteOrders } from "@/components/admin/sustainability/HighWasteOrders";
 import { sustainabilityApi, type SustainabilityDashboardData } from "@/lib/api";
 
 const tooltipStyle = {
@@ -58,7 +60,11 @@ export default function SustainabilityPage() {
     scrapWasteKg: 0,
     costSaved: 0,
     wasteRate: 0,
+    efficiencyPct: 0,
   };
+  const planAccuracy = dashboard?.planAccuracy;
+  const plannedVsActual = dashboard?.plannedVsActual ?? [];
+  const highWasteOrders = dashboard?.highWasteOrders ?? [];
   const materialDistribution = dashboard?.materialDistribution ?? [];
   const monthlyWaste = dashboard?.monthlyWaste ?? [];
   const projects = dashboard?.projects ?? [];
@@ -86,7 +92,7 @@ export default function SustainabilityPage() {
           <MetricCard
             title="Aluminium Used"
             value={`${formatNumber(summary.usedKg)} kg`}
-            detail="Across recorded projects"
+            detail={`${summary.efficiencyPct ?? 0}% material efficiency`}
             icon={PackageCheck}
             iconClassName="text-emerald-400"
           />
@@ -185,6 +191,45 @@ export default function SustainabilityPage() {
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-5">
+              <Card className="border-zinc-800 bg-zinc-900/50 xl:col-span-3">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg text-zinc-100">
+                    <Scissors className="h-5 w-5 text-emerald-400" />
+                    Planned vs Actual Waste
+                  </CardTitle>
+                  <p className="text-sm text-zinc-500">
+                    {planAccuracy && planAccuracy.ordersWithPlan > 0
+                      ? `Cutting optimiser planned ${planAccuracy.plannedWasteRate}% waste; the workshop produced ${planAccuracy.actualWasteRate}% across ${planAccuracy.ordersWithPlan} order${planAccuracy.ordersWithPlan === 1 ? "" : "s"}.`
+                      : "Waste the cutting optimiser planned for each order, compared with what was recorded."}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <PlannedVsActualChart data={plannedVsActual} />
+                </CardContent>
+              </Card>
+
+              <Card className="border-zinc-800 bg-zinc-900/50 xl:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg text-zinc-100">
+                    <AlertTriangle className="h-5 w-5 text-amber-400" />
+                    Orders Above Planned Waste
+                  </CardTitle>
+                  <p className="text-sm text-zinc-500">
+                    Actual waste more than {planAccuracy?.highWasteMarginPct ?? 3} points above plan — worth a check
+                    with the workshop.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <HighWasteOrders
+                    orders={highWasteOrders}
+                    marginPct={planAccuracy?.highWasteMarginPct ?? 3}
+                    ordersWithPlan={planAccuracy?.ordersWithPlan ?? 0}
+                  />
                 </CardContent>
               </Card>
             </div>

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { evaluateFormula, FormulaError, FormulaScope } from './formula.util';
+import { planCutting } from './cutting-optimizer';
 import type { Profile } from './schemas/profile.schema';
 import type { ProductTemplate, SizeBand } from './schemas/product-template.schema';
 
@@ -37,8 +38,10 @@ export interface BomProfileSummary {
   totalLengthFt: number;
   weightKg: number;
   cost: number;
-  /** Bars needed if every bar were used perfectly — the cutting optimiser refines this. */
+  /** Bars needed if every bar were used perfectly (theoretical lower bound). */
   minimumBars: number;
+  /** Bars to purchase according to the cutting optimiser (includes saw-cut allowance). */
+  barsNeeded: number;
   longestCutIn: number;
 }
 
@@ -62,6 +65,10 @@ export interface BomResult {
   totals: {
     totalLengthFt: number;
     aluminiumWeightKg: number;
+    /** Stock bars to purchase, from the cutting optimiser. */
+    barsNeeded: number;
+    /** Planned scrap as % of purchased aluminium. */
+    plannedWasteRatePct: number;
     profileCost: number;
     glassCost: number;
     hardwareCost: number;
@@ -192,6 +199,15 @@ export class BomService {
     }
 
     const profiles = this.summariseByProfile(lineResults, profilesByCode);
+    const cuttingPlan = planCutting(
+      lineResults,
+      Object.fromEntries(profiles.map((profile) => [profile.profileCode, profile.barLengthFt])),
+    );
+    for (const profile of profiles) {
+      profile.barsNeeded =
+        cuttingPlan.profiles.find((plan) => plan.profileCode === profile.profileCode)?.barsNeeded ??
+        profile.minimumBars;
+    }
 
     // Billing follows the existing shop convention: inches round up to the next foot.
     const billableAreaSqFt = Math.ceil(widthFt) * Math.ceil(heightFt);
@@ -237,6 +253,8 @@ export class BomService {
       totals: {
         totalLengthFt: round(lineResults.reduce((sum, line) => sum + line.totalLengthFt, 0)),
         aluminiumWeightKg: round(lineResults.reduce((sum, line) => sum + line.weightKg, 0), 3),
+        barsNeeded: cuttingPlan.totals.bars,
+        plannedWasteRatePct: cuttingPlan.totals.wasteRatePct,
         profileCost,
         glassCost,
         hardwareCost,
@@ -294,6 +312,7 @@ export class BomService {
         weightKg: 0,
         cost: 0,
         minimumBars: 0,
+        barsNeeded: 0,
         longestCutIn: 0,
       };
       current.totalLengthFt = round(current.totalLengthFt + line.totalLengthFt);

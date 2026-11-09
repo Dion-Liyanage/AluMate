@@ -3,7 +3,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateMaterialUsageDto } from './dto/create-material-usage.dto';
 import { CompleteFabricationDto } from './dto/complete-fabrication.dto';
-import { MaterialUsage, MaterialUsageDocument } from './schemas/material-usage.schema';
+import {
+  MaterialUsage,
+  MaterialUsageDocument,
+  PlannedMaterialUsage,
+} from './schemas/material-usage.schema';
+
+/** Actual waste this many percentage points above plan is flagged for review. */
+const HIGH_WASTE_MARGIN_PCT = 3;
+
+const rate = (part: number, whole: number) => (whole > 0 ? Number(((part / whole) * 100).toFixed(1)) : 0);
 
 @Injectable()
 export class SustainabilityService {
@@ -30,6 +39,7 @@ export class SustainabilityService {
     orderId: string,
     orderNumber: string,
     projectName: string,
+    planned?: PlannedMaterialUsage,
   ) {
     this.validateMaterialAllocation(data);
     const costPerKg = this.calculateCostPerKg(data.purchasedKg, data.totalCost);
@@ -45,6 +55,7 @@ export class SustainabilityService {
       orderId: new Types.ObjectId(orderId),
       orderNumber,
       projectName,
+      planned,
       recordedAt: new Date(),
       recordedBy: new Types.ObjectId(adminId),
     });
@@ -102,14 +113,15 @@ export class SustainabilityService {
     }
 
     const monthlyWaste = this.getMonthlyWaste(records);
+    const planComparison = this.getPlanComparison(records);
 
     return {
       summary: {
         ...summary,
-        wasteRate: summary.purchasedKg
-          ? Number(((summary.scrapWasteKg / summary.purchasedKg) * 100).toFixed(1))
-          : 0,
+        wasteRate: rate(summary.scrapWasteKg, summary.purchasedKg),
+        efficiencyPct: rate(summary.usedKg, summary.purchasedKg),
       },
+      ...planComparison,
       materialDistribution: [
         { name: 'Used in projects', value: summary.usedKg, color: '#34d399' },
         { name: 'Reusable offcuts', value: summary.reusableOffcutsKg, color: '#60a5fa' },
@@ -124,6 +136,55 @@ export class SustainabilityService {
             : 0,
         }))
         .sort((a, b) => b.latestRecordedAt.getTime() - a.latestRecordedAt.getTime()),
+    };
+  }
+
+  /** Planned (cutting optimiser) vs actual waste for orders completed with a plan. */
+  private getPlanComparison(records: MaterialUsage[]) {
+    const planned = records.filter((record) => record.planned && record.planned.purchasedKg > 0);
+
+    const comparisons = planned.map((record) => {
+      const plannedWasteRate = rate(record.planned!.scrapWasteKg, record.planned!.purchasedKg);
+      const actualWasteRate = rate(record.scrapWasteKg, record.purchasedKg);
+      return {
+        orderNumber: record.orderNumber ?? record.projectName,
+        projectName: record.projectName,
+        recordedAt: record.recordedAt,
+        plannedScrapKg: record.planned!.scrapWasteKg,
+        actualScrapKg: record.scrapWasteKg,
+        extraScrapKg: Number((record.scrapWasteKg - record.planned!.scrapWasteKg).toFixed(3)),
+        plannedWasteRate,
+        actualWasteRate,
+        difference: Number((actualWasteRate - plannedWasteRate).toFixed(1)),
+      };
+    });
+
+    const plannedTotals = planned.reduce(
+      (totals, record) => {
+        totals.plannedScrapKg += record.planned!.scrapWasteKg;
+        totals.plannedPurchasedKg += record.planned!.purchasedKg;
+        totals.actualScrapKg += record.scrapWasteKg;
+        totals.actualPurchasedKg += record.purchasedKg;
+        return totals;
+      },
+      { plannedScrapKg: 0, plannedPurchasedKg: 0, actualScrapKg: 0, actualPurchasedKg: 0 },
+    );
+
+    return {
+      planAccuracy: {
+        ordersWithPlan: planned.length,
+        totalOrders: records.length,
+        plannedWasteRate: rate(plannedTotals.plannedScrapKg, plannedTotals.plannedPurchasedKg),
+        actualWasteRate: rate(plannedTotals.actualScrapKg, plannedTotals.actualPurchasedKg),
+        extraScrapKg: Number((plannedTotals.actualScrapKg - plannedTotals.plannedScrapKg).toFixed(3)),
+        highWasteMarginPct: HIGH_WASTE_MARGIN_PCT,
+      },
+      // records are newest first; chart reads oldest → newest
+      plannedVsActual: comparisons.slice(0, 8).reverse(),
+      highWasteOrders: comparisons
+        .filter((comparison) => comparison.difference > HIGH_WASTE_MARGIN_PCT)
+        .sort((a, b) => b.difference - a.difference)
+        .slice(0, 10),
     };
   }
 
