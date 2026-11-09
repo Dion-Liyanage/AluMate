@@ -36,6 +36,7 @@ interface Design {
   description: string;
   imageUrls?: string[];
   modelUrl?: string;
+  systemType?: string | null;
 }
 
 // Map category to product type for the quotation config
@@ -278,6 +279,7 @@ export default function CatalogueDesignDetailPage() {
                       productType={productType}
                       catalogueDesignId={design._id}
                       catalogueDesignTitle={design.title}
+                      systemType={design.systemType ?? undefined}
                     />
                   </div>
                 </Card>

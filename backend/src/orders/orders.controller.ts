@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -14,11 +15,15 @@ import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { MaterialsService } from '../materials/materials.service';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly materialsService: MaterialsService,
+  ) {}
 
   @Get()
   async getMyOrders(@Request() req, @Query() query: any) {
@@ -55,9 +60,59 @@ export class OrdersController {
   async createOrder(@Body() body: any, @Request() req) {
     const customerId = req.user.id;
     const orderId = `ORD-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
-    
+
+    // Fields only the server / admin may set.
+    const {
+      verticalBars,
+      horizontalBars,
+      bomSnapshot: _bomSnapshot,
+      recommendedMaterials: _recommendedMaterials,
+      laborCalculation: _laborCalculation,
+      finalMaterialCost: _finalMaterialCost,
+      finalLaborCost: _finalLaborCost,
+      finalTotalCost: _finalTotalCost,
+      quotationId: _quotationId,
+      quotationPdfUrl: _quotationPdfUrl,
+      quotationSentAt: _quotationSentAt,
+      progress: _progress,
+      ...orderInput
+    } = body ?? {};
+
+    let materialPlan: Record<string, any> = {};
+    if (this.materialsService.isBomProduct(orderInput.productType)) {
+      if (!orderInput.systemType) {
+        throw new BadRequestException('Please choose an opening system (sliding, swing or fixed)');
+      }
+
+      const bom = await this.materialsService.estimate(orderInput.productType, orderInput.systemType, {
+        measurements: orderInput.measurements ?? {},
+        panels: orderInput.measurements?.panelCount,
+        verticalBars: Number(verticalBars) || 0,
+        horizontalBars: Number(horizontalBars) || 0,
+        color: orderInput.color,
+      });
+
+      materialPlan = {
+        estimatedPrice: bom.totals.total,
+        bomSnapshot: bom,
+        recommendedMaterials: bom.profiles.map((profile) => ({
+          profileName: `${profile.profileCode} ${profile.profileName}`,
+          thickness: `${profile.thicknessMm}mm`,
+          quantityFeet: profile.totalLengthFt,
+          pricePerFeet: profile.totalLengthFt ? Math.round(profile.cost / profile.totalLengthFt) : 0,
+          materialCost: profile.cost,
+        })),
+        laborCalculation: {
+          areaSqFt: bom.inputs.billableAreaSqFt,
+          laborRate: bom.laborRatePerSqFt,
+          laborCost: bom.totals.laborCost,
+        },
+      };
+    }
+
     const newOrder = await this.ordersService.create({
-      ...body,
+      ...orderInput,
+      ...materialPlan,
       customerId,
       orderId,
       status: 'quotation_pending',
@@ -122,7 +177,7 @@ export class OrdersController {
     }
 
     // Only allow cancellation if not already in production or completed
-    const nonCancellable = ['production', 'installation', 'completed'];
+    const nonCancellable = ['production', 'fabrication_completed', 'installation', 'completed'];
     if (nonCancellable.includes(order.status)) {
       return { success: false, message: 'Order cannot be cancelled at this stage' };
     }

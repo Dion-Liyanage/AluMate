@@ -34,6 +34,8 @@ export function OrdersSearchFilters() {
             <SelectItem value="quotation_sent">Quotation Sent</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="production">In Production</SelectItem>
+            <SelectItem value="fabrication_completed">Fabrication Completed</SelectItem>
+            <SelectItem value="installation">Installation</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
           </SelectContent>
         </Select>

@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Image as ImageIcon, X, Box as CubeIcon, CheckCircle2 } from "lucide-react";
 import { designsApi } from "@/lib/api";
 import { toast } from "sonner";
+import { DEFAULT_SYSTEM_TYPE, SystemTypeSelect, systemTypeForSubmit } from "./SystemTypeSelect";
 
 interface AddDesignDialogProps {
   onSuccess: () => void;
@@ -37,6 +38,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     title: "",
     description: "",
     category: "doors",
+    systemType: DEFAULT_SYSTEM_TYPE,
   });
 
 
@@ -67,6 +69,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
       title: "",
       description: "",
       category: "doors",
+      systemType: DEFAULT_SYSTEM_TYPE,
     });
     setSelectedModelFile(null);
   };
@@ -82,6 +85,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
+    submitData.append("systemType", systemTypeForSubmit(formData.category, formData.systemType));
     
 
 
@@ -142,7 +146,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
             <Label htmlFor="category">Category</Label>
             <Select
               value={formData.category}
-              onValueChange={(val) => setFormData({ ...formData, category: val })}
+              onValueChange={(val) => setFormData({ ...formData, category: val, systemType: DEFAULT_SYSTEM_TYPE })}
             >
               <SelectTrigger className="bg-zinc-900 border-zinc-800">
                 <SelectValue placeholder="Select category" />
@@ -156,6 +160,12 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
               </SelectContent>
             </Select>
           </div>
+          <SystemTypeSelect
+            id="systemType"
+            category={formData.category}
+            value={formData.systemType}
+            onChange={(val) => setFormData({ ...formData, systemType: val })}
+          />
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea

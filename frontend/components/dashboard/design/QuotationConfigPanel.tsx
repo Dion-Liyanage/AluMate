@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
@@ -11,13 +11,22 @@ import {
   StickyNote,
   ArrowRight,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 import { MeasurementForm } from "./MeasurementForm";
 import { ColorSelector } from "./ColorSelector";
-import { calculateEstimate, productMeasurements } from "./quotationConfig";
-import { ordersApi } from "@/lib/api";
+import {
+  calculateEstimate,
+  getRoundedFeet,
+  isBomProduct,
+  productMeasurements,
+  systemTypeLabels,
+} from "./quotationConfig";
+import { materialsApi, ordersApi } from "@/lib/api";
+import { extractStudioFeatures } from "@/lib/studio-features";
+import type { OpeningSystem } from "@/types";
 import { LiveEstimatePanel } from "./LiveEstimatePanel";
 
 interface QuotationConfigPanelProps {
@@ -30,6 +39,11 @@ interface QuotationConfigPanelProps {
   catalogueDesignId?: string;
   /** Optional catalogue design title */
   catalogueDesignTitle?: string;
+  /**
+   * Opening system of a catalogue design (sliding | swing | fixed). Catalogue
+   * designs never ask the customer — the system comes from the design itself.
+   */
+  systemType?: string;
 }
 
 interface QuotationState {
@@ -53,15 +67,12 @@ const initialState: QuotationState = {
 };
 
 type SectionId =
+  | "system"
   | "measurements"
   | "color"
   | "notes";
 
-const SECTIONS: { id: SectionId; title: string; isRequired: boolean }[] = [
-  { id: "measurements", title: "📐 Measurements", isRequired: true },
-  { id: "color", title: "🎨 Color & Finish", isRequired: true },
-  { id: "notes", title: "📝 Additional Notes", isRequired: false },
-];
+const BASE_SECTIONS: SectionId[] = ["measurements", "color", "notes"];
 
 // Collapsible section wrapper
 function ConfigSection({
@@ -150,11 +161,85 @@ export function QuotationConfigPanel({
   previewImage,
   catalogueDesignId,
   catalogueDesignTitle,
+  systemType: catalogueSystemType,
 }: QuotationConfigPanelProps) {
+  const usesBom = isBomProduct(productType);
+  const isCatalogue = !!catalogueDesignId;
+  // Only custom (studio) designs ask the customer to choose an opening system.
+  const showSystemStep = usesBom && !isCatalogue;
+  const sections: SectionId[] = useMemo(
+    () => (showSystemStep ? ["system", ...BASE_SECTIONS] : BASE_SECTIONS),
+    [showSystemStep]
+  );
+
   const [config, setConfig] = useState<QuotationState>(initialState);
-  const [activeSection, setActiveSection] = useState<SectionId>("measurements");
+  const [activeSection, setActiveSection] = useState<SectionId | null>(sections[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // ---------- Opening system (windows & doors) ----------
+  const [systems, setSystems] = useState<OpeningSystem[]>([]);
+  const [systemsLoading, setSystemsLoading] = useState(usesBom);
+  const [systemType, setSystemType] = useState<string>("");
+
+  const studioFeatures = useMemo(() => extractStudioFeatures(designData), [designData]);
+
+  useEffect(() => {
+    if (!usesBom) return;
+    let cancelled = false;
+    setSystemsLoading(true);
+    materialsApi
+      .getSystems(productType)
+      .then((response) => {
+        if (!cancelled) setSystems(response.data ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setSystems([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSystemsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [productType, usesBom]);
+
+  // Catalogue designs: use the design's system. Older designs saved before
+  // systems existed fall back to sliding (or the first available system).
+  useEffect(() => {
+    if (!isCatalogue || !usesBom || systems.length === 0) return;
+    const resolved =
+      systems.find((system) => system.systemType === catalogueSystemType) ??
+      systems.find((system) => system.systemType === "sliding") ??
+      systems[0];
+    setSystemType(resolved.systemType);
+  }, [isCatalogue, usesBom, systems, catalogueSystemType]);
+
+  const selectedSystem = systems.find((system) => system.systemType === systemType);
+
+  // Sensible panel default for the chosen system.
+  // Sliding designs from the studio: each vertical bar separates two sashes.
+  const defaultPanels = useMemo(() => {
+    if (!selectedSystem) return undefined;
+    let panels = selectedSystem.defaultPanels;
+    if (selectedSystem.systemType === "sliding" && studioFeatures?.verticalBars) {
+      panels = studioFeatures.verticalBars + 1;
+    }
+    return Math.min(selectedSystem.maxPanels, Math.max(selectedSystem.minPanels, panels));
+  }, [selectedSystem, studioFeatures]);
+
+  // Reset panels whenever the system (and so its default) changes.
+  useEffect(() => {
+    if (defaultPanels === undefined) return;
+    setConfig((prev) => ({ ...prev, measurements: { ...prev.measurements, panelCount: defaultPanels } }));
+  }, [defaultPanels]);
+
+  // Bars drawn in the studio become mullions/transoms — except on sliding
+  // systems, where vertical bars are the sash meeting points (panels).
+  const bomStudioFeatures = useMemo(() => {
+    if (!studioFeatures) return undefined;
+    return systemType === "sliding" ? { ...studioFeatures, verticalBars: 0 } : studioFeatures;
+  }, [studioFeatures, systemType]);
 
   const updateConfig = useCallback(
     <K extends keyof QuotationState>(key: K, value: QuotationState[K]) => {
@@ -179,50 +264,63 @@ export function QuotationConfigPanel({
       const val = config.measurements[f.key];
       if (f.type === "dimension") {
         // Dimension string like "5'2\"" - check if it has any feet or inches
-        const { getRoundedFeet } = require("./quotationConfig");
         return !!val && getRoundedFeet(val) > 0;
       }
       return val !== undefined && val !== "" && Number(val) > 0;
     });
 
-    const validations = {
+    const panels = Number(config.measurements.panelCount);
+    const systemValid =
+      !usesBom ||
+      (!!selectedSystem &&
+        Number.isInteger(panels) &&
+        panels >= selectedSystem.minPanels &&
+        panels <= selectedSystem.maxPanels);
+
+    const validations: Record<SectionId, boolean> = {
+      system: systemValid,
       measurements: measurementsValid,
       color: !!config.color,
       notes: true,
     };
 
-    const completions = {
+    const completions: Record<SectionId, boolean> = {
+      system: usesBom && systemValid,
       measurements: measurementsValid,
       color: !!config.color,
       notes: config.additionalNotes.trim().length > 0,
     };
 
     return { sectionValidations: validations, sectionCompletions: completions };
-  }, [config, productType]);
+  }, [config, productType, usesBom, selectedSystem]);
 
   const handleNext = (currentId: SectionId) => {
-    const currentIndex = SECTIONS.findIndex((s) => s.id === currentId);
-    if (currentIndex < SECTIONS.length - 1) {
-      setActiveSection(SECTIONS[currentIndex + 1].id);
+    const currentIndex = sections.indexOf(currentId);
+    if (currentIndex < sections.length - 1) {
+      setActiveSection(sections[currentIndex + 1]);
     }
   };
 
-  const allRequiredValid = sectionValidations.measurements && sectionValidations.color;
+  const allRequiredValid =
+    sectionValidations.system && sectionValidations.measurements && sectionValidations.color;
 
   const handleSubmit = async () => {
     if (!allRequiredValid || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      const estimate = calculateEstimate({
-        productType,
-        measurements: config.measurements,
-        purpose: config.purpose || "",
-        environment: "",
-        strength: config.strength || "",
-        color: config.color || "",
-        accessories: config.accessories || [],
-      });
+      // Windows & doors: the server builds the bill of materials and price.
+      const estimatedPrice = usesBom
+        ? undefined
+        : calculateEstimate({
+            productType,
+            measurements: config.measurements,
+            purpose: config.purpose || "",
+            environment: "",
+            strength: config.strength || "",
+            color: config.color || "",
+            accessories: config.accessories || [],
+          }).total;
 
       await ordersApi.create({
         productType,
@@ -233,14 +331,19 @@ export function QuotationConfigPanel({
         strengthCategory: config.strength,
         color: config.color,
         accessories: config.accessories,
-        estimatedPrice: estimate.total,
+        estimatedPrice,
+        ...(usesBom && {
+          systemType,
+          verticalBars: bomStudioFeatures?.verticalBars ?? 0,
+          horizontalBars: bomStudioFeatures?.horizontalBars ?? 0,
+        }),
         notes: config.additionalNotes ? [{ message: config.additionalNotes, createdBy: "Customer" }] : [],
       });
 
       setIsSubmitted(true);
     } catch (error) {
       console.error("Failed to submit quotation:", error);
-      alert("Failed to submit quotation. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to submit quotation. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -265,8 +368,13 @@ export function QuotationConfigPanel({
         <Button
           onClick={() => {
             setIsSubmitted(false);
-            setConfig(initialState);
-            setActiveSection("measurements");
+            // Catalogue designs keep their system, so keep its panel default too.
+            setConfig({
+              ...initialState,
+              measurements: isCatalogue && defaultPanels ? { panelCount: defaultPanels } : {},
+            });
+            if (!isCatalogue) setSystemType("");
+            setActiveSection(sections[0]);
           }}
           className="mt-6 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
         >
@@ -280,10 +388,40 @@ export function QuotationConfigPanel({
     <div className="flex flex-col h-full">
       {/* Scrollable configuration area */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-0">
+        {isCatalogue && usesBom && !systemsLoading && !selectedSystem && (
+          <p className="mb-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-[11px] text-amber-300">
+            Online pricing for this design is unavailable right now. Please contact us for a quotation.
+          </p>
+        )}
+
+        {showSystemStep && (
+          <ConfigSection
+            title="🪟 Opening System"
+            isOpen={activeSection === "system"}
+            onToggle={() => setActiveSection(activeSection === "system" ? null : "system")}
+            isCompleted={sectionCompletions.system}
+            isValid={sectionValidations.system}
+            showNext={true}
+            onNext={() => handleNext("system")}
+          >
+            <OpeningSystemSelector
+              systems={systems}
+              isLoading={systemsLoading}
+              value={systemType}
+              onChange={setSystemType}
+              panels={config.measurements.panelCount}
+              onPanelsChange={(value) => updateMeasurement("panelCount", value)}
+              selectedSystem={selectedSystem}
+              studioFeatures={studioFeatures}
+              productType={productType}
+            />
+          </ConfigSection>
+        )}
+
         <ConfigSection 
           title="📐 Measurements" 
           isOpen={activeSection === "measurements"}
-          onToggle={() => setActiveSection(activeSection === "measurements" ? "" as any : "measurements")}
+          onToggle={() => setActiveSection(activeSection === "measurements" ? null : "measurements")}
           isCompleted={sectionCompletions.measurements}
           isValid={sectionValidations.measurements}
           showNext={true}
@@ -301,7 +439,7 @@ export function QuotationConfigPanel({
         <ConfigSection 
           title="🎨 Color & Finish" 
           isOpen={activeSection === "color"}
-          onToggle={() => setActiveSection(activeSection === "color" ? "" as any : "color")}
+          onToggle={() => setActiveSection(activeSection === "color" ? null : "color")}
           isCompleted={sectionCompletions.color}
           isValid={sectionValidations.color}
           showNext={true}
@@ -320,7 +458,7 @@ export function QuotationConfigPanel({
         <ConfigSection 
           title="📝 Additional Notes" 
           isOpen={activeSection === "notes"}
-          onToggle={() => setActiveSection(activeSection === "notes" ? "" as any : "notes")}
+          onToggle={() => setActiveSection(activeSection === "notes" ? null : "notes")}
           isCompleted={sectionCompletions.notes}
           isValid={sectionValidations.notes}
           showNext={false}
@@ -350,6 +488,8 @@ export function QuotationConfigPanel({
             strength={config.strength}
             color={config.color}
             accessories={config.accessories}
+            systemType={usesBom ? systemType : undefined}
+            studioFeatures={bomStudioFeatures}
           />
         </div>
       </div>
@@ -383,6 +523,116 @@ export function QuotationConfigPanel({
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+function OpeningSystemSelector({
+  systems,
+  isLoading,
+  value,
+  onChange,
+  panels,
+  onPanelsChange,
+  selectedSystem,
+  studioFeatures,
+  productType,
+}: {
+  systems: OpeningSystem[];
+  isLoading: boolean;
+  value: string;
+  onChange: (systemType: string) => void;
+  panels: number | string | undefined;
+  onPanelsChange: (value: number | string) => void;
+  selectedSystem?: OpeningSystem;
+  studioFeatures?: { verticalBars: number; horizontalBars: number };
+  productType: string;
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 py-4 text-xs text-zinc-500">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        Loading available systems...
+      </div>
+    );
+  }
+
+  if (systems.length === 0) {
+    return (
+      <p className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-[11px] text-amber-300">
+        No {productType} systems are available right now. Please contact us for a quotation.
+      </p>
+    );
+  }
+
+  const panelLabel = productType === "door" ? "leaves / panels" : "panels / sashes";
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {systems.map((system) => {
+          const isSelected = system.systemType === value;
+          return (
+            <button
+              key={system._id}
+              type="button"
+              onClick={() => onChange(system.systemType)}
+              className={`rounded-lg border px-3 py-2.5 text-left transition-all ${
+                isSelected
+                  ? "border-violet-500/60 bg-violet-500/10 shadow-[0_0_12px_rgba(139,92,246,0.15)]"
+                  : "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
+              }`}
+            >
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-zinc-100">
+                {systemTypeLabels[system.systemType] ?? system.name}
+              </span>
+              {system.description && (
+                <span className="mt-0.5 block text-[10px] leading-snug text-zinc-500">{system.description}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {selectedSystem && selectedSystem.maxPanels > selectedSystem.minPanels && (
+        <div className="space-y-1.5">
+          <label className="text-xs text-zinc-400">
+            Number of {panelLabel}
+            <span className="ml-1 text-zinc-600">
+              ({selectedSystem.minPanels}–{selectedSystem.maxPanels})
+            </span>
+          </label>
+          <div className="flex gap-2">
+            {Array.from(
+              { length: selectedSystem.maxPanels - selectedSystem.minPanels + 1 },
+              (_, index) => selectedSystem.minPanels + index
+            ).map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => onPanelsChange(count)}
+                className={`h-9 w-11 rounded-lg border text-sm font-semibold transition-all ${
+                  Number(panels) === count
+                    ? "border-violet-500/60 bg-violet-500/15 text-violet-200"
+                    : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700"
+                }`}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {studioFeatures && (studioFeatures.verticalBars > 0 || studioFeatures.horizontalBars > 0) && (
+        <p className="rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-[11px] leading-relaxed text-sky-300/90">
+          Your studio design has {studioFeatures.verticalBars} vertical and {studioFeatures.horizontalBars} horizontal
+          bar{studioFeatures.horizontalBars === 1 ? "" : "s"}.{" "}
+          {value === "sliding"
+            ? "Vertical bars set the number of sliding panels; horizontal bars are added as fixed transoms."
+            : "They are included in the cut list as mullions and transoms."}
+        </p>
+      )}
     </div>
   );
 }

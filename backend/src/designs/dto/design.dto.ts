@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsArray, IsUrl, IsBoolean } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsArray, IsUrl, IsBoolean, IsIn } from 'class-validator';
 
 export class CreateDesignDto {
   @IsString()
@@ -16,6 +17,11 @@ export class CreateDesignDto {
   @IsEnum(['doors', 'windows', 'cupboards', 'pantries', 'ceilings'])
   @IsNotEmpty()
   category: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' || value === 'none' ? null : value))
+  @IsIn(['sliding', 'swing', 'fixed'])
+  systemType?: string;
 
   @IsOptional()
   imageUrls?: string[];
@@ -51,6 +57,11 @@ export class UpdateDesignDto {
   @IsEnum(['doors', 'windows', 'cupboards', 'pantries', 'ceilings'])
   @IsOptional()
   category?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' || value === 'none' ? null : value))
+  @IsIn(['sliding', 'swing', 'fixed'])
+  systemType?: string;
 
   @IsOptional()
   imageUrls?: string[];

@@ -27,6 +27,7 @@ import Link from "next/link";
 import { designsApi } from "@/lib/api";
 import { Design3DViewer } from "@/components/catalogue/Design3DViewer";
 import { toast } from "sonner";
+import { DEFAULT_SYSTEM_TYPE, SystemTypeSelect, systemTypeForSubmit } from "./SystemTypeSelect";
 
 interface Design {
   _id: string;
@@ -36,6 +37,7 @@ interface Design {
   description: string;
   imageUrls?: string[];
   modelUrl?: string;
+  systemType?: string | null;
 }
 
 interface DesignTableProps {
@@ -55,6 +57,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
     title: "",
     description: "",
     category: "doors",
+    systemType: DEFAULT_SYSTEM_TYPE,
   });
 
   const openEditDialog = (design: Design) => {
@@ -66,6 +69,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
       title: design.title,
       description: design.description,
       category: design.category,
+      systemType: design.systemType ?? DEFAULT_SYSTEM_TYPE,
     });
   };
 
@@ -95,6 +99,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
+    submitData.append("systemType", systemTypeForSubmit(formData.category, formData.systemType));
     
     if (selectedFile) {
       submitData.append("images", selectedFile);
@@ -168,6 +173,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                     }`}
                   >
                     {design.category}
+                    {design.systemType ? ` · ${design.systemType}` : ""}
                   </Badge>
 
                   <div className="flex items-center gap-1.5">
@@ -240,7 +246,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                             <Label htmlFor="edit-category">Category</Label>
                             <Select
                               value={formData.category}
-                              onValueChange={(value) => setFormData({ ...formData, category: value })}
+                              onValueChange={(value) => setFormData({ ...formData, category: value, systemType: DEFAULT_SYSTEM_TYPE })}
                             >
                               <SelectTrigger id="edit-category" className="bg-zinc-900 border-zinc-800">
                                 <SelectValue placeholder="Select category" />
@@ -254,6 +260,13 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                               </SelectContent>
                             </Select>
                           </div>
+
+                          <SystemTypeSelect
+                            id="edit-systemType"
+                            category={formData.category}
+                            value={formData.systemType}
+                            onChange={(value) => setFormData({ ...formData, systemType: value })}
+                          />
 
                           <div className="space-y-2">
                             <Label htmlFor="edit-description">Description</Label>

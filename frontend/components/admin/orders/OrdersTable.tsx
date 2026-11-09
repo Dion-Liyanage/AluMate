@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { BomResult } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Eye, 
@@ -58,6 +59,8 @@ export interface Order {
   catalogueDesignId?: any;
   recommendedMaterials?: any[];
   laborCalculation?: any;
+  systemType?: string;
+  bomSnapshot?: BomResult;
 }
 
 interface OrdersTableProps {

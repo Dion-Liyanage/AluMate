@@ -9,6 +9,7 @@ export type OrderStatus =
   | "quotation_sent" 
   | "approved" 
   | "production" 
+  | "fabrication_completed"
   | "installation" 
   | "completed" 
   | "cancelled";
@@ -38,6 +39,10 @@ const statusConfig: Record<OrderStatus, { label: string; className: string }> = 
   production: { 
     label: "In Production", 
     className: "bg-purple-500/20 text-purple-400 border-purple-500/30" 
+  },
+  fabrication_completed: {
+    label: "Fabrication Completed",
+    className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
   },
   installation: { 
     label: "Installing", 

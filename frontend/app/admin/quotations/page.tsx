@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { animate } from "framer-motion";
 import { formatMeasurement } from "@/lib/utils";
+import { BomPreview } from "@/components/materials/BomPreview";
+import type { BomResult } from "@/types";
 
 const QUOTATION_STATUSES = ["quotation_pending", "quotation_sent"];
 
@@ -75,6 +77,8 @@ interface QuotationOrder {
   quotationPdfUrl?: string;
   quotationSentAt?: string;
   expectedCompletionDate?: string;
+  systemType?: string;
+  bomSnapshot?: BomResult;
 }
 
 function formatLKR(amount: number): string {
@@ -392,11 +396,11 @@ export default function AdminQuotationsPage() {
 
         {/* Details Drawer / Dialog */}
         <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-[600px] max-h-[92vh] overflow-hidden p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-            <div className="flex max-h-[92vh] flex-col">
-              <DialogHeader className="shrink-0 border-b border-zinc-800 px-6 py-5 bg-zinc-950">
+          <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 sm:max-w-[720px] max-h-[92vh] overflow-hidden p-0 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="flex max-h-[92vh] min-w-0 flex-col">
+              <DialogHeader className="shrink-0 border-b border-zinc-800 px-4 py-5 sm:px-6 bg-zinc-950">
                 <div className="flex items-center justify-between gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <DialogTitle className="text-2xl font-bold text-zinc-100">Order Details</DialogTitle>
                     <DialogDescription className="text-zinc-400">
                       {selectedOrder?.orderId} — Review and prepare final quotation
@@ -407,7 +411,7 @@ export default function AdminQuotationsPage() {
               </DialogHeader>
 
               {selectedOrder && (
-                <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
+                <div className="custom-scrollbar min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6">
                   <div className="space-y-8">
                     {/* Order Info */}
                     <section>
@@ -578,6 +582,37 @@ export default function AdminQuotationsPage() {
                         </div>
                       </div>
                     </section>
+
+                    {selectedOrder.bomSnapshot && (
+                      <>
+                        <Separator className="bg-zinc-800/50" />
+                        <section className="space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                              <Ruler className="h-3.5 w-3.5" />
+                              Bill of Materials (at order time)
+                            </h4>
+                            {selectedOrder.status === 'quotation_pending' && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const totals = selectedOrder.bomSnapshot!.totals;
+                                  setFinalMaterialCost(String(totals.materialCost + totals.finishSurcharge));
+                                  setFinalLaborCost(String(totals.laborCost));
+                                  setFinalTotalCost(String(totals.total));
+                                }}
+                                className="h-7 border-violet-500/30 bg-violet-500/10 text-[11px] text-violet-200 hover:bg-violet-500/20"
+                              >
+                                Use BOM costs
+                              </Button>
+                            )}
+                          </div>
+                          <BomPreview bom={selectedOrder.bomSnapshot} showCosts />
+                        </section>
+                      </>
+                    )}
 
                     <Separator className="bg-zinc-800/50" />
 

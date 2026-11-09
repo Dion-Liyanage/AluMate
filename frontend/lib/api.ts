@@ -4,7 +4,21 @@
  */
 
 import axios, { type AxiosError } from "axios";
-import type { User, Order, Quotation, ServiceRequest, InventoryItem, Notification, Project } from "@/types";
+import type {
+  User,
+  Order,
+  Quotation,
+  ServiceRequest,
+  InventoryItem,
+  Notification,
+  Project,
+  MaterialProfile,
+  ProductTemplate,
+  OpeningSystem,
+  BomInput,
+  BomResult,
+  CuttingPlan,
+} from "@/types";
 
 type BackendErrorPayload = {
   message?: string | string[];
@@ -86,6 +100,61 @@ interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
+}
+
+export interface MaterialUsageInput {
+  projectName: string;
+  purchasedKg: number;
+  usedKg: number;
+  reusableOffcutsKg: number;
+  scrapWasteKg: number;
+  totalCost: number;
+}
+
+export interface PlanComparison {
+  orderNumber: string;
+  projectName: string;
+  recordedAt: string;
+  plannedScrapKg: number;
+  actualScrapKg: number;
+  extraScrapKg: number;
+  plannedWasteRate: number;
+  actualWasteRate: number;
+  difference: number;
+}
+
+export type FabricationMaterialUsageInput = Omit<MaterialUsageInput, "projectName">;
+
+export interface SustainabilityDashboardData {
+  summary: {
+    purchasedKg: number;
+    usedKg: number;
+    reusableOffcutsKg: number;
+    scrapWasteKg: number;
+    costSaved: number;
+    wasteRate: number;
+    efficiencyPct: number;
+  };
+  planAccuracy: {
+    ordersWithPlan: number;
+    totalOrders: number;
+    plannedWasteRate: number;
+    actualWasteRate: number;
+    extraScrapKg: number;
+    highWasteMarginPct: number;
+  };
+  plannedVsActual: PlanComparison[];
+  highWasteOrders: PlanComparison[];
+  materialDistribution: Array<{ name: string; value: number; color: string }>;
+  monthlyWaste: Array<{ month: string; wasteRate: number }>;
+  projects: Array<{
+    project: string;
+    used: number;
+    reusable: number;
+    scrap: number;
+    purchased: number;
+    wasteRate: number;
+  }>;
 }
 
 // ---------- Auth API ----------
@@ -187,6 +256,18 @@ export const adminOrdersApi = {
   updateStatus: async (id: string, data: { status: string; progress?: number }) => {
     const res = await apiClient.patch<ApiResponse<{ data: Order }>>(
       `/admin/orders/${id}/status`,
+      data
+    );
+    return res.data;
+  },
+
+  getCuttingPlan: async (id: string) => {
+    const response = await apiClient.get<ApiResponse<CuttingPlan | null>>(`/admin/orders/${id}/cutting-plan`);
+    return response.data;
+  },
+  completeFabrication: async (id: string, data: FabricationMaterialUsageInput) => {
+    const res = await apiClient.post<ApiResponse>(
+      `/admin/orders/${id}/complete-fabrication`,
       data
     );
     return res.data;
@@ -648,6 +729,86 @@ export const projectsApi = {
   delete: async (id: string) => {
     const res = await apiClient.delete<ApiResponse<any>>(`/projects/${id}`);
     return res.data;
+  },
+};
+
+export const sustainabilityApi = {
+  getDashboard: async () => {
+    const response = await apiClient.get<ApiResponse<SustainabilityDashboardData>>(
+      "/admin/sustainability/dashboard"
+    );
+    return response.data;
+  },
+  recordMaterialUsage: async (data: MaterialUsageInput) => {
+    const response = await apiClient.post<ApiResponse>(
+      "/admin/sustainability/material-usage",
+      data
+    );
+    return response.data;
+  },
+};
+
+// ---------- Materials & BOM API ----------
+
+export type ProfileInput = Omit<MaterialProfile, "_id" | "isSample">;
+export type ProductTemplateInput = Omit<ProductTemplate, "_id" | "isSample">;
+
+export const materialsApi = {
+  getSystems: async (productType?: string) => {
+    const response = await apiClient.get<ApiResponse<OpeningSystem[]>>("/materials/systems", {
+      params: productType ? { productType } : undefined,
+    });
+    return response.data;
+  },
+  estimate: async (data: BomInput & { productType: string; systemType: string }) => {
+    const response = await apiClient.post<ApiResponse<BomResult>>("/materials/estimate", data);
+    return response.data;
+  },
+};
+
+export const adminMaterialsApi = {
+  getProfiles: async () => {
+    const response = await apiClient.get<ApiResponse<MaterialProfile[]>>("/admin/materials/profiles");
+    return response.data;
+  },
+  createProfile: async (data: ProfileInput) => {
+    const response = await apiClient.post<ApiResponse<MaterialProfile>>("/admin/materials/profiles", data);
+    return response.data;
+  },
+  updateProfile: async (id: string, data: Partial<ProfileInput>) => {
+    const response = await apiClient.patch<ApiResponse<MaterialProfile>>(`/admin/materials/profiles/${id}`, data);
+    return response.data;
+  },
+  deleteProfile: async (id: string) => {
+    const response = await apiClient.delete<ApiResponse>(`/admin/materials/profiles/${id}`);
+    return response.data;
+  },
+  getTemplates: async () => {
+    const response = await apiClient.get<ApiResponse<ProductTemplate[]>>("/admin/materials/templates");
+    return response.data;
+  },
+  getTemplate: async (id: string) => {
+    const response = await apiClient.get<ApiResponse<ProductTemplate>>(`/admin/materials/templates/${id}`);
+    return response.data;
+  },
+  createTemplate: async (data: ProductTemplateInput) => {
+    const response = await apiClient.post<ApiResponse<ProductTemplate>>("/admin/materials/templates", data);
+    return response.data;
+  },
+  updateTemplate: async (id: string, data: Partial<ProductTemplateInput>) => {
+    const response = await apiClient.patch<ApiResponse<ProductTemplate>>(`/admin/materials/templates/${id}`, data);
+    return response.data;
+  },
+  deleteTemplate: async (id: string) => {
+    const response = await apiClient.delete<ApiResponse>(`/admin/materials/templates/${id}`);
+    return response.data;
+  },
+  previewTemplate: async (template: ProductTemplateInput, input: BomInput) => {
+    const response = await apiClient.post<ApiResponse<BomResult>>("/admin/materials/templates/preview", {
+      template,
+      input,
+    });
+    return response.data;
   },
 };
 
