@@ -26,7 +26,6 @@ const WELCOME: AiChatMessage = {
 };
 
 const MAX_IMAGE_DIMENSION = 1280;
-const TEASER_DISMISSED_KEY = "alumate_ai_teaser_dismissed";
 const TEASER_DELAY_MS = 2500;
 
 /** Downscale to a JPEG so uploads are fast and use less of the free AI quota. */
@@ -131,23 +130,13 @@ export function ChatWidget() {
 
   const storageKey = `alumate_ai_chat_${user?.id ?? "guest"}`;
 
-  // Show the "Ask me anything" teaser shortly after load, once per browser session.
+  // Show the "Ask me anything" teaser shortly after every page load (closing it hides it until the next load).
   useEffect(() => {
-    let dismissed = false;
-    try {
-      dismissed = sessionStorage.getItem(TEASER_DISMISSED_KEY) === "1";
-    } catch {}
-    if (dismissed) return;
     const t = setTimeout(() => setShowTeaser(true), TEASER_DELAY_MS);
     return () => clearTimeout(t);
   }, []);
 
-  const dismissTeaser = () => {
-    setShowTeaser(false);
-    try {
-      sessionStorage.setItem(TEASER_DISMISSED_KEY, "1");
-    } catch {}
-  };
+  const dismissTeaser = () => setShowTeaser(false);
 
   const toggleOpen = () => {
     setOpen((o) => !o);
@@ -256,7 +245,7 @@ export function ChatWidget() {
 
   if (HIDDEN_PREFIXES.some((p) => pathname?.startsWith(p)) || user?.role === "admin") return null;
 
-  const shown = messages.length ? messages : [WELCOME];
+  const shown = [WELCOME, ...messages];
 
   return (
     <>
