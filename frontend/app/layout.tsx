@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SidebarProvider } from "@/contexts/SidebarContext";
+import { ChatWidget } from "@/components/ai-chat/ChatWidget";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,6 +37,7 @@ export default function RootLayout({
         <AuthProvider>
           <SidebarProvider>
             {children}
+            <ChatWidget />
             <Toaster
               position="top-right"
               richColors

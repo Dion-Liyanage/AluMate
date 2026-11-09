@@ -164,6 +164,50 @@
   }
 }
 
+/* AI assistant: neon light that travels around an element's border.
+   Put <span class="ai-neon-border" /> inside a positioned, rounded element. */
+@property --ai-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes ai-border-spin {
+  to {
+    --ai-angle: 360deg;
+  }
+}
+
+.ai-neon-border {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--ai-angle),
+    rgba(217, 70, 239, 0.15) 0deg,
+    rgba(244, 114, 182, 0.9) 40deg,
+    rgba(255, 255, 255, 0.95) 60deg,
+    rgba(217, 70, 239, 0.8) 90deg,
+    rgba(236, 72, 153, 0.15) 150deg,
+    rgba(139, 92, 246, 0.2) 270deg,
+    rgba(217, 70, 239, 0.15) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: ai-border-spin 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-neon-border {
+    animation: none;
+  }
+}
+
 /* Hide spin buttons for Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

@@ -23,6 +23,7 @@ import { MailModule } from './mail/mail.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { SustainabilityModule } from './sustainability/sustainability.module';
 import { MaterialsModule } from './materials/materials.module';
+import { AiChatModule } from './ai-chat/ai-chat.module';
 
 
 @Module({
@@ -66,6 +67,7 @@ import { MaterialsModule } from './materials/materials.module';
     AnalyticsModule,
     SustainabilityModule,
     MaterialsModule,
+    AiChatModule,
   ],
 
   controllers: [AppController],
