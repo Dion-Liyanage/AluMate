@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -6,6 +7,7 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
   UseGuards,
   Query,
   UseInterceptors,
@@ -19,6 +21,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
+import { SustainabilityService } from '../sustainability/sustainability.service';
+import { CompleteFabricationDto } from '../sustainability/dto/complete-fabrication.dto';
 
 @Controller('admin/orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -29,6 +33,7 @@ export class AdminOrdersController {
     private readonly cloudinaryService: CloudinaryService,
     private readonly mailService: MailService,
     private readonly usersService: UsersService,
+    private readonly sustainabilityService: SustainabilityService,
   ) {}
 
   @Get()
@@ -95,6 +100,27 @@ export class AdminOrdersController {
     @Param('id') id: string,
     @Body() updateData: { status: string; progress?: number }
   ) {
+    const order = await this.ordersService.findById(id);
+    if (!order) {
+      throw new BadRequestException('Order not found');
+    }
+
+    const allowedTransitions: Record<string, string[]> = {
+      approved: ['production', 'cancelled'],
+      production: ['cancelled'],
+      fabrication_completed: ['installation'],
+      installation: ['completed'],
+    };
+
+    if (
+      updateData.status !== order.status &&
+      !allowedTransitions[order.status]?.includes(updateData.status)
+    ) {
+      throw new BadRequestException(
+        'This order status must be changed through its required workflow action.',
+      );
+    }
+
     // Map status to progress if not provided
     const statusProgressMap: Record<string, number> = {
       'draft': 0,
@@ -103,6 +129,7 @@ export class AdminOrdersController {
       'approved': 25,
       'material_preparation': 40,
       'production': 65,
+      'fabrication_completed': 75,
       'installation': 85,
       'completed': 100,
     };
@@ -115,6 +142,42 @@ export class AdminOrdersController {
     return {
       success: true,
       data: updatedOrder
+    };
+  }
+
+  @Post(':id/complete-fabrication')
+  async completeFabrication(
+    @Param('id') id: string,
+    @Body() materialUsage: CompleteFabricationDto,
+    @Request() req,
+  ) {
+    const order = await this.ordersService.findById(id);
+
+    if (!order) {
+      throw new BadRequestException('Order not found');
+    }
+
+    if (order.status !== 'production') {
+      throw new BadRequestException('Only orders in production can complete fabrication');
+    }
+
+    const usage = await this.sustainabilityService.createForOrder(
+      materialUsage,
+      req.user.id,
+      order._id.toString(),
+      order.orderId,
+      order.productType,
+    );
+
+    const updatedOrder = await this.ordersService.update(id, {
+      status: 'fabrication_completed',
+      progress: 75,
+    });
+
+    return {
+      success: true,
+      message: 'Fabrication completed and material usage recorded',
+      data: { order: updatedOrder, materialUsage: usage },
     };
   }
 

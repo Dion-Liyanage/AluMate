@@ -32,6 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Order } from "./OrdersTable";
 import { OrderStatusBadge } from "./OrderStatusBadge";
+import { CompleteFabricationDialog } from "./CompleteFabricationDialog";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -361,20 +362,53 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
                   No PDF
                 </Button>
               )}
-              <Button 
-                className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 font-bold px-8 h-12 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.1)] flex items-center gap-2"
-                onClick={() => handleUpdateStatus('completed')}
-                disabled={isUpdating || order.status === 'completed'}
-              >
-                <CheckCircle2 className="h-5 w-5" />
-                Complete Order
-              </Button>
+              {order.status === 'approved' && (
+                <Button 
+                  className="bg-purple-500/10 border border-purple-500/50 text-purple-300 hover:bg-purple-500/20 font-bold px-8 h-12 rounded-xl transition-all flex items-center gap-2"
+                  onClick={() => handleUpdateStatus('production')}
+                  disabled={isUpdating}
+                >
+                  <Hammer className="h-5 w-5" />
+                  Start Production
+                </Button>
+              )}
+              {order.status === 'production' && order._id && (
+                <CompleteFabricationDialog
+                  orderId={order._id}
+                  orderNumber={order.id}
+                  productType={order.productType}
+                  onCompleted={() => {
+                    onRefresh?.();
+                    onOpenChange(false);
+                  }}
+                />
+              )}
+              {order.status === 'fabrication_completed' && (
+                <Button 
+                  className="bg-cyan-500/10 border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20 font-bold px-8 h-12 rounded-xl transition-all flex items-center gap-2"
+                  onClick={() => handleUpdateStatus('installation')}
+                  disabled={isUpdating}
+                >
+                  <Truck className="h-5 w-5" />
+                  Start Installation
+                </Button>
+              )}
+              {order.status === 'installation' && (
+                <Button 
+                  className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 font-bold px-8 h-12 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.1)] flex items-center gap-2"
+                  onClick={() => handleUpdateStatus('completed')}
+                  disabled={isUpdating}
+                >
+                  <CheckCircle2 className="h-5 w-5" />
+                  Complete Order
+                </Button>
+              )}
             </div>
             <Button 
               variant="ghost" 
               className="w-full text-zinc-500 hover:text-red-400 hover:bg-red-500/10 font-bold h-10"
               onClick={() => handleUpdateStatus('cancelled')}
-              disabled={isUpdating || order.status === 'cancelled' || order.status === 'completed'}
+              disabled={isUpdating || order.status === 'cancelled' || order.status === 'completed' || order.status === 'fabrication_completed' || order.status === 'installation'}
             >
               Cancel Fabrication Request
             </Button>

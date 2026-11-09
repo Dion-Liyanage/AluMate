@@ -69,7 +69,7 @@ export function OrdersOverviewCards() {
         setStatsData({
           total: orders.length,
           pending: orders.filter(o => o.status === 'approved').length,
-          production: orders.filter(o => o.status === 'production' || o.status === 'installation').length,
+          production: orders.filter(o => o.status === 'production' || o.status === 'fabrication_completed' || o.status === 'installation').length,
           completed: orders.filter(o => o.status === 'completed').length,
           services: 0
         });

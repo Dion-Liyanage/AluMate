@@ -21,6 +21,7 @@ import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import { MessagesModule } from './messages/messages.module';
 import { MailModule } from './mail/mail.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { SustainabilityModule } from './sustainability/sustainability.module';
 
 
 @Module({
@@ -62,6 +63,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     MessagesModule,
     MailModule,
     AnalyticsModule,
+    SustainabilityModule,
   ],
 
   controllers: [AppController],

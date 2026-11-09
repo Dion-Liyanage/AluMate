@@ -187,7 +187,7 @@ export function OrdersTable({ onViewDetails }: { onViewDetails: (order: any) => 
                   Accept Quotation
                 </DropdownMenuItem>
               )}
-              {(!INACTIVE_STATUSES.includes(order.status) && order.status !== 'production' && order.status !== 'installation') && (
+              {(!INACTIVE_STATUSES.includes(order.status) && order.status !== 'production' && order.status !== 'fabrication_completed' && order.status !== 'installation') && (
                 <>
                   <DropdownMenuSeparator className="bg-zinc-800" />
                   <DropdownMenuItem 

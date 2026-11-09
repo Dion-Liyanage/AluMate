@@ -19,7 +19,7 @@ export interface Order {
   customerId: string;
   title: string;
   description: string;
-  status: 'pending' | 'quoted' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'quoted' | 'confirmed' | 'in-progress' | 'fabrication_completed' | 'completed' | 'cancelled';
   quotationId?: string;
   totalAmount?: number;
   createdAt: Date;

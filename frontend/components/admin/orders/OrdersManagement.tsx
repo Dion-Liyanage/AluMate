@@ -128,6 +128,8 @@ export function OrdersManagement() {
                 <SelectItem value="quotation_pending">Quotation Pending</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="production">In Production</SelectItem>
+                <SelectItem value="fabrication_completed">Fabrication Completed</SelectItem>
+                <SelectItem value="installation">Installation</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>

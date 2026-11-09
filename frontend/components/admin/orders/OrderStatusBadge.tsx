@@ -9,6 +9,7 @@ export type AdminOrderStatus =
   | 'quotation_sent'
   | 'approved'
   | 'production'
+  | 'fabrication_completed'
   | 'material_purchasing'
   | 'installation'
   | 'completed'
@@ -39,6 +40,10 @@ const statusConfig: Record<AdminOrderStatus, { label: string; className: string 
   production: { 
     label: "In Production", 
     className: "bg-purple-500/15 text-purple-300 border-purple-500/30" 
+  },
+  fabrication_completed: {
+    label: "Fabrication Completed",
+    className: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
   },
   material_purchasing: { 
     label: "Material Purchasing", 

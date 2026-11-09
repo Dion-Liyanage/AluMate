@@ -122,7 +122,7 @@ export class OrdersController {
     }
 
     // Only allow cancellation if not already in production or completed
-    const nonCancellable = ['production', 'installation', 'completed'];
+    const nonCancellable = ['production', 'fabrication_completed', 'installation', 'completed'];
     if (nonCancellable.includes(order.status)) {
       return { success: false, message: 'Order cannot be cancelled at this stage' };
     }

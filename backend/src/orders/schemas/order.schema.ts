@@ -69,6 +69,7 @@ export class Order {
       'quotation_sent',
       'approved',
       'production',
+      'fabrication_completed',
       'installation',
       'completed',
       'cancelled',

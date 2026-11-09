@@ -88,6 +88,38 @@ interface ApiResponse<T = unknown> {
   message?: string;
 }
 
+export interface MaterialUsageInput {
+  projectName: string;
+  purchasedKg: number;
+  usedKg: number;
+  reusableOffcutsKg: number;
+  scrapWasteKg: number;
+  totalCost: number;
+}
+
+export type FabricationMaterialUsageInput = Omit<MaterialUsageInput, "projectName">;
+
+export interface SustainabilityDashboardData {
+  summary: {
+    purchasedKg: number;
+    usedKg: number;
+    reusableOffcutsKg: number;
+    scrapWasteKg: number;
+    costSaved: number;
+    wasteRate: number;
+  };
+  materialDistribution: Array<{ name: string; value: number; color: string }>;
+  monthlyWaste: Array<{ month: string; wasteRate: number }>;
+  projects: Array<{
+    project: string;
+    used: number;
+    reusable: number;
+    scrap: number;
+    purchased: number;
+    wasteRate: number;
+  }>;
+}
+
 // ---------- Auth API ----------
 
 export const authApi = {
@@ -187,6 +219,14 @@ export const adminOrdersApi = {
   updateStatus: async (id: string, data: { status: string; progress?: number }) => {
     const res = await apiClient.patch<ApiResponse<{ data: Order }>>(
       `/admin/orders/${id}/status`,
+      data
+    );
+    return res.data;
+  },
+
+  completeFabrication: async (id: string, data: FabricationMaterialUsageInput) => {
+    const res = await apiClient.post<ApiResponse>(
+      `/admin/orders/${id}/complete-fabrication`,
       data
     );
     return res.data;
@@ -648,6 +688,22 @@ export const projectsApi = {
   delete: async (id: string) => {
     const res = await apiClient.delete<ApiResponse<any>>(`/projects/${id}`);
     return res.data;
+  },
+};
+
+export const sustainabilityApi = {
+  getDashboard: async () => {
+    const response = await apiClient.get<ApiResponse<SustainabilityDashboardData>>(
+      "/admin/sustainability/dashboard"
+    );
+    return response.data;
+  },
+  recordMaterialUsage: async (data: MaterialUsageInput) => {
+    const response = await apiClient.post<ApiResponse>(
+      "/admin/sustainability/material-usage",
+      data
+    );
+    return response.data;
   },
 };
 
