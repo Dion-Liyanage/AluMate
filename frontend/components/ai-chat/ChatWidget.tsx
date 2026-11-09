@@ -10,8 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { aiChatApi, aiChatHistoryApi, type AiChatMessage, type AiConversationSummary } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-/** Routes where the bubble would get in the way (admin area, auth forms, full-screen tools). */
-const HIDDEN_PREFIXES = ["/admin", "/login", "/register", "/forgot-password", "/dashboard/messages", "/dashboard/design"];
+/** Routes where the bubble would get in the way (admin area, auth forms, the full-screen 3D studio editor). */
+const HIDDEN_PREFIXES = ["/admin", "/login", "/register", "/forgot-password", "/dashboard/messages", "/dashboard/design/studio"];
 
 const SUGGESTIONS = [
   "Can you make a sliding window like this? (attach a photo)",
