@@ -4,7 +4,20 @@
  */
 
 import axios, { type AxiosError } from "axios";
-import type { User, Order, Quotation, ServiceRequest, InventoryItem, Notification, Project } from "@/types";
+import type {
+  User,
+  Order,
+  Quotation,
+  ServiceRequest,
+  InventoryItem,
+  Notification,
+  Project,
+  MaterialProfile,
+  ProductTemplate,
+  OpeningSystem,
+  BomInput,
+  BomResult,
+} from "@/types";
 
 type BackendErrorPayload = {
   message?: string | string[];
@@ -703,6 +716,70 @@ export const sustainabilityApi = {
       "/admin/sustainability/material-usage",
       data
     );
+    return response.data;
+  },
+};
+
+// ---------- Materials & BOM API ----------
+
+export type ProfileInput = Omit<MaterialProfile, "_id" | "isSample">;
+export type ProductTemplateInput = Omit<ProductTemplate, "_id" | "isSample">;
+
+export const materialsApi = {
+  getSystems: async (productType?: string) => {
+    const response = await apiClient.get<ApiResponse<OpeningSystem[]>>("/materials/systems", {
+      params: productType ? { productType } : undefined,
+    });
+    return response.data;
+  },
+  estimate: async (data: BomInput & { productType: string; systemType: string }) => {
+    const response = await apiClient.post<ApiResponse<BomResult>>("/materials/estimate", data);
+    return response.data;
+  },
+};
+
+export const adminMaterialsApi = {
+  getProfiles: async () => {
+    const response = await apiClient.get<ApiResponse<MaterialProfile[]>>("/admin/materials/profiles");
+    return response.data;
+  },
+  createProfile: async (data: ProfileInput) => {
+    const response = await apiClient.post<ApiResponse<MaterialProfile>>("/admin/materials/profiles", data);
+    return response.data;
+  },
+  updateProfile: async (id: string, data: Partial<ProfileInput>) => {
+    const response = await apiClient.patch<ApiResponse<MaterialProfile>>(`/admin/materials/profiles/${id}`, data);
+    return response.data;
+  },
+  deleteProfile: async (id: string) => {
+    const response = await apiClient.delete<ApiResponse>(`/admin/materials/profiles/${id}`);
+    return response.data;
+  },
+  getTemplates: async () => {
+    const response = await apiClient.get<ApiResponse<ProductTemplate[]>>("/admin/materials/templates");
+    return response.data;
+  },
+  getTemplate: async (id: string) => {
+    const response = await apiClient.get<ApiResponse<ProductTemplate>>(`/admin/materials/templates/${id}`);
+    return response.data;
+  },
+  createTemplate: async (data: ProductTemplateInput) => {
+    const response = await apiClient.post<ApiResponse<ProductTemplate>>("/admin/materials/templates", data);
+    return response.data;
+  },
+  updateTemplate: async (id: string, data: Partial<ProductTemplateInput>) => {
+    const response = await apiClient.patch<ApiResponse<ProductTemplate>>(`/admin/materials/templates/${id}`, data);
+    return response.data;
+  },
+  deleteTemplate: async (id: string) => {
+    const response = await apiClient.delete<ApiResponse>(`/admin/materials/templates/${id}`);
+    return response.data;
+  },
+  previewTemplate: async (template: ProductTemplateInput, input: BomInput) => {
+    const response = await apiClient.post<ApiResponse<BomResult>>("/admin/materials/templates/preview", {
+      template,
+      input,
+    });
     return response.data;
   },
 };

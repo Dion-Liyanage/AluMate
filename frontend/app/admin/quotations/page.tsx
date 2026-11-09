@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { animate } from "framer-motion";
 import { formatMeasurement } from "@/lib/utils";
+import { BomPreview } from "@/components/materials/BomPreview";
+import type { BomResult } from "@/types";
 
 const QUOTATION_STATUSES = ["quotation_pending", "quotation_sent"];
 
@@ -75,6 +77,8 @@ interface QuotationOrder {
   quotationPdfUrl?: string;
   quotationSentAt?: string;
   expectedCompletionDate?: string;
+  systemType?: string;
+  bomSnapshot?: BomResult;
 }
 
 function formatLKR(amount: number): string {
@@ -578,6 +582,37 @@ export default function AdminQuotationsPage() {
                         </div>
                       </div>
                     </section>
+
+                    {selectedOrder.bomSnapshot && (
+                      <>
+                        <Separator className="bg-zinc-800/50" />
+                        <section className="space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                              <Ruler className="h-3.5 w-3.5" />
+                              Bill of Materials (at order time)
+                            </h4>
+                            {selectedOrder.status === 'quotation_pending' && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const totals = selectedOrder.bomSnapshot!.totals;
+                                  setFinalMaterialCost(String(totals.materialCost + totals.finishSurcharge));
+                                  setFinalLaborCost(String(totals.laborCost));
+                                  setFinalTotalCost(String(totals.total));
+                                }}
+                                className="h-7 border-violet-500/30 bg-violet-500/10 text-[11px] text-violet-200 hover:bg-violet-500/20"
+                              >
+                                Use BOM costs
+                              </Button>
+                            )}
+                          </div>
+                          <BomPreview bom={selectedOrder.bomSnapshot} showCosts />
+                        </section>
+                      </>
+                    )}
 
                     <Separator className="bg-zinc-800/50" />
 

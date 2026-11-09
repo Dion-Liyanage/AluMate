@@ -69,7 +69,9 @@ export function OrdersManagement() {
           notes: o.notes,
           catalogueDesignId: o.catalogueDesignId,
           recommendedMaterials: o.recommendedMaterials,
-          laborCalculation: o.laborCalculation
+          laborCalculation: o.laborCalculation,
+          systemType: o.systemType,
+          bomSnapshot: o.bomSnapshot,
         }));
         
         // Filter by Tab (Design Type) if needed

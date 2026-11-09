@@ -17,6 +17,10 @@ export class Design {
   @Prop({ required: true, enum: ['doors', 'windows', 'cupboards', 'pantries', 'ceilings'] })
   category: string;
 
+  /** Opening system for window/door designs — decides which material template is used. */
+  @Prop({ enum: ['sliding', 'swing', 'fixed'] })
+  systemType?: string;
+
   @Prop({ type: [String], default: [] })
   imageUrls: string[];
 

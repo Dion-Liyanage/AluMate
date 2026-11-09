@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Order } from "./OrdersTable";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { CompleteFabricationDialog } from "./CompleteFabricationDialog";
+import { BomPreview } from "@/components/materials/BomPreview";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -239,6 +240,20 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
           )}
 
           <Separator className="bg-zinc-900" />
+
+          {/* Fabrication cut list (bill of materials snapshot) */}
+          {order.bomSnapshot && (
+            <>
+              <div className="space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200 flex items-center gap-2">
+                  <Ruler className="h-4 w-4 text-emerald-400" />
+                  Fabrication Cut List
+                </h4>
+                <BomPreview bom={order.bomSnapshot} />
+              </div>
+              <Separator className="bg-zinc-900" />
+            </>
+          )}
 
           {/* Material Breakdown Section */}
           <div className="space-y-4">

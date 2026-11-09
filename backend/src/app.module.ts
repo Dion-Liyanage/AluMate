@@ -22,6 +22,7 @@ import { MessagesModule } from './messages/messages.module';
 import { MailModule } from './mail/mail.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { SustainabilityModule } from './sustainability/sustainability.module';
+import { MaterialsModule } from './materials/materials.module';
 
 
 @Module({
@@ -64,6 +65,7 @@ import { SustainabilityModule } from './sustainability/sustainability.module';
     MailModule,
     AnalyticsModule,
     SustainabilityModule,
+    MaterialsModule,
   ],
 
   controllers: [AppController],

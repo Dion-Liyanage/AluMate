@@ -114,6 +114,17 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'Design' })
   catalogueDesignId: Types.ObjectId;
 
+  /** Opening system for windows/doors: sliding | swing | fixed */
+  @Prop()
+  systemType: string;
+
+  /**
+   * Bill of materials generated when the order was placed. Kept as a
+   * snapshot so later price / template edits never change past orders.
+   */
+  @Prop({ type: Object })
+  bomSnapshot: Record<string, any>;
+
   @Prop()
   color: string;
 
