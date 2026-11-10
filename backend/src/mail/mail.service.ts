@@ -19,12 +19,17 @@ export class MailService {
    */
   async sendEmail(to: string, subject: string, html: string) {
     try {
-      const data = await this.resend.emails.send({
+      // Resend reports API failures (bad key, unverified sender, ...) in `error`
+      // rather than throwing, so surface them explicitly.
+      const { data, error } = await this.resend.emails.send({
         from: this.from,
         to,
         subject,
         html,
       });
+      if (error) {
+        throw new Error(`${error.name}: ${error.message}`);
+      }
       return data;
     } catch (error) {
       console.error('Email sending failed:', error);

@@ -21,6 +21,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { MailService } from '../mail/mail.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { UsersService } from '../users/users.service';
 import { SustainabilityService } from '../sustainability/sustainability.service';
 import { CompleteFabricationDto } from '../sustainability/dto/complete-fabrication.dto';
@@ -34,6 +35,7 @@ export class AdminOrdersController {
     private readonly ordersService: OrdersService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly mailService: MailService,
+    private readonly notificationsService: NotificationsService,
     private readonly usersService: UsersService,
     private readonly sustainabilityService: SustainabilityService,
   ) {}
@@ -97,6 +99,10 @@ export class AdminOrdersController {
     };
   }
 
+  private customerIdOf(order: any): string | undefined {
+    return order?.customerId?._id?.toString() || order?.customerId?.toString();
+  }
+
   @Patch(':id/status')
   async updateStatus(
     @Param('id') id: string,
@@ -141,6 +147,15 @@ export class AdminOrdersController {
     }
 
     const updatedOrder = await this.ordersService.update(id, updateData);
+
+    if (updateData.status && updateData.status !== order.status) {
+      await this.notificationsService.notifyOrderStatus(
+        this.customerIdOf(order),
+        order.orderId,
+        updateData.status,
+      );
+    }
+
     return {
       success: true,
       data: updatedOrder
@@ -207,6 +222,12 @@ export class AdminOrdersController {
       status: 'fabrication_completed',
       progress: 75,
     });
+
+    await this.notificationsService.notifyOrderStatus(
+      this.customerIdOf(order),
+      order.orderId,
+      'fabrication_completed',
+    );
 
     return {
       success: true,
@@ -282,9 +303,15 @@ export class AdminOrdersController {
 
     const updatedOrder = await this.ordersService.update(id, updateData);
 
+    await this.notificationsService.notifyOrderStatus(
+      this.customerIdOf(order),
+      order.orderId,
+      'quotation_sent',
+    );
+
     // Send email notification to customer
     try {
-      const customerId = (order.customerId as any)?._id?.toString() || order.customerId?.toString();
+      const customerId = this.customerIdOf(order);
       const user = await this.usersService.findById(customerId);
       if (user) {
         this.mailService.sendQuotationReady(
@@ -317,6 +344,14 @@ export class AdminOrdersController {
     const updatedOrder = await this.ordersService.update(id, {
       status: 'cancelled',
     });
+
+    if (order.status !== 'cancelled') {
+      await this.notificationsService.notifyOrderStatus(
+        this.customerIdOf(order),
+        order.orderId,
+        'cancelled',
+      );
+    }
 
     return {
       success: true,
