@@ -87,4 +87,68 @@ describe('planCutting', () => {
       expect(profile.barsNeeded).toBeGreaterThanOrEqual(profile.minimumBars);
     }
   });
+
+  describe('shorter stock lengths (21 ft bar also sold as 7 ft and 14 ft)', () => {
+    const lengths = { P1: [7, 14, 21] };
+
+    it('buys a 7 ft piece when the cuts fit in one', () => {
+      const plan = planCutting([line('Small', 2, 36)], lengths, settings); // 3 ft + 3 ft
+      const profile = plan.profiles[0];
+      expect(profile.stockToBuy).toEqual([{ lengthIn: 84, count: 1 }]);
+      expect(profile.bars[0].stockLengthIn).toBe(84);
+      expect(plan.totals.purchaseCost).toBe(7 * 100);
+    });
+
+    it('uses a 14 ft piece when 7 ft is too short', () => {
+      const plan = planCutting([line('Mid', 1, 120)], lengths, settings); // 10 ft
+      expect(plan.profiles[0].stockToBuy).toEqual([{ lengthIn: 168, count: 1 }]);
+    });
+
+    it('mixes full bars and shorter pieces', () => {
+      // 20 ft fills a full bar; the 5 ft piece only needs a 7 ft piece
+      const plan = planCutting([line('Long', 1, 240), line('Short', 1, 60)], lengths, settings);
+      const profile = plan.profiles[0];
+      expect(profile.barLengthIn).toBe(252);
+      expect(profile.stockToBuy).toEqual([
+        { lengthIn: 252, count: 1 },
+        { lengthIn: 84, count: 1 },
+      ]);
+      expect(profile.barsNeeded).toBe(2);
+      expect(plan.totals.purchaseCost).toBe((21 + 7) * 100);
+    });
+
+    it('keeps the material balance on every downsized bar', () => {
+      const plan = planCutting([line('A', 3, 50), line('B', 2, 130)], lengths, settings);
+      for (const bar of plan.profiles[0].bars) {
+        expect(bar.usedIn + bar.kerfIn + bar.leftoverIn).toBeCloseTo(bar.stockLengthIn, 6);
+      }
+      const t = plan.totals;
+      expect(t.usedKg + t.reusableOffcutsKg + t.scrapWasteKg).toBeCloseTo(t.purchasedKg, 2);
+    });
+
+    it('fits a piece that exactly matches a shorter length without a saw cut', () => {
+      const plan = planCutting([line('Exact', 1, 84)], lengths, settings);
+      const bar = plan.profiles[0].bars[0];
+      expect(bar.stockLengthIn).toBe(84);
+      expect(bar.kerfIn).toBe(0);
+      expect(bar.leftoverType).toBe('none');
+    });
+
+    it('joins pieces longer than the full 21 ft bar', () => {
+      const plan = planCutting([line('Huge', 1, 300)], lengths, settings); // 25 ft
+      expect(plan.profiles[0].stockToBuy).toEqual([
+        { lengthIn: 252, count: 1 },
+        { lengthIn: 84, count: 1 },
+      ]);
+      expect(plan.warnings[0]).toMatch(/longer than one 21ft bar/);
+    });
+
+    it('plans old BOM snapshots that only stored barLengthFt', () => {
+      const plan = planCuttingFromBom({
+        lines: [line('Small', 1, 36)],
+        profiles: [{ profileCode: 'P1', barLengthFt: 16 }],
+      });
+      expect(plan.profiles[0].stockToBuy).toEqual([{ lengthIn: 192, count: 1 }]);
+    });
+  });
 });

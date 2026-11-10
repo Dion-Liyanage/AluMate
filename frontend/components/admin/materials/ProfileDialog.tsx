@@ -33,9 +33,17 @@ interface ProfileDialogProps {
 }
 
 type FormState = Record<
-  "code" | "name" | "series" | "thicknessMm" | "weightKgPerM" | "barLengthFt" | "pricePerFt",
+  "code" | "name" | "series" | "thicknessMm" | "weightKgPerM" | "barLengthFt" | "shorterLengthsFt" | "pricePerFt",
   string
 > & { shape: ProfileShape; isActive: boolean };
+
+/** "7, 14" → [7, 14]; null if any entry isn't a positive number. */
+const parseLengths = (text: string): number[] | null => {
+  const parts = text.split(/[,\s]+/).filter(Boolean);
+  const numbers = parts.map(Number);
+  if (numbers.some((n) => !Number.isFinite(n) || n <= 0)) return null;
+  return [...new Set(numbers)].sort((a, b) => a - b);
+};
 
 const emptyForm: FormState = {
   code: "",
@@ -44,7 +52,8 @@ const emptyForm: FormState = {
   shape: "frame",
   thicknessMm: "",
   weightKgPerM: "",
-  barLengthFt: "16",
+  barLengthFt: "20",
+  shorterLengthsFt: "",
   pricePerFt: "",
   isActive: true,
 };
@@ -57,6 +66,7 @@ const toForm = (profile: MaterialProfile): FormState => ({
   thicknessMm: String(profile.thicknessMm),
   weightKgPerM: String(profile.weightKgPerM),
   barLengthFt: String(profile.barLengthFt),
+  shorterLengthsFt: (profile.shorterLengthsFt ?? []).join(", "),
   pricePerFt: String(profile.pricePerFt),
   isActive: profile.isActive,
 });
@@ -75,6 +85,18 @@ export function ProfileDialog({ open, onOpenChange, profile, existingSeries, onS
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    const barLengthFt = Number(form.barLengthFt);
+    const shorterLengthsFt = parseLengths(form.shorterLengthsFt);
+    if (shorterLengthsFt === null) {
+      toast.error("Shorter lengths must be numbers in feet, separated by commas (e.g. 7, 14)");
+      return;
+    }
+    const tooLong = shorterLengthsFt.filter((length) => length >= barLengthFt);
+    if (tooLong.length) {
+      toast.error(`Shorter lengths must be less than the ${barLengthFt} ft bar (got ${tooLong.join(", ")} ft)`);
+      return;
+    }
+
     const payload: ProfileInput = {
       code: form.code.trim().toUpperCase(),
       name: form.name.trim(),
@@ -82,7 +104,8 @@ export function ProfileDialog({ open, onOpenChange, profile, existingSeries, onS
       shape: form.shape,
       thicknessMm: Number(form.thicknessMm),
       weightKgPerM: Number(form.weightKgPerM),
-      barLengthFt: Number(form.barLengthFt),
+      barLengthFt,
+      shorterLengthsFt,
       pricePerFt: Number(form.pricePerFt),
       isActive: form.isActive,
     };
@@ -194,6 +217,22 @@ export function ProfileDialog({ open, onOpenChange, profile, existingSeries, onS
             {numberField("weightKgPerM", "Weight (kg per metre)", "0.001")}
             {numberField("barLengthFt", "Stock bar length (ft)", "0.5", "1")}
             {numberField("pricePerFt", "Price per ft (LKR)", "1")}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="profile-shorterLengthsFt" className="text-xs text-zinc-400">
+              Also sold as shorter pieces (ft) — optional
+            </Label>
+            <Input
+              id="profile-shorterLengthsFt"
+              placeholder="e.g. 7, 14"
+              value={form.shorterLengthsFt}
+              onChange={(event) => update("shorterLengthsFt", event.target.value)}
+              className="bg-zinc-900 border-zinc-800"
+            />
+            <p className="text-[11px] text-zinc-500">
+              Lengths the supplier cuts from the full bar. The cutting plan buys the shortest piece that fits.
+            </p>
           </div>
 
           <div className="flex items-center justify-between rounded-lg border border-zinc-800 px-3 py-2">

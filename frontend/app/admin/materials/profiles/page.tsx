@@ -168,7 +168,14 @@ export default function AluminiumProfilesPage() {
                           <TableCell className="text-xs capitalize text-zinc-400">{profile.shape}</TableCell>
                           <TableCell className="text-right text-xs text-zinc-300">{profile.thicknessMm} mm</TableCell>
                           <TableCell className="text-right text-xs text-zinc-300">{profile.weightKgPerM}</TableCell>
-                          <TableCell className="text-right text-xs text-zinc-300">{profile.barLengthFt} ft</TableCell>
+                          <TableCell className="text-right text-xs text-zinc-300">
+                            {profile.barLengthFt} ft
+                            {profile.shorterLengthsFt?.length ? (
+                              <span className="block text-[10px] text-zinc-500">
+                                also {profile.shorterLengthsFt.join(" / ")} ft
+                              </span>
+                            ) : null}
+                          </TableCell>
                           <TableCell className="text-right text-xs text-zinc-200">{formatLKR(profile.pricePerFt)}</TableCell>
                           <TableCell>
                             <div className="flex gap-1">

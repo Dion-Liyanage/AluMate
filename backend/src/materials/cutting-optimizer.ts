@@ -8,6 +8,10 @@
  *
  * Pieces longer than a bar are split into full bars plus a remainder piece,
  * which must be joined on site (flagged as a warning).
+ *
+ * When a profile is also sold in shorter pieces (e.g. 7 ft and 14 ft cut from a
+ * 21 ft bar), each packed bar is then downsized to the shortest stock length
+ * that still holds its cuts, so small jobs don't pay for a whole bar.
  */
 import { CuttingSettings, DEFAULT_CUTTING_SETTINGS } from './cutting.constants';
 
@@ -36,6 +40,8 @@ export interface PlannedCut {
 
 export interface PlannedBar {
   index: number;
+  /** Length of the stock piece bought for this bar (full bar or a shorter piece). */
+  stockLengthIn: number;
   cuts: PlannedCut[];
   usedIn: number;
   kerfIn: number;
@@ -43,12 +49,23 @@ export interface PlannedBar {
   leftoverType: LeftoverType;
 }
 
+export interface StockPurchase {
+  lengthIn: number;
+  count: number;
+}
+
 export interface ProfileCuttingPlan {
   profileCode: string;
   profileName: string;
+  /** Full bar length. */
   barLengthIn: number;
+  /** Every length this profile can be bought in, shortest first (ends with the full bar). */
+  stockLengthsIn: number[];
   bars: PlannedBar[];
+  /** Stock pieces to buy, of any length. */
   barsNeeded: number;
+  /** How many pieces of each stock length to buy, longest first. */
+  stockToBuy: StockPurchase[];
   pieces: number;
   purchasedKg: number;
   usedKg: number;
@@ -84,10 +101,37 @@ const round = (value: number, decimals = 3) => {
 const pct = (part: number, whole: number) => (whole > 0 ? round((part / whole) * 100, 1) : 0);
 
 interface OpenBar {
+  stockLengthIn: number;
   cuts: PlannedCut[];
   remainingIn: number;
   usedIn: number;
   kerfIn: number;
+}
+
+/** Lays `cuts` along a stock piece in order; null if they don't fit. */
+function layOut(cuts: PlannedCut[], stockLengthIn: number, settings: CuttingSettings): OpenBar | null {
+  let remainingIn = stockLengthIn;
+  let usedIn = 0;
+  let kerfIn = 0;
+  for (const cut of cuts) {
+    if (remainingIn + EPSILON < cut.lengthIn) return null;
+    // The saw cut only costs material if there is bar left after the piece.
+    const kerf = Math.min(settings.kerfIn, Math.max(0, remainingIn - cut.lengthIn));
+    usedIn += cut.lengthIn;
+    kerfIn += kerf;
+    remainingIn = Math.max(0, remainingIn - cut.lengthIn - kerf);
+  }
+  return { stockLengthIn, cuts, remainingIn, usedIn, kerfIn };
+}
+
+/** Moves a packed bar onto the shortest stock length that still holds all its cuts. */
+function downsize(bar: OpenBar, stockLengthsIn: number[], settings: CuttingSettings): OpenBar {
+  for (const length of stockLengthsIn) {
+    if (length >= bar.stockLengthIn) break;
+    const fitted = layOut(bar.cuts, length, settings);
+    if (fitted) return fitted;
+  }
+  return bar;
 }
 
 function packProfile(
@@ -111,7 +155,7 @@ function packProfile(
       }
     }
 
-    const target = best ?? { cuts: [], remainingIn: barLengthIn, usedIn: 0, kerfIn: 0 };
+    const target = best ?? { stockLengthIn: barLengthIn, cuts: [], remainingIn: barLengthIn, usedIn: 0, kerfIn: 0 };
     if (!best) bars.push(target);
 
     // The saw cut only costs material if there is bar left after the piece.
@@ -126,12 +170,13 @@ function packProfile(
 }
 
 /**
- * @param lines        BOM cut-list lines
- * @param barLengthFt  stock bar length for each profile code
+ * @param lines          BOM cut-list lines
+ * @param stockLengthsFt for each profile code, the full bar length in feet, or every
+ *                       purchasable length (the longest is taken as the full bar)
  */
 export function planCutting(
   lines: CutLineInput[],
-  barLengthFt: Record<string, number>,
+  stockLengthsFt: Record<string, number | number[]>,
   settings: CuttingSettings = DEFAULT_CUTTING_SETTINGS,
 ): CuttingPlan {
   const warnings: string[] = [];
@@ -144,7 +189,11 @@ export function planCutting(
   const profiles: ProfileCuttingPlan[] = [];
 
   for (const [profileCode, profileLines] of byProfile) {
-    const barLengthIn = (barLengthFt[profileCode] ?? 0) * 12;
+    const lengthsFt = ([] as number[]).concat(stockLengthsFt[profileCode] ?? []);
+    const stockLengthsIn = [...new Set(lengthsFt.filter((ft) => ft > 0).map((ft) => ft * 12))].sort(
+      (a, b) => a - b,
+    );
+    const barLengthIn = stockLengthsIn[stockLengthsIn.length - 1] ?? 0;
     if (barLengthIn <= 0) {
       warnings.push(`${profileCode}: unknown stock bar length — skipped in the cutting plan.`);
       continue;
@@ -166,6 +215,7 @@ export function planCutting(
           );
           while (remaining > barLengthIn + EPSILON) {
             fullBars.push({
+              stockLengthIn: barLengthIn,
               cuts: [{ component: line.component, lengthIn: barLengthIn, isJoint: true }],
               remainingIn: 0,
               usedIn: barLengthIn,
@@ -180,7 +230,10 @@ export function planCutting(
       }
     }
 
-    const packed = [...fullBars, ...packProfile(pieces, barLengthIn, settings)];
+    const packed = [
+      ...fullBars,
+      ...packProfile(pieces, barLengthIn, settings).map((bar) => downsize(bar, stockLengthsIn, settings)),
+    ];
 
     let usedIn = 0;
     let offcutIn = 0;
@@ -195,6 +248,7 @@ export function planCutting(
       scrapIn += bar.kerfIn; // saw dust is scrap too
       return {
         index: index + 1,
+        stockLengthIn: bar.stockLengthIn,
         cuts: bar.cuts,
         usedIn: round(bar.usedIn),
         kerfIn: round(bar.kerfIn),
@@ -203,18 +257,27 @@ export function planCutting(
       };
     });
 
+    const purchasedIn = bars.reduce((sum, bar) => sum + bar.stockLengthIn, 0);
+    const counts = new Map<number, number>();
+    for (const bar of bars) counts.set(bar.stockLengthIn, (counts.get(bar.stockLengthIn) ?? 0) + 1);
+    const stockToBuy = [...counts.entries()]
+      .sort(([a], [b]) => b - a)
+      .map(([lengthIn, count]) => ({ lengthIn, count }));
+
     profiles.push({
       profileCode,
       profileName: profileLines[0].profileName,
       barLengthIn,
+      stockLengthsIn,
       bars,
       barsNeeded: bars.length,
+      stockToBuy,
       pieces: pieces.length + fullBars.length,
-      purchasedKg: round(bars.length * barLengthIn * kgPerIn),
+      purchasedKg: round(purchasedIn * kgPerIn),
       usedKg: round(usedIn * kgPerIn),
       reusableOffcutsKg: round(offcutIn * kgPerIn),
       scrapWasteKg: round(scrapIn * kgPerIn),
-      purchaseCost: Math.round(((bars.length * barLengthIn) / 12) * pricePerFt),
+      purchaseCost: Math.round((purchasedIn / 12) * pricePerFt),
     });
   }
 
@@ -242,11 +305,19 @@ export function planCutting(
   };
 }
 
-/** Builds a cutting plan from a stored BOM snapshot (order.bomSnapshot). */
+/**
+ * Builds a cutting plan from a stored BOM snapshot (order.bomSnapshot).
+ * Snapshots saved before shorter stock lengths existed only have `barLengthFt`.
+ */
 export function planCuttingFromBom(
-  bom: { lines: CutLineInput[]; profiles: { profileCode: string; barLengthFt: number }[] },
+  bom: {
+    lines: CutLineInput[];
+    profiles: { profileCode: string; barLengthFt: number; stockLengthsFt?: number[] }[];
+  },
   settings: CuttingSettings = DEFAULT_CUTTING_SETTINGS,
 ): CuttingPlan {
-  const barLengths = Object.fromEntries(bom.profiles.map((p) => [p.profileCode, p.barLengthFt]));
-  return planCutting(bom.lines, barLengths, settings);
+  const lengths = Object.fromEntries(
+    bom.profiles.map((p) => [p.profileCode, p.stockLengthsFt?.length ? p.stockLengthsFt : p.barLengthFt]),
+  );
+  return planCutting(bom.lines, lengths, settings);
 }

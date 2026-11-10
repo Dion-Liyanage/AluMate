@@ -1,5 +1,15 @@
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { PROFILE_SHAPES } from '../schemas/profile.schema';
 
 const toCode = ({ value }: { value: unknown }) =>
@@ -36,6 +46,15 @@ export class CreateProfileDto {
   @IsNumber()
   @Min(1)
   barLengthFt: number;
+
+  /** Shorter lengths the supplier sells cut from the full bar, in feet. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @Type(() => Number)
+  @IsNumber({}, { each: true })
+  @Min(0.5, { each: true })
+  shorterLengthsFt?: number[];
 
   @Type(() => Number)
   @IsNumber()
@@ -85,6 +104,14 @@ export class UpdateProfileDto {
   @IsNumber()
   @Min(1)
   barLengthFt?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @Type(() => Number)
+  @IsNumber({}, { each: true })
+  @Min(0.5, { each: true })
+  shorterLengthsFt?: number[];
 
   @IsOptional()
   @Type(() => Number)

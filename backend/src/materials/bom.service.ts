@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { evaluateFormula, FormulaError, FormulaScope } from './formula.util';
 import { planCutting } from './cutting-optimizer';
+import { stockLengthsFt } from './stock-lengths';
 import type { Profile } from './schemas/profile.schema';
 import type { ProductTemplate, SizeBand } from './schemas/product-template.schema';
 
@@ -34,14 +35,19 @@ export interface BomProfileSummary {
   profileCode: string;
   profileName: string;
   thicknessMm: number;
+  /** Full stock bar length. */
   barLengthFt: number;
+  /** Every length the profile can be bought in, shortest first (ends with the full bar). */
+  stockLengthsFt: number[];
   totalLengthFt: number;
   weightKg: number;
   cost: number;
-  /** Bars needed if every bar were used perfectly (theoretical lower bound). */
+  /** Full bars needed if every bar were used perfectly (theoretical lower bound). */
   minimumBars: number;
-  /** Bars to purchase according to the cutting optimiser (includes saw-cut allowance). */
+  /** Stock pieces to purchase according to the cutting optimiser (includes saw-cut allowance). */
   barsNeeded: number;
+  /** Stock pieces to purchase by length, longest first. */
+  stockToBuy: { lengthFt: number; count: number }[];
   longestCutIn: number;
 }
 
@@ -201,12 +207,14 @@ export class BomService {
     const profiles = this.summariseByProfile(lineResults, profilesByCode);
     const cuttingPlan = planCutting(
       lineResults,
-      Object.fromEntries(profiles.map((profile) => [profile.profileCode, profile.barLengthFt])),
+      Object.fromEntries(profiles.map((profile) => [profile.profileCode, profile.stockLengthsFt])),
     );
     for (const profile of profiles) {
-      profile.barsNeeded =
-        cuttingPlan.profiles.find((plan) => plan.profileCode === profile.profileCode)?.barsNeeded ??
-        profile.minimumBars;
+      const plan = cuttingPlan.profiles.find((p) => p.profileCode === profile.profileCode);
+      profile.barsNeeded = plan?.barsNeeded ?? profile.minimumBars;
+      profile.stockToBuy = plan
+        ? plan.stockToBuy.map(({ lengthIn, count }) => ({ lengthFt: round(lengthIn / 12), count }))
+        : [{ lengthFt: profile.barLengthFt, count: profile.minimumBars }];
     }
 
     // Billing follows the existing shop convention: inches round up to the next foot.
@@ -308,11 +316,13 @@ export class BomService {
         profileName: profile.name,
         thicknessMm: profile.thicknessMm,
         barLengthFt: profile.barLengthFt,
+        stockLengthsFt: stockLengthsFt(profile.barLengthFt, profile.shorterLengthsFt),
         totalLengthFt: 0,
         weightKg: 0,
         cost: 0,
         minimumBars: 0,
         barsNeeded: 0,
+        stockToBuy: [],
         longestCutIn: 0,
       };
       current.totalLengthFt = round(current.totalLengthFt + line.totalLengthFt);

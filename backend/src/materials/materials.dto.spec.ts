@@ -84,4 +84,13 @@ describe('materials request validation', () => {
     badAngle.sizeBands[0].lines[0] = { ...badAngle.sizeBands[0].lines[0], cutAngle: 30 as 45 };
     await expect(validate(PreviewTemplateDto, { template: badAngle, input })).rejects.toThrow(BadRequestException);
   });
+
+  it('accepts shorter stock lengths on profiles and rejects bad ones', async () => {
+    const sample = SAMPLE_PROFILES.find((p) => p.code === 'SW70-TRK')!;
+    const created = await validate(CreateProfileDto, { ...sample, shorterLengthsFt: ['7', '14'] });
+    expect(created.shorterLengthsFt).toEqual([7, 14]);
+
+    await expect(validate(UpdateProfileDto, { shorterLengthsFt: [7, 'abc'] })).rejects.toThrow(BadRequestException);
+    await expect(validate(UpdateProfileDto, { shorterLengthsFt: [0] })).rejects.toThrow(BadRequestException);
+  });
 });

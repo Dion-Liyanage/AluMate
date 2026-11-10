@@ -139,7 +139,9 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
                       {profile.totalLengthFt.toFixed(1)} ft
                     </TableCell>
                     <TableCell className="py-2 text-right text-xs text-zinc-200">
-                      {profile.barsNeeded ?? profile.minimumBars} × {profile.barLengthFt}ft
+                      {profile.stockToBuy?.length
+                        ? profile.stockToBuy.map((s) => `${s.count} × ${s.lengthFt}ft`).join(" + ")
+                        : `${profile.barsNeeded ?? profile.minimumBars} × ${profile.barLengthFt}ft`}
                     </TableCell>
                     <TableCell className="py-2 text-right text-xs text-zinc-400">{formatKg(profile.weightKg)}</TableCell>
                     <TableCell className="py-2 text-right text-xs text-zinc-200">{formatLKR(profile.cost)}</TableCell>

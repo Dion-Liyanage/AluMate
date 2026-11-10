@@ -18,7 +18,10 @@ function Stat({ label, value, tone = "text-zinc-100" }: { label: string; value: 
 }
 
 function BarStrip({ bar, barLengthIn }: { bar: PlannedBar; barLengthIn: number }) {
-  const widthPct = (lengthIn: number) => `${Math.max(0, (lengthIn / barLengthIn) * 100)}%`;
+  // Strips are drawn to the scale of the full bar, so shorter stock pieces look shorter.
+  const stockLengthIn = bar.stockLengthIn ?? barLengthIn;
+  const widthPct = (lengthIn: number) => `${Math.max(0, (lengthIn / stockLengthIn) * 100)}%`;
+  const stripPct = `${Math.min(100, (stockLengthIn / barLengthIn) * 100)}%`;
   const isOffcut = bar.leftoverType === "offcut";
   const stripe = isOffcut ? "96,165,250" : "245,158,11";
   const leftoverStyle = {
@@ -28,29 +31,37 @@ function BarStrip({ bar, barLengthIn }: { bar: PlannedBar; barLengthIn: number }
 
   return (
     <div className="flex items-center gap-2">
-      <span className="w-12 shrink-0 text-right text-[10px] font-medium text-zinc-500">Bar {bar.index}</span>
-      <div className="flex h-8 flex-1 overflow-hidden rounded-md border border-zinc-700 bg-zinc-900">
-        {bar.cuts.map((cut, index) => (
-          <div
-            key={index}
-            title={`${cut.component} — ${formatFeetInches(cut.lengthIn)}${cut.isJoint ? " (joined piece)" : ""}`}
-            style={{ width: widthPct(cut.lengthIn) }}
-            className={`flex items-center justify-center overflow-hidden border-r-2 border-zinc-950 text-[10px] font-semibold text-emerald-950 ${
-              cut.isJoint ? "bg-emerald-300/70" : index % 2 === 0 ? "bg-emerald-400" : "bg-emerald-300"
-            }`}
-          >
-            <span className="truncate px-1">{formatFeetInches(cut.lengthIn)}</span>
-          </div>
-        ))}
-        {bar.leftoverIn > 0 && (
-          <div
-            title={`${bar.leftoverType === "offcut" ? "Reusable offcut" : "Scrap"} — ${formatFeetInches(bar.leftoverIn)}`}
-            style={{ width: widthPct(bar.leftoverIn), ...leftoverStyle }}
-            className={`flex items-center justify-center overflow-hidden text-[10px] font-semibold ${leftoverClass}`}
-          >
-            <span className="truncate px-1">{formatFeetInches(bar.leftoverIn)}</span>
-          </div>
-        )}
+      <span className="w-16 shrink-0 text-right text-[10px] font-medium leading-tight text-zinc-500">
+        Bar {bar.index}
+        <span className="block text-zinc-600">{formatFeetInches(stockLengthIn)}</span>
+      </span>
+      <div className="flex-1">
+        <div
+          style={{ width: stripPct }}
+          className="flex h-8 overflow-hidden rounded-md border border-zinc-700 bg-zinc-900"
+        >
+          {bar.cuts.map((cut, index) => (
+            <div
+              key={index}
+              title={`${cut.component} — ${formatFeetInches(cut.lengthIn)}${cut.isJoint ? " (joined piece)" : ""}`}
+              style={{ width: widthPct(cut.lengthIn) }}
+              className={`flex items-center justify-center overflow-hidden border-r-2 border-zinc-950 text-[10px] font-semibold text-emerald-950 ${
+                cut.isJoint ? "bg-emerald-300/70" : index % 2 === 0 ? "bg-emerald-400" : "bg-emerald-300"
+              }`}
+            >
+              <span className="truncate px-1">{formatFeetInches(cut.lengthIn)}</span>
+            </div>
+          ))}
+          {bar.leftoverIn > 0 && (
+            <div
+              title={`${bar.leftoverType === "offcut" ? "Reusable offcut" : "Scrap"} — ${formatFeetInches(bar.leftoverIn)}`}
+              style={{ width: widthPct(bar.leftoverIn), ...leftoverStyle }}
+              className={`flex items-center justify-center overflow-hidden text-[10px] font-semibold ${leftoverClass}`}
+            >
+              <span className="truncate px-1">{formatFeetInches(bar.leftoverIn)}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -62,7 +73,7 @@ export function CuttingPlanView({ plan }: CuttingPlanViewProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        <Stat label="Bars to buy" value={String(totals.bars)} />
+        <Stat label="Pieces to buy" value={String(totals.bars)} />
         <Stat label="Purchased" value={formatKg(totals.purchasedKg)} />
         <Stat label="Used" value={formatKg(totals.usedKg)} tone="text-emerald-300" />
         <Stat label="Reusable offcuts" value={formatKg(totals.reusableOffcutsKg)} tone="text-sky-300" />
@@ -89,7 +100,13 @@ export function CuttingPlanView({ plan }: CuttingPlanViewProps) {
               <span className="ml-2 text-zinc-300">{profile.profileName}</span>
             </p>
             <p className="text-[11px] text-zinc-500">
-              {profile.barsNeeded} × {formatFeetInches(profile.barLengthIn)} bar{profile.barsNeeded === 1 ? "" : "s"} ·{" "}
+              {(profile.stockToBuy?.length
+                ? profile.stockToBuy
+                : [{ lengthIn: profile.barLengthIn, count: profile.barsNeeded }]
+              )
+                .map((s) => `${s.count} × ${formatFeetInches(s.lengthIn)}`)
+                .join(" + ")}{" "}
+              ·{" "}
               {profile.pieces} pieces · {formatLKR(profile.purchaseCost)}
             </p>
           </div>
