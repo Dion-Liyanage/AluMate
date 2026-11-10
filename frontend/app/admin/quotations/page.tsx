@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import {
   FileText, Eye, Send, Clock, CheckCircle2, Loader2,
   Search, Filter, RotateCw, Calendar, X, Upload,
-  Ruler, Palette, StickyNote, Package, Banknote, Download
+  Ruler, Palette, StickyNote, Package, Banknote, Download,
+  ChevronDown, ChevronUp, Info
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Link from "next/link";
@@ -108,6 +109,8 @@ export default function AdminQuotationsPage() {
   const [finalCompletionDate, setFinalCompletionDate] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
+  // System estimate is a reference for the fabricator — collapsed by default.
+  const [showSystemEstimate, setShowSystemEstimate] = useState(false);
 
   // Automatically calculate finalTotalCost when finalMaterialCost or finalLaborCost changes
   useEffect(() => {
@@ -160,6 +163,7 @@ export default function AdminQuotationsPage() {
     setFinalTotalCost(order.finalTotalCost?.toString() || "");
     setFinalCompletionDate(order.expectedCompletionDate ? format(new Date(order.expectedCompletionDate), 'yyyy-MM-dd') : "");
     setPdfFile(null);
+    setShowSystemEstimate(false);
     setIsDrawerOpen(true);
   };
 
@@ -590,7 +594,8 @@ export default function AdminQuotationsPage() {
                           <div className="flex items-center justify-between gap-2">
                             <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
                               <Ruler className="h-3.5 w-3.5" />
-                              Bill of Materials (at order time)
+                              System Estimate
+                              <span className="normal-case tracking-normal font-medium text-zinc-600">(reference only)</span>
                             </h4>
                             {selectedOrder.status === 'quotation_pending' && (
                               <Button
@@ -605,11 +610,30 @@ export default function AdminQuotationsPage() {
                                 }}
                                 className="h-7 border-violet-500/30 bg-violet-500/10 text-[11px] text-violet-200 hover:bg-violet-500/20"
                               >
-                                Use BOM costs
+                                Use as starting point
                               </Button>
                             )}
                           </div>
-                          <BomPreview bom={selectedOrder.bomSnapshot} showCosts />
+                          <p className="flex items-start gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-[11px] leading-relaxed text-zinc-400">
+                            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-500" />
+                            Calculated from the aluminium profiles and standard rates at order time. It does not include
+                            every lock, hinge, wheel, rubber beading, rivet or site condition — use it as a guide and set
+                            the final price below.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setShowSystemEstimate((open) => !open)}
+                            className="flex w-full items-center justify-between rounded-lg border border-zinc-800 px-3 py-2 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+                          >
+                            <span>
+                              {showSystemEstimate ? "Hide details" : "Show details"}
+                              <span className="ml-2 text-zinc-500">
+                                Estimated total {formatLKR(selectedOrder.bomSnapshot.totals.total)}
+                              </span>
+                            </span>
+                            {showSystemEstimate ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                          </button>
+                          {showSystemEstimate && <BomPreview bom={selectedOrder.bomSnapshot} showCosts />}
                         </section>
                       </>
                     )}
