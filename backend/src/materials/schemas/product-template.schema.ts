@@ -52,6 +52,15 @@ export class SizeBand {
   @Prop({ min: 0 })
   maxPanelWidthFt?: number;
 
+  /**
+   * All-inclusive customer price per sq.ft (aluminium, glass, hardware, labour).
+   * When set, the total is billable area × this rate; labour is the
+   * area × laborRatePerSqFt share of it and material is the rest.
+   * When empty, the total is itemised (profiles + glass + hardware + labour).
+   */
+  @Prop({ min: 0 })
+  pricePerSqFt?: number;
+
   @Prop({ required: true, min: 0 })
   laborRatePerSqFt: number;
 

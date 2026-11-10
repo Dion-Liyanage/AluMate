@@ -22,7 +22,8 @@ const describeBand = (band: ProductTemplate["sizeBands"][number]) => {
     band.maxAreaSqFt ? `≤ ${band.maxAreaSqFt} sq.ft` : null,
     band.maxPanelWidthFt ? `panel ≤ ${band.maxPanelWidthFt}ft` : null,
   ].filter(Boolean);
-  return limits.length ? limits.join(", ") : "any larger size";
+  const size = limits.length ? limits.join(", ") : "any larger size";
+  return band.pricePerSqFt ? `${size} · LKR ${band.pricePerSqFt.toLocaleString()}/sq.ft` : size;
 };
 
 export default function ProductTemplatesPage() {

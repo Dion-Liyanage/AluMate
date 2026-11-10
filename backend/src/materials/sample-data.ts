@@ -62,6 +62,11 @@ export const SAMPLE_PROFILES: SampleProfile[] = [
   profile('SW80-JMB', 'Heavy Sliding Side Jamb', '80mm Sliding Window', 'jamb', 1.4, 0.66, 450),
   profile('SW80-SSH', 'Heavy Sliding Sash', '80mm Sliding Window', 'sash', 1.4, 0.72, 480),
   profile('SW80-INT', 'Heavy Sliding Interlock', '80mm Sliding Window', 'interlock', 1.4, 0.8, 520),
+  // 100mm sliding window — extra large (placeholder weights & prices: replace with supplier figures)
+  profile('SW100-TRK', 'XL Sliding Track Frame', '100mm Sliding Window', 'track', 1.6, 1.1, 700),
+  profile('SW100-JMB', 'XL Sliding Side Jamb', '100mm Sliding Window', 'jamb', 1.6, 0.85, 560),
+  profile('SW100-SSH', 'XL Sliding Sash', '100mm Sliding Window', 'sash', 1.6, 0.95, 600),
+  profile('SW100-INT', 'XL Sliding Interlock', '100mm Sliding Window', 'interlock', 1.6, 1.05, 650),
   // 41mm casement — standard swing & fixed windows
   profile('CW41-FRM', 'Casement Outer Frame', '41mm Casement', 'frame', 1.2, 0.55, 380),
   profile('CW41-SSH', 'Casement Sash', '41mm Casement', 'sash', 1.2, 0.5, 360),
@@ -157,21 +162,36 @@ export const SAMPLE_TEMPLATES = [
     maxPanels: 4,
     defaultPanels: 2,
     sizeBands: [
+      // Up to 6 ft wide × 4 ft high
       {
         name: 'Standard – 70mm series',
-        maxWidthFt: 7,
-        maxAreaSqFt: 28,
+        maxWidthFt: 6,
+        maxHeightFt: 4,
+        pricePerSqFt: 3000,
         laborRatePerSqFt: 250,
         glassRatePerSqFt: 650,
         hardwareCostPerPanel: 1800,
         lines: slidingLines('SW70', 1, 2.5),
       },
+      // Up to 8 ft wide × 10 ft high
       {
         name: 'Large – 80mm heavy series',
+        maxWidthFt: 8,
+        maxHeightFt: 10,
+        pricePerSqFt: 4500,
         laborRatePerSqFt: 300,
         glassRatePerSqFt: 750,
         hardwareCostPerPanel: 2400,
         lines: slidingLines('SW80', 1.25, 3),
+      },
+      // Anything larger
+      {
+        name: 'Extra large – 100mm series',
+        pricePerSqFt: 7000,
+        laborRatePerSqFt: 350,
+        glassRatePerSqFt: 850,
+        hardwareCostPerPanel: 3000,
+        lines: slidingLines('SW100', 1.5, 3.5),
       },
     ],
   },
@@ -184,17 +204,20 @@ export const SAMPLE_TEMPLATES = [
     maxPanels: 3,
     defaultPanels: 1,
     sizeBands: [
+      // Up to 4 ft wide, any height
       {
         name: 'Standard – 41mm casement',
-        maxPanelWidthFt: 2.5,
-        maxHeightFt: 6,
+        maxWidthFt: 4,
+        pricePerSqFt: 3000,
         laborRatePerSqFt: 250,
         glassRatePerSqFt: 650,
         hardwareCostPerPanel: 2200,
         lines: casementLines('CW41'),
       },
+      // Wider than 4 ft
       {
         name: 'Large – 60mm heavy casement',
+        pricePerSqFt: 4500,
         laborRatePerSqFt: 320,
         glassRatePerSqFt: 750,
         hardwareCostPerPanel: 2800,

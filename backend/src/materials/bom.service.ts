@@ -68,6 +68,12 @@ export interface BomResult {
   };
   lines: BomLineResult[];
   profiles: BomProfileSummary[];
+  /**
+   * How the customer price was worked out:
+   *   per-sq-ft — billable area × an all-inclusive rate (labour is a share of it)
+   *   itemised  — aluminium + glass + hardware + labour
+   */
+  pricing: { method: 'per-sq-ft' | 'itemised'; ratePerSqFt?: number };
   totals: {
     totalLengthFt: number;
     aluminiumWeightKg: number;
@@ -75,11 +81,16 @@ export interface BomResult {
     barsNeeded: number;
     /** Planned scrap as % of purchased aluminium. */
     plannedWasteRatePct: number;
+    /** Aluminium cost from the cut list (workshop cost; part of the price only when itemised). */
     profileCost: number;
+    /** Glass cost (workshop cost; part of the price only when itemised). */
     glassCost: number;
+    /** Hardware cost (workshop cost; part of the price only when itemised). */
     hardwareCost: number;
+    /** Labour share of the customer price. */
     laborCost: number;
     finishSurcharge: number;
+    /** Material share of the customer price (before any finish surcharge). */
     materialCost: number;
     total: number;
   };
@@ -222,8 +233,21 @@ export class BomService {
     const profileCost = lineResults.reduce((sum, line) => sum + line.cost, 0);
     const glassCost = Math.round(billableAreaSqFt * band.glassRatePerSqFt);
     const hardwareCost = Math.round(panels * band.hardwareCostPerPanel);
-    const laborCost = Math.round(billableAreaSqFt * band.laborRatePerSqFt);
-    const subtotal = profileCost + glassCost + hardwareCost + laborCost;
+
+    const ratePerSqFt = band.pricePerSqFt ?? 0;
+    const isPerSqFt = ratePerSqFt > 0;
+    let laborCost: number;
+    let materialCost: number;
+    if (isPerSqFt) {
+      // All-inclusive rate: labour is its share of the price, material is the rest.
+      const price = Math.round(billableAreaSqFt * ratePerSqFt);
+      laborCost = Math.min(price, Math.round(billableAreaSqFt * band.laborRatePerSqFt));
+      materialCost = price - laborCost;
+    } else {
+      laborCost = Math.round(billableAreaSqFt * band.laborRatePerSqFt);
+      materialCost = profileCost + glassCost + hardwareCost;
+    }
+    const subtotal = materialCost + laborCost;
     const finishSurcharge = input.color === 'wood-finish' ? Math.round(subtotal * WOOD_FINISH_SURCHARGE) : 0;
 
     const explanation = [
@@ -234,6 +258,11 @@ export class BomService {
         2,
       )} kg of profile`,
     ];
+    if (isPerSqFt) {
+      explanation.push(
+        `Priced at LKR ${ratePerSqFt.toLocaleString('en-US')} per sq.ft × ${billableAreaSqFt} sq.ft (aluminium, glass, hardware and labour included)`,
+      );
+    }
     if (verticalBars || horizontalBars) {
       explanation.push(
         `Includes ${verticalBars} vertical and ${horizontalBars} horizontal bar${horizontalBars === 1 ? '' : 's'} from your design`,
@@ -258,6 +287,7 @@ export class BomService {
       },
       lines: lineResults,
       profiles,
+      pricing: isPerSqFt ? { method: 'per-sq-ft', ratePerSqFt } : { method: 'itemised' },
       totals: {
         totalLengthFt: round(lineResults.reduce((sum, line) => sum + line.totalLengthFt, 0)),
         aluminiumWeightKg: round(lineResults.reduce((sum, line) => sum + line.weightKg, 0), 3),
@@ -268,7 +298,7 @@ export class BomService {
         hardwareCost,
         laborCost,
         finishSurcharge,
-        materialCost: profileCost + glassCost + hardwareCost,
+        materialCost,
         total: subtotal + finishSurcharge,
       },
       laborRatePerSqFt: band.laborRatePerSqFt,

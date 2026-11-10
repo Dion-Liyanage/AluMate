@@ -168,6 +168,8 @@ export interface SizeBand {
   maxHeightFt?: number | null;
   maxAreaSqFt?: number | null;
   maxPanelWidthFt?: number | null;
+  /** All-inclusive customer price per sq.ft; empty means itemised pricing. */
+  pricePerSqFt?: number | null;
   laborRatePerSqFt: number;
   glassRatePerSqFt: number;
   hardwareCostPerPanel: number;
@@ -264,6 +266,8 @@ export interface BomResult {
     materialCost: number;
     total: number;
   };
+  /** How the price was worked out (missing on cut lists saved before per-sq.ft pricing). */
+  pricing?: { method: "per-sq-ft" | "itemised"; ratePerSqFt?: number };
   laborRatePerSqFt: number;
   explanation: string[];
   warnings: string[];

@@ -51,6 +51,7 @@ const toInput = (template: ProductTemplateInput): ProductTemplateInput => ({
     maxHeightFt: band.maxHeightFt ?? null,
     maxAreaSqFt: band.maxAreaSqFt ?? null,
     maxPanelWidthFt: band.maxPanelWidthFt ?? null,
+    pricePerSqFt: band.pricePerSqFt ?? null,
     laborRatePerSqFt: band.laborRatePerSqFt,
     glassRatePerSqFt: band.glassRatePerSqFt,
     hardwareCostPerPanel: band.hardwareCostPerPanel,

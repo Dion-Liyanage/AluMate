@@ -125,7 +125,9 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
                   <TableHead className="text-right text-[10px] uppercase text-zinc-500">Total length</TableHead>
                   <TableHead className="text-right text-[10px] uppercase text-zinc-500">Bars to buy</TableHead>
                   <TableHead className="text-right text-[10px] uppercase text-zinc-500">Weight</TableHead>
-                  <TableHead className="text-right text-[10px] uppercase text-zinc-500">Cost</TableHead>
+                  <TableHead className="text-right text-[10px] uppercase text-zinc-500">
+                    {bom.pricing?.method === "per-sq-ft" ? "Workshop cost" : "Cost"}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -156,18 +158,33 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
           </p>
 
           <div className="space-y-1.5 rounded-lg border border-zinc-800 bg-zinc-900/30 p-3 text-xs">
-            {[
-              ["Aluminium profiles", bom.totals.profileCost],
-              ["Glass", bom.totals.glassCost],
-              ["Hardware", bom.totals.hardwareCost],
-              [`Labour (${bom.inputs.billableAreaSqFt} sq.ft × ${formatLKR(bom.laborRatePerSqFt)})`, bom.totals.laborCost],
-              ...(bom.totals.finishSurcharge ? [["Wood finish surcharge (30%)", bom.totals.finishSurcharge] as const] : []),
-            ].map(([label, value]) => (
-              <div key={label as string} className="flex justify-between text-zinc-400">
-                <span>{label}</span>
-                <span className="text-zinc-200">{formatLKR(value as number)}</span>
-              </div>
-            ))}
+            {bom.pricing?.method === "per-sq-ft" && (
+              <p className="pb-1 text-[11px] text-zinc-400">
+                {bom.inputs.billableAreaSqFt} sq.ft × {formatLKR(bom.pricing.ratePerSqFt ?? 0)} per sq.ft (all-inclusive) ={" "}
+                <span className="font-semibold text-zinc-200">
+                  {formatLKR(bom.totals.materialCost + bom.totals.laborCost)}
+                </span>
+              </p>
+            )}
+            {(bom.pricing?.method === "per-sq-ft"
+              ? [
+                  ["Material (aluminium, glass & hardware)", bom.totals.materialCost],
+                  [`Labour (${bom.inputs.billableAreaSqFt} sq.ft × ${formatLKR(bom.laborRatePerSqFt)})`, bom.totals.laborCost],
+                ]
+              : [
+                  ["Aluminium profiles", bom.totals.profileCost],
+                  ["Glass", bom.totals.glassCost],
+                  ["Hardware", bom.totals.hardwareCost],
+                  [`Labour (${bom.inputs.billableAreaSqFt} sq.ft × ${formatLKR(bom.laborRatePerSqFt)})`, bom.totals.laborCost],
+                ]
+            )
+              .concat(bom.totals.finishSurcharge ? [["Wood finish surcharge (30%)", bom.totals.finishSurcharge]] : [])
+              .map(([label, value]) => (
+                <div key={label as string} className="flex justify-between text-zinc-400">
+                  <span>{label}</span>
+                  <span className="text-zinc-200">{formatLKR(value as number)}</span>
+                </div>
+              ))}
             <div className="flex justify-between border-t border-zinc-800 pt-1.5 text-sm font-semibold text-zinc-100">
               <span>Total</span>
               <span>{formatLKR(bom.totals.total)}</span>
