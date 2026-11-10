@@ -88,9 +88,9 @@ export default function DashboardPage() {
         // ignore
       }
 
-      // saved designs are stored locally
+      // saved designs (also imports any left in this browser's old storage)
       try {
-        const saved = getSavedDesigns();
+        const saved = await getSavedDesigns();
         setSavedDesignCount(saved.length);
       } catch (err) {
         // ignore

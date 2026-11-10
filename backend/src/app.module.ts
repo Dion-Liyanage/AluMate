@@ -24,6 +24,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { SustainabilityModule } from './sustainability/sustainability.module';
 import { MaterialsModule } from './materials/materials.module';
 import { AiChatModule } from './ai-chat/ai-chat.module';
+import { SavedDesignsModule } from './saved-designs/saved-designs.module';
 
 
 @Module({
@@ -68,6 +69,7 @@ import { AiChatModule } from './ai-chat/ai-chat.module';
     SustainabilityModule,
     MaterialsModule,
     AiChatModule,
+    SavedDesignsModule,
   ],
 
   controllers: [AppController],

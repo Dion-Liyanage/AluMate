@@ -1,95 +1,152 @@
-export interface SavedDesign {
+import { savedDesignsApi, type SavedDesignRecord } from "@/lib/api";
+
+/**
+ * Saved designs live in the database, tied to the logged-in user, so they show
+ * on every device. They used to be kept in the browser's localStorage; any
+ * left there are uploaded to the account once (see importLocalSavedDesigns).
+ */
+export type SavedDesign = SavedDesignRecord;
+
+// Old browser-only storage, kept only so existing designs can be imported.
+const LEGACY_STORAGE_KEY = "alumate_saved_designs";
+// After a successful import the old data is moved here (not deleted) as a backup.
+const LEGACY_BACKUP_KEY = "alumate_saved_designs_imported";
+const IMPORT_BATCH_SIZE = 10;
+
+const isBrowser = () => typeof window !== "undefined";
+
+interface LegacySavedDesign {
   id: string;
   name: string;
   productType: string;
   designJson: string;
-  previewImage: string;
+  previewImage?: string;
   description?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const STORAGE_KEY = "alumate_saved_designs";
-
-const isBrowser = () => typeof window !== "undefined";
-
-const readSavedDesigns = (): SavedDesign[] => {
+const readLegacyDesigns = (): LegacySavedDesign[] => {
   if (!isBrowser()) return [];
-
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return [];
-
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as SavedDesign[]) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter(
+          (d) => d && typeof d.id === "string" && typeof d.designJson === "string" && d.name && d.productType
+        )
+      : [];
   } catch {
     return [];
   }
 };
 
-const writeSavedDesigns = (designs: SavedDesign[]) => {
-  if (!isBrowser()) return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(designs));
+let importInFlight: Promise<void> | null = null;
+
+/**
+ * Upload designs saved in this browser (old storage) to the user's account.
+ * Safe to call repeatedly: the server only adds designs it doesn't have yet,
+ * and the local copy is moved to a backup key once everything is uploaded.
+ */
+export const importLocalSavedDesigns = (): Promise<void> => {
+  if (!isBrowser()) return Promise.resolve();
+  if (importInFlight) return importInFlight;
+
+  importInFlight = (async () => {
+    const legacy = readLegacyDesigns();
+    if (legacy.length === 0) return;
+
+    let imported = 0;
+    for (let i = 0; i < legacy.length; i += IMPORT_BATCH_SIZE) {
+      const batch = legacy.slice(i, i + IMPORT_BATCH_SIZE).map((d) => ({
+        id: d.id,
+        name: d.name,
+        productType: d.productType,
+        designJson: d.designJson,
+        previewImage: d.previewImage ?? "",
+        description: d.description || undefined,
+        createdAt: d.createdAt,
+        updatedAt: d.updatedAt,
+      }));
+      const res = await savedDesignsApi.importMany(batch);
+      imported += res.data?.imported ?? 0;
+    }
+
+    try {
+      localStorage.setItem(LEGACY_BACKUP_KEY, localStorage.getItem(LEGACY_STORAGE_KEY) ?? "[]");
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } catch {
+      // Storage unavailable — the server ignores duplicates, so a retry is harmless.
+    }
+
+    if (imported > 0) {
+      console.info(`Imported ${imported} saved design(s) from this browser to your account.`);
+    }
+  })().finally(() => {
+    importInFlight = null;
+  });
+
+  return importInFlight;
 };
 
-const sortByUpdatedAtDesc = (designs: SavedDesign[]) =>
-  [...designs].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+const importQuietly = async () => {
+  try {
+    await importLocalSavedDesigns();
+  } catch (err) {
+    // Keep the local copy; the next page load will try again.
+    console.error("Failed to import browser saved designs:", err);
+  }
+};
+
+/** Newest first. Does not include designJson (use getSavedDesignById for that). */
+export const getSavedDesigns = async (): Promise<SavedDesign[]> => {
+  await importQuietly();
+  const res = await savedDesignsApi.getAll();
+  return res.data ?? [];
+};
+
+export const getSavedDesignById = async (id: string): Promise<SavedDesign | null> => {
+  await importQuietly();
+  try {
+    const res = await savedDesignsApi.getById(id);
+    return res.data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+export const deleteSavedDesign = async (id: string) => {
+  await savedDesignsApi.delete(id);
+};
 
 const generateId = () => {
   if (isBrowser() && typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-
   return `design-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 };
 
-export const getSavedDesigns = () => sortByUpdatedAtDesc(readSavedDesigns());
-
-export const getSavedDesignById = (id: string) =>
-  readSavedDesigns().find((design) => design.id === id);
-
-export const deleteSavedDesign = (id: string) => {
-  const nextDesigns = readSavedDesigns().filter((design) => design.id !== id);
-  writeSavedDesigns(nextDesigns);
-};
-
-export const upsertSavedDesign = (
-  input: Omit<SavedDesign, "id" | "createdAt" | "updatedAt"> & { id?: string }
-) => {
-  const now = new Date().toISOString();
-  const existingDesigns = readSavedDesigns();
-  const existingIndex = input.id
-    ? existingDesigns.findIndex((design) => design.id === input.id)
-    : -1;
-
-  if (existingIndex >= 0) {
-    const existing = existingDesigns[existingIndex];
-    const updated: SavedDesign = {
-      ...existing,
-      ...input,
-      id: existing.id,
-      createdAt: existing.createdAt,
-      updatedAt: now,
-    };
-
-    existingDesigns[existingIndex] = updated;
-    writeSavedDesigns(existingDesigns);
-    return updated;
-  }
-
-  const created: SavedDesign = {
-    id: input.id ?? generateId(),
+export const upsertSavedDesign = async (input: {
+  id?: string;
+  name: string;
+  productType: string;
+  designJson: string;
+  previewImage: string;
+  description?: string;
+}): Promise<SavedDesign> => {
+  const id = input.id ?? generateId();
+  const res = await savedDesignsApi.save(id, {
     name: input.name,
     productType: input.productType,
     designJson: input.designJson,
     previewImage: input.previewImage,
     description: input.description,
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  writeSavedDesigns([...existingDesigns, created]);
-  return created;
+  });
+  if (!res.success || !res.data) {
+    throw new Error(res.message || "Failed to save design");
+  }
+  return res.data;
 };
 
 export const createDefaultDesignName = (productType: string) => {
