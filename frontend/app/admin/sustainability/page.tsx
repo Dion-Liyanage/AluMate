@@ -27,6 +27,9 @@ const tooltipStyle = {
   border: "1px solid #3f3f46",
   borderRadius: "8px",
 };
+// Recharts defaults tooltip text to dark colours — invisible on the dark card.
+const tooltipLabelStyle = { color: "#e4e4e7", fontWeight: 600 };
+const tooltipItemStyle = { color: "#e4e4e7" };
 
 export default function SustainabilityPage() {
   const [dashboard, setDashboard] = useState<SustainabilityDashboardData | null>(null);
@@ -153,7 +156,7 @@ export default function SustainabilityPage() {
                               <Cell key={item.name} fill={item.color} />
                             ))}
                           </Pie>
-                          <Tooltip contentStyle={tooltipStyle} />
+                          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
                           <Legend verticalAlign="bottom" iconType="circle" />
                         </PieChart>
                       </ResponsiveContainer>
@@ -184,6 +187,8 @@ export default function SustainabilityPage() {
                         />
                         <Tooltip
                           contentStyle={tooltipStyle}
+                          labelStyle={tooltipLabelStyle}
+                          itemStyle={tooltipItemStyle}
                           formatter={(value) => [`${value}%`, "Waste rate"]}
                           cursor={{ fill: "rgba(255,255,255,0.04)" }}
                         />
