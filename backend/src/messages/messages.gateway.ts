@@ -10,10 +10,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
+import { corsOrigin } from '../common/cors';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // In production, replace with your FRONTEND_URL
+    origin: corsOrigin,
+    credentials: true,
   },
 })
 export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {

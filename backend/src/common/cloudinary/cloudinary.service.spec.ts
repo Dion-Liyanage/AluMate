@@ -7,6 +7,7 @@ jest.mock('cloudinary', () => ({
   v2: {
     uploader: {
       upload_stream: jest.fn(),
+      destroy: jest.fn(),
     },
   },
 }));
@@ -59,6 +60,60 @@ describe('CloudinaryService', () => {
       });
 
       await expect(service.uploadFile(mockFile)).rejects.toThrow('Upload failed');
+    });
+  });
+
+  describe('parseUrl', () => {
+    it('parses an image URL and strips the extension', () => {
+      expect(
+        service.parseUrl(
+          'https://res.cloudinary.com/demo/image/upload/v1712345678/alumate/projects/abc123.png',
+        ),
+      ).toEqual({ publicId: 'alumate/projects/abc123', resourceType: 'image' });
+    });
+
+    it('keeps the extension for raw files', () => {
+      expect(
+        service.parseUrl(
+          'https://res.cloudinary.com/demo/raw/upload/v1/alumate/designs/models/door.glb',
+        ),
+      ).toEqual({ publicId: 'alumate/designs/models/door.glb', resourceType: 'raw' });
+    });
+
+    it('ignores transformations before the version', () => {
+      expect(
+        service.parseUrl(
+          'https://res.cloudinary.com/demo/image/upload/fl_attachment/v99/alumate/x.jpg',
+        ),
+      ).toEqual({ publicId: 'alumate/x', resourceType: 'image' });
+    });
+
+    it('returns null for non-Cloudinary URLs', () => {
+      expect(service.parseUrl('/uploads/projects/123.png')).toBeNull();
+    });
+  });
+
+  describe('deleteByUrls', () => {
+    it('destroys only Cloudinary assets and swallows errors', async () => {
+      (cloudinary.uploader.destroy as jest.Mock)
+        .mockReset()
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValue({ result: 'ok' });
+
+      await expect(
+        service.deleteByUrls([
+          'https://res.cloudinary.com/demo/image/upload/v1/alumate/a.png',
+          '/uploads/projects/legacy.png',
+          undefined,
+          'https://res.cloudinary.com/demo/raw/upload/v1/alumate/m.glb',
+        ]),
+      ).resolves.toBeUndefined();
+
+      expect(cloudinary.uploader.destroy).toHaveBeenCalledTimes(2);
+      expect(cloudinary.uploader.destroy).toHaveBeenCalledWith('alumate/m.glb', {
+        resource_type: 'raw',
+        invalidate: true,
+      });
     });
   });
 });

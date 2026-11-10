@@ -5,11 +5,13 @@ import { existsSync, unlinkSync } from 'fs';
 import { basename, join } from 'path';
 import { Project, ProjectDocument } from './schemas/project.schema';
 import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   private deleteLocalProjectImages(imageUrls?: string[]) {
@@ -81,7 +83,11 @@ export class ProjectsService {
     }
 
     if (updateProjectDto.imageUrls && updateProjectDto.imageUrls.length > 0) {
-      this.deleteLocalProjectImages(previousImageUrls);
+      const kept = new Set(updateProjectDto.imageUrls);
+      const removedImages = previousImageUrls.filter((url) => !kept.has(url));
+      this.deleteLocalProjectImages(removedImages);
+      // Fire-and-forget: cleanup failures must not fail the update
+      void this.cloudinaryService.deleteByUrls(removedImages);
     }
 
     return updatedProject;
@@ -95,6 +101,7 @@ export class ProjectsService {
 
     await this.projectModel.findByIdAndDelete(id).exec();
     this.deleteLocalProjectImages(project.imageUrls);
+    void this.cloudinaryService.deleteByUrls(project.imageUrls || []);
   }
 
   async count(): Promise<number> {
