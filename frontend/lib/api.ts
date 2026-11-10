@@ -69,6 +69,9 @@ apiClient.interceptors.response.use(
       if (typeof window !== "undefined") {
         localStorage.removeItem("alumate_token");
         localStorage.removeItem("alumate_user");
+        // Clear the middleware cookie too, otherwise /login bounces back to
+        // /dashboard and the two redirects loop forever.
+        document.cookie = "alumate_token=; path=/; max-age=0";
         // Only redirect if not already on login/register page
         if (
           !window.location.pathname.includes("/login") &&

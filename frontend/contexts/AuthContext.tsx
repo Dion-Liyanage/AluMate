@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearAuthStorage = useCallback(() => {
     localStorage.removeItem("alumate_token");
     localStorage.removeItem("alumate_user");
+    document.cookie = "alumate_token=; path=/; max-age=0";
     setUser(null);
     setToken(null);
   }, []);
