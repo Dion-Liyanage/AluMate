@@ -41,13 +41,21 @@ export default function SavedDesignQuotationPage() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    if (designId) {
-      const found = getSavedDesignById(designId);
-      if (found) {
-        setDesign(found);
-      }
+    if (!designId) {
+      setIsMounted(true);
+      return;
     }
+    let cancelled = false;
+    getSavedDesignById(designId)
+      .then((found) => {
+        if (!cancelled && found) setDesign(found);
+      })
+      .finally(() => {
+        if (!cancelled) setIsMounted(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [designId]);
 
   if (!isMounted || isAuthLoading) {

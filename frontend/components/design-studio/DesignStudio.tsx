@@ -229,19 +229,24 @@ export default function DesignStudio({ productType, savedDesignId }: DesignStudi
       }
 
       if (json) {
-        const savedDesign = upsertSavedDesign({
-          id: currentSavedDesignId ?? undefined,
-          name: designName.trim() || createDefaultDesignName(productType),
-          productType,
-          designJson: json,
-          previewImage: preview ?? "",
-          description: designDescription.trim() || undefined,
-        });
+        try {
+          const savedDesign = await upsertSavedDesign({
+            id: currentSavedDesignId ?? undefined,
+            name: designName.trim() || createDefaultDesignName(productType),
+            productType,
+            designJson: json,
+            previewImage: preview ?? "",
+            description: designDescription.trim() || undefined,
+          });
 
-        setCurrentSavedDesignId(savedDesign.id);
-        setShowSaveModal(false);
-        setIsDirty(false);
-        toast.success("Design saved to Saved Designs");
+          setCurrentSavedDesignId(savedDesign.id);
+          setShowSaveModal(false);
+          setIsDirty(false);
+          toast.success("Design saved to Saved Designs");
+        } catch (err) {
+          console.error("Failed to save design:", err);
+          toast.error(err instanceof Error ? err.message : "Failed to save design");
+        }
       }
 
       console.log("Design saved", { json: json?.length, preview: preview?.length });
@@ -256,14 +261,27 @@ export default function DesignStudio({ productType, savedDesignId }: DesignStudi
     if (!savedDesignId) return;
     if (initialSavedDesignLoadedRef.current === savedDesignId) return;
 
-    const savedDesign = getSavedDesignById(savedDesignId);
-    if (!savedDesign) return;
-
-    fabricRef.current?.loadFromJSON(savedDesign.designJson);
-    setCurrentSavedDesignId(savedDesign.id);
-    setDesignName(savedDesign.name);
-    setDesignDescription(savedDesign.description ?? "");
     initialSavedDesignLoadedRef.current = savedDesignId;
+
+    let cancelled = false;
+    getSavedDesignById(savedDesignId).then((savedDesign) => {
+      if (cancelled) return;
+      if (!savedDesign?.designJson) {
+        initialSavedDesignLoadedRef.current = null;
+        toast.error("Could not load the saved design");
+        return;
+      }
+      fabricRef.current?.loadFromJSON(savedDesign.designJson);
+      setCurrentSavedDesignId(savedDesign.id);
+      setDesignName(savedDesign.name);
+      setDesignDescription(savedDesign.description ?? "");
+    });
+    return () => {
+      cancelled = true;
+      if (initialSavedDesignLoadedRef.current === savedDesignId) {
+        initialSavedDesignLoadedRef.current = null;
+      }
+    };
   }, [canvasReady, savedDesignId]);
 
   const handleViewToggle = useCallback(

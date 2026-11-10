@@ -42,19 +42,30 @@ export default function SavedDesignsPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
 
-  const loadSavedDesigns = () => setSavedDesigns(getSavedDesigns());
+  const loadSavedDesigns = async () => {
+    try {
+      setSavedDesigns(await getSavedDesigns());
+    } catch (err) {
+      console.error("Failed to load saved designs:", err);
+      toast.error("Could not load your saved designs");
+    }
+  };
 
   useEffect(() => {
-    setIsMounted(true);
-    loadSavedDesigns();
+    loadSavedDesigns().finally(() => setIsMounted(true));
   }, []);
 
   const designCount = useMemo(() => savedDesigns.length, [savedDesigns]);
 
-  const handleDelete = (id: string) => {
-    deleteSavedDesign(id);
-    loadSavedDesigns();
-    toast.success("Saved design deleted");
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteSavedDesign(id);
+      setSavedDesigns((prev) => prev.filter((d) => d.id !== id));
+      toast.success("Saved design deleted");
+    } catch (err) {
+      console.error("Failed to delete saved design:", err);
+      toast.error("Could not delete the saved design");
+    }
   };
 
   const handleOpen = (design: SavedDesign) => {

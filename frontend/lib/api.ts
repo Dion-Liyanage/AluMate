@@ -557,6 +557,64 @@ export const inventoryApi = {
 
 // ---------- Notifications API ----------
 
+// ==================== SAVED DESIGNS (design studio drafts) ====================
+
+export interface SavedDesignRecord {
+  id: string;
+  name: string;
+  productType: string;
+  designJson?: string;
+  previewImage: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SavedDesignInput {
+  name: string;
+  productType: string;
+  designJson: string;
+  previewImage?: string;
+  description?: string;
+}
+
+export const savedDesignsApi = {
+  getAll: async () => {
+    const res = await apiClient.get<ApiResponse<SavedDesignRecord[]>>("/saved-designs");
+    return res.data;
+  },
+
+  getById: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<SavedDesignRecord>>(
+      `/saved-designs/${encodeURIComponent(id)}`
+    );
+    return res.data;
+  },
+
+  save: async (id: string, data: SavedDesignInput) => {
+    const res = await apiClient.put<ApiResponse<SavedDesignRecord>>(
+      `/saved-designs/${encodeURIComponent(id)}`,
+      data
+    );
+    return res.data;
+  },
+
+  importMany: async (
+    designs: (SavedDesignInput & { id: string; createdAt?: string; updatedAt?: string })[]
+  ) => {
+    const res = await apiClient.post<ApiResponse<{ imported: number }>>(
+      "/saved-designs/import",
+      { designs }
+    );
+    return res.data;
+  },
+
+  delete: async (id: string) => {
+    const res = await apiClient.delete<ApiResponse>(`/saved-designs/${encodeURIComponent(id)}`);
+    return res.data;
+  },
+};
+
 export const notificationsApi = {
   getAll: async (params?: { isRead?: boolean; page?: number; limit?: number }) => {
     const res = await apiClient.get<
