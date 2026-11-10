@@ -147,6 +147,8 @@ export interface MaterialProfile {
   thicknessMm: number;
   weightKgPerM: number;
   barLengthFt: number;
+  /** Shorter pieces the supplier also sells cut from the full bar, in feet (e.g. [7, 14]). */
+  shorterLengthsFt?: number[];
   pricePerFt: number;
   isActive: boolean;
   isSample?: boolean;
@@ -219,12 +221,16 @@ export interface BomProfileSummary {
   profileName: string;
   thicknessMm: number;
   barLengthFt: number;
+  /** Every purchasable length, shortest first (missing on cut lists saved before it existed). */
+  stockLengthsFt?: number[];
   totalLengthFt: number;
   weightKg: number;
   cost: number;
   minimumBars: number;
   /** Bars to purchase per the cutting optimiser (missing on cut lists saved before it existed). */
   barsNeeded?: number;
+  /** Stock pieces to purchase by length, longest first (missing on older cut lists). */
+  stockToBuy?: { lengthFt: number; count: number }[];
   longestCutIn: number;
 }
 
@@ -276,6 +282,8 @@ export interface PlannedCut {
 
 export interface PlannedBar {
   index: number;
+  /** Length of the stock piece bought for this bar (missing on plans from older servers). */
+  stockLengthIn?: number;
   cuts: PlannedCut[];
   usedIn: number;
   kerfIn: number;
@@ -287,8 +295,10 @@ export interface ProfileCuttingPlan {
   profileCode: string;
   profileName: string;
   barLengthIn: number;
+  stockLengthsIn?: number[];
   bars: PlannedBar[];
   barsNeeded: number;
+  stockToBuy?: { lengthIn: number; count: number }[];
   pieces: number;
   purchasedKg: number;
   usedKg: number;

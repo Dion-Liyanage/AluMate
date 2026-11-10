@@ -18,8 +18,18 @@ type SampleProfile = {
   thicknessMm: number;
   weightKgPerM: number;
   barLengthFt: number;
+  shorterLengthsFt: number[];
   pricePerFt: number;
 };
+
+/**
+ * Stock bar lengths by product family:
+ *   - sliding window profiles: 21 ft bars, also sold as 7 ft and 14 ft pieces
+ *   - swing / fixed (casement) window profiles and glazing bead: 20 ft bars
+ *   - all door profiles: 20 ft bars
+ */
+export const SLIDING_WINDOW_BAR = { barLengthFt: 21, shorterLengthsFt: [7, 14] };
+export const STANDARD_BAR = { barLengthFt: 20, shorterLengthsFt: [] as number[] };
 
 const profile = (
   code: string,
@@ -29,7 +39,17 @@ const profile = (
   thicknessMm: number,
   weightKgPerM: number,
   pricePerFt: number,
-): SampleProfile => ({ code, name, series, shape, thicknessMm, weightKgPerM, barLengthFt: 16, pricePerFt });
+): SampleProfile => ({
+  code,
+  name,
+  series,
+  shape,
+  thicknessMm,
+  weightKgPerM,
+  ...(code.startsWith('SW') ? SLIDING_WINDOW_BAR : STANDARD_BAR),
+  shorterLengthsFt: code.startsWith('SW') ? [...SLIDING_WINDOW_BAR.shorterLengthsFt] : [],
+  pricePerFt,
+});
 
 export const SAMPLE_PROFILES: SampleProfile[] = [
   // 70mm sliding window — standard

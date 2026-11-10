@@ -141,3 +141,50 @@ describe('BomService', () => {
     }
   });
 });
+
+describe('stock bar lengths', () => {
+  const service = new BomService();
+
+  it('sample sliding window profiles are 21 ft bars also sold as 7 ft and 14 ft', () => {
+    const sliding = SAMPLE_PROFILES.filter((p) => p.series.includes('Sliding Window'));
+    expect(sliding.length).toBeGreaterThan(0);
+    for (const p of sliding) {
+      expect(p.barLengthFt).toBe(21);
+      expect(p.shorterLengthsFt).toEqual([7, 14]);
+    }
+  });
+
+  it('sample swing/fixed window and door profiles are 20 ft bars', () => {
+    const others = SAMPLE_PROFILES.filter((p) => !p.series.includes('Sliding Window'));
+    for (const p of others) {
+      expect(p.barLengthFt).toBe(20);
+      expect(p.shorterLengthsFt).toEqual([]);
+    }
+  });
+
+  it('a small sliding window buys shorter pieces where possible', () => {
+    const bom = service.generate(
+      template('window', 'sliding'),
+      { measurements: { width: `3'`, height: `3'` }, panels: 2 },
+      profiles,
+    );
+    for (const profile of bom.profiles) {
+      expect(profile.stockLengthsFt).toEqual([7, 14, 21]);
+      expect(profile.stockToBuy.reduce((n, s) => n + s.count, 0)).toBe(profile.barsNeeded);
+    }
+    const lengthsBought = bom.profiles.flatMap((p) => p.stockToBuy.map((s) => s.lengthFt));
+    expect(lengthsBought.some((ft) => ft < 21)).toBe(true);
+  });
+
+  it('door profiles only use 20 ft bars', () => {
+    const bom = service.generate(
+      template('door', 'swing'),
+      { measurements: { width: `3'`, height: `7'` }, panels: 1 },
+      profiles,
+    );
+    for (const profile of bom.profiles) {
+      expect(profile.stockLengthsFt).toEqual([20]);
+      expect(profile.stockToBuy.every((s) => s.lengthFt === 20)).toBe(true);
+    }
+  });
+});

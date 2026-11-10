@@ -19,6 +19,7 @@ import {
   TEMPLATE_PRODUCT_TYPES,
 } from './schemas/product-template.schema';
 import { SAMPLE_PROFILES, SAMPLE_TEMPLATES } from './sample-data';
+import { validateShorterLengths } from './stock-lengths';
 
 type TemplateShape = Pick<
   ProductTemplate,
@@ -62,6 +63,7 @@ export class MaterialsService implements OnModuleInit {
   }
 
   async createProfile(dto: CreateProfileDto) {
+    this.assertValidStockLengths(dto.barLengthFt, dto.shorterLengthsFt);
     try {
       return await this.profileModel.create({ ...dto, isSample: false });
     } catch (error) {
@@ -71,6 +73,10 @@ export class MaterialsService implements OnModuleInit {
 
   async updateProfile(id: string, dto: UpdateProfileDto) {
     const existing = await this.getProfileOrThrow(id);
+    this.assertValidStockLengths(
+      dto.barLengthFt ?? existing.barLengthFt,
+      dto.shorterLengthsFt ?? existing.shorterLengthsFt,
+    );
 
     if (dto.code && dto.code !== existing.code && (await this.isProfileUsed(existing.code))) {
       throw new ConflictException(
@@ -98,6 +104,11 @@ export class MaterialsService implements OnModuleInit {
     }
     await existing.deleteOne();
     return { deleted: true };
+  }
+
+  private assertValidStockLengths(barLengthFt: number, shorterLengthsFt?: number[]) {
+    const error = validateShorterLengths(barLengthFt, shorterLengthsFt);
+    if (error) throw new BadRequestException(error);
   }
 
   // ---------- Templates ----------

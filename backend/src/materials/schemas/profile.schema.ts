@@ -39,9 +39,16 @@ export class Profile {
   @Prop({ required: true, min: 0 })
   weightKgPerM: number;
 
-  /** Length of the stock bar supplied, in feet */
+  /** Length of the full stock bar supplied, in feet */
   @Prop({ required: true, min: 1 })
   barLengthFt: number;
+
+  /**
+   * Shorter pieces the supplier also sells cut from the full bar, in feet
+   * (e.g. [7, 14] for a 21 ft bar). Empty means only full bars can be bought.
+   */
+  @Prop({ type: [Number], default: [] })
+  shorterLengthsFt: number[];
 
   @Prop({ required: true, min: 0 })
   pricePerFt: number;
