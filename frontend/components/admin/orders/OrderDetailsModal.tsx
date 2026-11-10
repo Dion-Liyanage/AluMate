@@ -307,19 +307,50 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
             </>
           )}
 
-          {/* Material Breakdown Section */}
+          {/* Confirmed quotation — the same figures as the quotation PDF the customer accepted */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              Confirmed Quotation
+            </h4>
+            {order.finalTotalCost !== undefined ? (
+              <div className="p-4 rounded-xl border border-zinc-900 bg-zinc-950/20 space-y-3">
+                {order.finalMaterialCost !== undefined && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-500">Material</span>
+                    <span className="text-zinc-200 font-bold">Rs. {order.finalMaterialCost.toLocaleString()}</span>
+                  </div>
+                )}
+                {order.finalLaborCost !== undefined && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-500">Labour & Installation</span>
+                    <span className="text-zinc-200 font-bold">Rs. {order.finalLaborCost.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center border-t border-zinc-900 pt-3">
+                  <span className="text-zinc-400 font-bold uppercase text-[10px]">Total (sent to customer)</span>
+                  <span className="text-emerald-400 font-black text-lg">Rs. {order.finalTotalCost.toLocaleString()}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="p-4 rounded-xl border border-zinc-900 bg-zinc-950/20 text-xs text-zinc-500">
+                No final quotation has been sent for this order yet.
+              </p>
+            )}
+          </div>
+
+          {/* Aluminium needed — quantities only; prices come from the confirmed quotation above */}
           <div className="space-y-4">
             <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200 flex items-center gap-2">
               <Package className="h-4 w-4 text-blue-400" />
-              Material Breakdown
+              Aluminium Required
             </h4>
             <div className="rounded-xl border border-zinc-900 overflow-hidden bg-zinc-950/20">
               <Table>
                 <TableHeader className="bg-zinc-900/30">
                   <TableRow className="border-zinc-900 hover:bg-transparent">
-                    <TableHead className="text-[10px] uppercase text-zinc-500 font-bold py-3">Item</TableHead>
-                    <TableHead className="text-[10px] uppercase text-zinc-500 font-bold py-3 text-center">Qty</TableHead>
-                    <TableHead className="text-[10px] uppercase text-zinc-500 font-bold py-3 text-right pr-4">Price</TableHead>
+                    <TableHead className="text-[10px] uppercase text-zinc-500 font-bold py-3">Profile</TableHead>
+                    <TableHead className="text-[10px] uppercase text-zinc-500 font-bold py-3 text-right pr-4">Length</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -329,70 +360,20 @@ export function OrderDetailsModal({ order, isOpen, onOpenChange, onRefresh }: Or
                         <TableCell className="text-sm font-bold text-zinc-300 py-3">
                           {item.profileName} {item.thickness ? `(${item.thickness})` : ''}
                         </TableCell>
-                        <TableCell className="text-xs text-zinc-500 font-medium py-3 text-center">
+                        <TableCell className="text-xs text-zinc-400 font-medium py-3 text-right pr-4">
                           {item.quantityFeet} ft
-                        </TableCell>
-                        <TableCell className="text-sm text-zinc-100 font-black py-3 text-right pr-4">
-                          Rs. {item.materialCost?.toLocaleString() || (item.quantityFeet * (item.pricePerFeet || 0)).toLocaleString()}
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center py-4 text-zinc-500 text-xs">
-                        No material breakdown available
+                      <TableCell colSpan={2} className="text-center py-4 text-zinc-500 text-xs">
+                        No material list available
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
-            </div>
-          </div>
-
-          {/* Labor & Fabrication Section */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-200 flex items-center gap-2">
-              <Hammer className="h-4 w-4 text-blue-400" />
-              Labor & Fabrication
-            </h4>
-            <div className="p-4 rounded-xl border border-zinc-900 bg-zinc-950/20 space-y-3">
-              {order.laborCalculation ? (
-                <>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-zinc-500">
-                      Fabrication Labor ({order.laborCalculation.areaSqFt || 0} sq.ft × Rs. {order.laborCalculation.laborRate || 0})
-                    </span>
-                    <span className="text-zinc-200 font-bold">Rs. {(order.laborCalculation.laborCost || 0).toLocaleString()}</span>
-                  </div>
-                  {order.finalLaborCost !== undefined && order.finalLaborCost !== order.laborCalculation.laborCost && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-zinc-500">Final Adjusted Labor & Installation</span>
-                      <span className="text-zinc-200 font-bold">Rs. {order.finalLaborCost.toLocaleString()}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center text-sm border-t border-zinc-900 pt-3">
-                    <span className="text-zinc-400 font-bold uppercase text-[10px]">Total Fabrication Cost</span>
-                    <span className="text-blue-400 font-black">
-                      Rs. {(order.finalLaborCost !== undefined ? order.finalLaborCost : order.laborCalculation.laborCost || 0).toLocaleString()}
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-zinc-500">Fabrication & Installation Labor</span>
-                    <span className="text-zinc-200 font-bold">
-                      {order.finalLaborCost !== undefined ? `Rs. ${order.finalLaborCost.toLocaleString()}` : "Pending"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm border-t border-zinc-900 pt-3">
-                    <span className="text-zinc-400 font-bold uppercase text-[10px]">Total Fabrication Cost</span>
-                    <span className="text-blue-400 font-black">
-                      {order.finalLaborCost !== undefined ? `Rs. ${order.finalLaborCost.toLocaleString()}` : "Pending"}
-                    </span>
-                  </div>
-                </>
-              )}
             </div>
           </div>
 

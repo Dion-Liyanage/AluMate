@@ -14,7 +14,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { AlertTriangle, Banknote, Leaf, Loader2, PackageCheck, Recycle, Scissors, Trash2 } from "lucide-react";
+import { AlertTriangle, Banknote, FileDown, Leaf, Loader2, PackageCheck, Recycle, Scissors, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { downloadSustainabilityReport } from "@/lib/sustainability-report";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecordMaterialUsageDialog } from "@/components/admin/sustainability/RecordMaterialUsageDialog";
@@ -27,11 +30,28 @@ const tooltipStyle = {
   border: "1px solid #3f3f46",
   borderRadius: "8px",
 };
+// Recharts defaults tooltip text to dark colours — invisible on the dark card.
+const tooltipLabelStyle = { color: "#e4e4e7", fontWeight: 600 };
+const tooltipItemStyle = { color: "#e4e4e7" };
 
 export default function SustainabilityPage() {
   const [dashboard, setDashboard] = useState<SustainabilityDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleDownloadReport = async () => {
+    if (!dashboard) return;
+    setIsExporting(true);
+    try {
+      await downloadSustainabilityReport(dashboard);
+    } catch (err) {
+      console.error("Failed to create report:", err);
+      toast.error("Could not create the PDF report");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true);
@@ -79,7 +99,19 @@ export default function SustainabilityPage() {
               Track aluminium use, recover reusable offcuts, and reduce fabrication waste.
             </p>
           </div>
-          <RecordMaterialUsageDialog onSaved={loadDashboard} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDownloadReport}
+              disabled={!dashboard || isExporting}
+              className="border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"
+            >
+              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+              Download PDF Report
+            </Button>
+            <RecordMaterialUsageDialog onSaved={loadDashboard} />
+          </div>
         </div>
 
         {error && (
@@ -153,7 +185,7 @@ export default function SustainabilityPage() {
                               <Cell key={item.name} fill={item.color} />
                             ))}
                           </Pie>
-                          <Tooltip contentStyle={tooltipStyle} />
+                          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
                           <Legend verticalAlign="bottom" iconType="circle" />
                         </PieChart>
                       </ResponsiveContainer>
@@ -184,6 +216,8 @@ export default function SustainabilityPage() {
                         />
                         <Tooltip
                           contentStyle={tooltipStyle}
+                          labelStyle={tooltipLabelStyle}
+                          itemStyle={tooltipItemStyle}
                           formatter={(value) => [`${value}%`, "Waste rate"]}
                           cursor={{ fill: "rgba(255,255,255,0.04)" }}
                         />

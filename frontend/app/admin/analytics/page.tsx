@@ -137,6 +137,7 @@ export default function AnalyticsPage() {
                     <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }}
+                      labelStyle={{ color: '#e4e4e7', fontWeight: 600 }}
                       itemStyle={{ color: '#3b82f6' }}
                     />
                     <Area type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
@@ -162,6 +163,7 @@ export default function AnalyticsPage() {
                       outerRadius={100}
                       paddingAngle={5}
                       dataKey="value"
+                      stroke="none"
                     >
                       {statusData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -169,6 +171,8 @@ export default function AnalyticsPage() {
                     </Pie>
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }}
+                      labelStyle={{ color: '#e4e4e7', fontWeight: 600 }}
+                      itemStyle={{ color: '#e4e4e7' }}
                     />
                     <Legend verticalAlign="bottom" height={36}/>
                   </PieChart>
@@ -196,6 +200,8 @@ export default function AnalyticsPage() {
                     <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }}
+                      labelStyle={{ color: '#e4e4e7', fontWeight: 600 }}
+                      itemStyle={{ color: '#e4e4e7' }}
                       cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                     />
                     <Bar dataKey="value" name="Order Count" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40}>
