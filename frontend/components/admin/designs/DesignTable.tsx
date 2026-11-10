@@ -27,7 +27,13 @@ import Link from "next/link";
 import { designsApi } from "@/lib/api";
 import { Design3DViewer } from "@/components/catalogue/Design3DViewer";
 import { toast } from "sonner";
-import { DEFAULT_SYSTEM_TYPE, SystemTypeSelect, systemTypeForSubmit } from "./SystemTypeSelect";
+import {
+  DEFAULT_SYSTEM_TYPE,
+  PanelCountSelect,
+  SystemTypeSelect,
+  panelCountForSubmit,
+  systemTypeForSubmit,
+} from "./SystemTypeSelect";
 
 interface Design {
   _id: string;
@@ -38,6 +44,7 @@ interface Design {
   imageUrls?: string[];
   modelUrl?: string;
   systemType?: string | null;
+  panelCount?: number | null;
 }
 
 interface DesignTableProps {
@@ -58,6 +65,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
     description: "",
     category: "doors",
     systemType: DEFAULT_SYSTEM_TYPE,
+    panelCount: "",
   });
 
   const openEditDialog = (design: Design) => {
@@ -70,6 +78,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
       description: design.description,
       category: design.category,
       systemType: design.systemType ?? DEFAULT_SYSTEM_TYPE,
+      panelCount: design.panelCount ? String(design.panelCount) : "",
     });
   };
 
@@ -100,6 +109,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
     submitData.append("systemType", systemTypeForSubmit(formData.category, formData.systemType));
+    submitData.append("panelCount", panelCountForSubmit(formData.category, formData.panelCount));
     
     if (selectedFile) {
       submitData.append("images", selectedFile);
@@ -174,6 +184,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                   >
                     {design.category}
                     {design.systemType ? ` · ${design.systemType}` : ""}
+                    {design.panelCount ? ` · ${design.panelCount} panels` : ""}
                   </Badge>
 
                   <div className="flex items-center gap-1.5">
@@ -246,7 +257,7 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                             <Label htmlFor="edit-category">Category</Label>
                             <Select
                               value={formData.category}
-                              onValueChange={(value) => setFormData({ ...formData, category: value, systemType: DEFAULT_SYSTEM_TYPE })}
+                              onValueChange={(value) => setFormData({ ...formData, category: value, systemType: DEFAULT_SYSTEM_TYPE, panelCount: "" })}
                             >
                               <SelectTrigger id="edit-category" className="bg-zinc-900 border-zinc-800">
                                 <SelectValue placeholder="Select category" />
@@ -266,6 +277,12 @@ export function DesignTable({ designs, onRefresh }: DesignTableProps) {
                             category={formData.category}
                             value={formData.systemType}
                             onChange={(value) => setFormData({ ...formData, systemType: value })}
+                          />
+                          <PanelCountSelect
+                            id="edit-panelCount"
+                            category={formData.category}
+                            value={formData.panelCount}
+                            onChange={(value) => setFormData({ ...formData, panelCount: value })}
                           />
 
                           <div className="space-y-2">

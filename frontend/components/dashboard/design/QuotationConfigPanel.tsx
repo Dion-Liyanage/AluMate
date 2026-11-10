@@ -44,6 +44,8 @@ interface QuotationConfigPanelProps {
    * designs never ask the customer — the system comes from the design itself.
    */
   systemType?: string;
+  /** Fixed number of panels of a catalogue design (set by the admin). */
+  panelCount?: number;
 }
 
 interface QuotationState {
@@ -162,6 +164,7 @@ export function QuotationConfigPanel({
   catalogueDesignId,
   catalogueDesignTitle,
   systemType: catalogueSystemType,
+  panelCount: cataloguePanelCount,
 }: QuotationConfigPanelProps) {
   const usesBom = isBomProduct(productType);
   const isCatalogue = !!catalogueDesignId;
@@ -217,16 +220,20 @@ export function QuotationConfigPanel({
 
   const selectedSystem = systems.find((system) => system.systemType === systemType);
 
-  // Sensible panel default for the chosen system.
-  // Sliding designs from the studio: each vertical bar separates two sashes.
+  // Customers don't choose the number of panels — it comes from the design:
+  // - catalogue designs: the fixed count set by the admin on the design
+  // - studio sliding designs: each vertical bar separates two sashes
+  // Otherwise the opening system's default is used.
   const defaultPanels = useMemo(() => {
     if (!selectedSystem) return undefined;
     let panels = selectedSystem.defaultPanels;
-    if (selectedSystem.systemType === "sliding" && studioFeatures?.verticalBars) {
+    if (isCatalogue && cataloguePanelCount) {
+      panels = cataloguePanelCount;
+    } else if (selectedSystem.systemType === "sliding" && studioFeatures?.verticalBars) {
       panels = studioFeatures.verticalBars + 1;
     }
     return Math.min(selectedSystem.maxPanels, Math.max(selectedSystem.minPanels, panels));
-  }, [selectedSystem, studioFeatures]);
+  }, [selectedSystem, studioFeatures, isCatalogue, cataloguePanelCount]);
 
   // Reset panels whenever the system (and so its default) changes.
   useEffect(() => {
@@ -409,9 +416,6 @@ export function QuotationConfigPanel({
               isLoading={systemsLoading}
               value={systemType}
               onChange={setSystemType}
-              panels={config.measurements.panelCount}
-              onPanelsChange={(value) => updateMeasurement("panelCount", value)}
-              selectedSystem={selectedSystem}
               studioFeatures={studioFeatures}
               productType={productType}
             />
@@ -532,9 +536,6 @@ function OpeningSystemSelector({
   isLoading,
   value,
   onChange,
-  panels,
-  onPanelsChange,
-  selectedSystem,
   studioFeatures,
   productType,
 }: {
@@ -542,9 +543,6 @@ function OpeningSystemSelector({
   isLoading: boolean;
   value: string;
   onChange: (systemType: string) => void;
-  panels: number | string | undefined;
-  onPanelsChange: (value: number | string) => void;
-  selectedSystem?: OpeningSystem;
   studioFeatures?: { verticalBars: number; horizontalBars: number };
   productType: string;
 }) {
@@ -564,8 +562,6 @@ function OpeningSystemSelector({
       </p>
     );
   }
-
-  const panelLabel = productType === "door" ? "leaves / panels" : "panels / sashes";
 
   return (
     <div className="space-y-4">
@@ -593,36 +589,6 @@ function OpeningSystemSelector({
           );
         })}
       </div>
-
-      {selectedSystem && selectedSystem.maxPanels > selectedSystem.minPanels && (
-        <div className="space-y-1.5">
-          <label className="text-xs text-zinc-400">
-            Number of {panelLabel}
-            <span className="ml-1 text-zinc-600">
-              ({selectedSystem.minPanels}–{selectedSystem.maxPanels})
-            </span>
-          </label>
-          <div className="flex gap-2">
-            {Array.from(
-              { length: selectedSystem.maxPanels - selectedSystem.minPanels + 1 },
-              (_, index) => selectedSystem.minPanels + index
-            ).map((count) => (
-              <button
-                key={count}
-                type="button"
-                onClick={() => onPanelsChange(count)}
-                className={`h-9 w-11 rounded-lg border text-sm font-semibold transition-all ${
-                  Number(panels) === count
-                    ? "border-violet-500/60 bg-violet-500/15 text-violet-200"
-                    : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700"
-                }`}
-              >
-                {count}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {studioFeatures && (studioFeatures.verticalBars > 0 || studioFeatures.horizontalBars > 0) && (
         <p className="rounded-lg border border-sky-500/20 bg-sky-500/5 px-3 py-2 text-[11px] leading-relaxed text-sky-300/90">

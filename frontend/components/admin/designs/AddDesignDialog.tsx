@@ -23,7 +23,13 @@ import { Label } from "@/components/ui/label";
 import { Plus, Image as ImageIcon, X, Box as CubeIcon, CheckCircle2 } from "lucide-react";
 import { designsApi } from "@/lib/api";
 import { toast } from "sonner";
-import { DEFAULT_SYSTEM_TYPE, SystemTypeSelect, systemTypeForSubmit } from "./SystemTypeSelect";
+import {
+  DEFAULT_SYSTEM_TYPE,
+  PanelCountSelect,
+  SystemTypeSelect,
+  panelCountForSubmit,
+  systemTypeForSubmit,
+} from "./SystemTypeSelect";
 
 interface AddDesignDialogProps {
   onSuccess: () => void;
@@ -39,6 +45,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     description: "",
     category: "doors",
     systemType: DEFAULT_SYSTEM_TYPE,
+    panelCount: "",
   });
 
 
@@ -70,6 +77,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
       description: "",
       category: "doors",
       systemType: DEFAULT_SYSTEM_TYPE,
+      panelCount: "",
     });
     setSelectedModelFile(null);
   };
@@ -86,6 +94,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
     submitData.append("description", formData.description);
     submitData.append("category", formData.category);
     submitData.append("systemType", systemTypeForSubmit(formData.category, formData.systemType));
+    submitData.append("panelCount", panelCountForSubmit(formData.category, formData.panelCount));
     
 
 
@@ -146,7 +155,7 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
             <Label htmlFor="category">Category</Label>
             <Select
               value={formData.category}
-              onValueChange={(val) => setFormData({ ...formData, category: val, systemType: DEFAULT_SYSTEM_TYPE })}
+              onValueChange={(val) => setFormData({ ...formData, category: val, systemType: DEFAULT_SYSTEM_TYPE, panelCount: "" })}
             >
               <SelectTrigger className="bg-zinc-900 border-zinc-800">
                 <SelectValue placeholder="Select category" />
@@ -165,6 +174,12 @@ export function AddDesignDialog({ onSuccess }: AddDesignDialogProps) {
             category={formData.category}
             value={formData.systemType}
             onChange={(val) => setFormData({ ...formData, systemType: val })}
+          />
+          <PanelCountSelect
+            id="panelCount"
+            category={formData.category}
+            value={formData.panelCount}
+            onChange={(val) => setFormData({ ...formData, panelCount: val })}
           />
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
