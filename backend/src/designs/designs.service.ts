@@ -5,11 +5,13 @@ import { existsSync, unlinkSync } from 'fs';
 import { basename, join } from 'path';
 import { Design, DesignDocument } from './schemas/design.schema';
 import { CreateDesignDto, UpdateDesignDto } from './dto/design.dto';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 
 @Injectable()
 export class DesignsService {
   constructor(
     @InjectModel(Design.name) private designModel: Model<DesignDocument>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   private deleteLocalDesignImages(imageUrls?: string[]) {
@@ -72,6 +74,7 @@ export class DesignsService {
     }
 
     const previousImageUrls = existingDesign.imageUrls || [];
+    const previousModelUrl = existingDesign.modelUrl;
 
     const updatedDesign = await this.designModel
       .findByIdAndUpdate(id, updateDesignDto, { new: true })
@@ -80,9 +83,25 @@ export class DesignsService {
       throw new NotFoundException(`Design with ID ${id} not found`);
     }
 
+    const replacedAssets: string[] = [];
+
     if (updateDesignDto.imageUrls && updateDesignDto.imageUrls.length > 0) {
-      this.deleteLocalDesignImages(previousImageUrls);
+      const kept = new Set(updateDesignDto.imageUrls);
+      const removedImages = previousImageUrls.filter((url) => !kept.has(url));
+      this.deleteLocalDesignImages(removedImages);
+      replacedAssets.push(...removedImages);
     }
+
+    if (
+      updateDesignDto.modelUrl &&
+      previousModelUrl &&
+      updateDesignDto.modelUrl !== previousModelUrl
+    ) {
+      replacedAssets.push(previousModelUrl);
+    }
+
+    // Fire-and-forget: cleanup failures must not fail the update
+    void this.cloudinaryService.deleteByUrls(replacedAssets);
 
     return updatedDesign;
   }
@@ -95,5 +114,9 @@ export class DesignsService {
 
     await this.designModel.findByIdAndDelete(id).exec();
     this.deleteLocalDesignImages(design.imageUrls);
+    void this.cloudinaryService.deleteByUrls([
+      ...(design.imageUrls || []),
+      design.modelUrl,
+    ]);
   }
 }
