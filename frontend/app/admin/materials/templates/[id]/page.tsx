@@ -74,7 +74,6 @@ function TemplateEditor() {
   const [profiles, setProfiles] = useState<MaterialProfile[]>([]);
   const [draft, setDraft] = useState<ProductTemplateInput | null>(null);
   const [savedSnapshot, setSavedSnapshot] = useState("");
-  const [isSample, setIsSample] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -96,7 +95,6 @@ function TemplateEditor() {
         if (templateResponse?.data) {
           const template = templateResponse.data as ProductTemplate;
           initial = toInput(template);
-          setIsSample(!!template.isSample);
         } else {
           const productType = searchParams.get("productType") === "door" ? "door" : "window";
           const systemType = (searchParams.get("systemType") ?? "sliding") as SystemType;
@@ -152,7 +150,6 @@ function TemplateEditor() {
         const saved = response.data ? toInput(response.data) : payload;
         setDraft(saved);
         setSavedSnapshot(JSON.stringify(saved));
-        setIsSample(false);
         toast.success("Template saved");
       }
     } catch (error) {
@@ -206,7 +203,6 @@ function TemplateEditor() {
             <h2 className="text-2xl font-bold text-zinc-100">{draft.name || "New template"}</h2>
             <p className="text-sm capitalize text-zinc-500">
               {draft.systemType} {draft.productType}
-              {isSample && <span className="ml-2 normal-case text-amber-400">· sample data</span>}
               {isDirty && <span className="ml-2 normal-case text-sky-400">· unsaved changes</span>}
             </p>
           </div>

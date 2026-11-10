@@ -14,6 +14,7 @@ const protectedRoutes = [
   "/orders",
   "/quotations/request",
   "/profile",
+  "/notifications",
 ];
 
 // Routes that require admin role

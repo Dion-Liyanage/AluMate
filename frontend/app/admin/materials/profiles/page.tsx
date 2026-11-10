@@ -61,8 +61,6 @@ export default function AluminiumProfilesPage() {
     return Array.from(groups.entries());
   }, [profiles, search]);
 
-  const hasSamples = profiles.some((p) => p.isSample);
-
   const openCreate = () => {
     setEditing(null);
     setDialogOpen(true);
@@ -124,13 +122,6 @@ export default function AluminiumProfilesPage() {
           </div>
         </div>
 
-        {hasSamples && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-            Profiles marked <strong>Sample</strong> use illustrative weights and prices. Replace them with values from
-            your supplier&apos;s catalogue before quoting real customers.
-          </div>
-        )}
-
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
           <Input
@@ -190,11 +181,6 @@ export default function AluminiumProfilesPage() {
                               >
                                 {profile.isActive ? "Active" : "Inactive"}
                               </span>
-                              {profile.isSample && (
-                                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
-                                  Sample
-                                </span>
-                              )}
                             </div>
                           </TableCell>
                           <TableCell>

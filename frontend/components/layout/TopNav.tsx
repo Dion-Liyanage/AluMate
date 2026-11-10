@@ -12,7 +12,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { notificationsApi } from "@/lib/api";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+/** Fired by the notifications page after marking items read so the badge refreshes. */
+export const NOTIFICATIONS_CHANGED_EVENT = "notifications:changed";
 
 interface TopNavProps {
   title: string;
@@ -21,6 +27,30 @@ interface TopNavProps {
 
 export function TopNav({ title, onMenuToggle }: TopNavProps) {
   const { user, logout } = useAuth();
+  const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const refreshUnread = useCallback(() => {
+    if (!user) return;
+    notificationsApi
+      .getUnreadCount()
+      .then((res) => setUnreadCount(res.data?.count ?? 0))
+      .catch(() => {
+        // Badge is non-critical; keep the last known value.
+      });
+  }, [user]);
+
+  // Refresh on login, on navigation, every minute, and when the list page changes read state.
+  useEffect(refreshUnread, [refreshUnread, pathname]);
+
+  useEffect(() => {
+    const interval = setInterval(refreshUnread, 60_000);
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnread);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, refreshUnread);
+    };
+  }, [refreshUnread]);
 
   const initials = user
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
@@ -45,19 +75,21 @@ export function TopNav({ title, onMenuToggle }: TopNavProps) {
         {/* Right side */}
         <div className="flex items-center gap-3">
           {/* Notifications */}
-          <Link href="/notifications">
+          <Link href="/notifications" aria-label={`Notifications${unreadCount ? ` (${unreadCount} unread)` : ""}`}>
             <Button
               variant="ghost"
               size="icon"
               className="relative text-zinc-400 hover:text-white hover:bg-zinc-800"
             >
               <Bell className="h-5 w-5" />
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] bg-red-500 border-zinc-950"
-              >
-                3
-              </Badge>
+              {unreadCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-5 min-w-5 rounded-full px-1 flex items-center justify-center text-[10px] bg-red-500 border-zinc-950"
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Badge>
+              )}
             </Button>
           </Link>
 

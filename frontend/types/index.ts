@@ -96,13 +96,14 @@ export interface InventoryItem {
 }
 
 export interface Notification {
-  id: string;
+  _id: string;
   userId: string;
   title: string;
   message: string;
   type: 'order' | 'quotation' | 'service' | 'system';
   isRead: boolean;
-  createdAt: Date;
+  linkTo?: string;
+  createdAt: string;
 }
 
 export interface ProjectFeedback {

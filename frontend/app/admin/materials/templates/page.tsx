@@ -123,11 +123,6 @@ export default function ProductTemplatesPage() {
                                   Inactive
                                 </span>
                               )}
-                              {template.isSample && (
-                                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-300">
-                                  Sample
-                                </span>
-                              )}
                             </div>
                           </div>
 

@@ -5,6 +5,7 @@ import { OrdersService } from './orders.service';
 import { Order } from './schemas/order.schema';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -48,6 +49,10 @@ describe('OrdersService', () => {
           useValue: mockOrderModel,
         },
         { provide: MailService, useValue: mockMailService },
+        {
+          provide: NotificationsService,
+          useValue: { notifyOrderStatus: jest.fn().mockResolvedValue(undefined) },
+        },
         { provide: UsersService, useValue: mockUsersService },
       ],
     }).compile();

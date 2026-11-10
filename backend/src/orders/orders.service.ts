@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
@@ -11,6 +12,7 @@ export class OrdersService {
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     private mailService: MailService,
     private usersService: UsersService,
+    private notificationsService: NotificationsService,
   ) {}
 
   private generateOrderId(): string {
@@ -56,6 +58,13 @@ export class OrdersService {
     const orderId = this.generateOrderId();
     const newOrder = new this.orderModel({ ...orderData, orderId });
     const savedOrder = await newOrder.save();
+
+    // In-app notification (never throws)
+    await this.notificationsService.notifyOrderStatus(
+      orderData.customerId?.toString(),
+      savedOrder.orderId,
+      'quotation_pending',
+    );
 
     // Send Confirmation Email
     try {
