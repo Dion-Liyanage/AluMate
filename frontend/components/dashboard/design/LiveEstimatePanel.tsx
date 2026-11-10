@@ -144,7 +144,7 @@ export function LiveEstimatePanel({
             <p className="text-xs text-zinc-500 max-w-[220px] mx-auto">
               {hasRequiredInput
                 ? usesBom
-                  ? "Ready to calculate the exact aluminium cut list and cost for your design."
+                  ? "Ready to calculate the aluminium needed and the cost for your design."
                   : "Ready to calculate your estimated cost based on current configuration."
                 : "Fill all required fields above to unlock estimation."}
             </p>
@@ -192,30 +192,20 @@ export function LiveEstimatePanel({
 
               <div className="h-px bg-zinc-800" />
 
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">
-                    {lastEstimate.bom ? "Estimated Material (aluminium, glass & hardware)" : "Estimated Material"}
-                  </span>
-                  <span className="text-sm font-medium text-zinc-200">{formatLKR(lastEstimate.materialCost)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Estimated Labor</span>
-                  <span className="text-sm font-medium text-zinc-200">{formatLKR(lastEstimate.laborCost)}</span>
-                </div>
-              </div>
-
-              <div className="h-px bg-zinc-800" />
-
-              <div className="flex items-center justify-between">
-                <span className="text-base font-semibold text-zinc-200">Estimated Cost Range</span>
-                <span
-                  className={`text-xl font-bold ${
+              {/* Range only — an exact material/labour split would contradict the range. */}
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-zinc-200">Estimated Cost Range</p>
+                <p
+                  className={`text-xl font-bold whitespace-nowrap ${
                     showStalePrice ? "text-zinc-500" : "bg-gradient-to-r from-violet-400 to-sky-400 bg-clip-text text-transparent"
                   }`}
                 >
-                  {formatLKR(lastEstimate.total * 0.9)} - {formatLKR(lastEstimate.total * 1.15)}
-                </span>
+                  {formatLKR(lastEstimate.total * 0.9)} – {formatLKR(lastEstimate.total * 1.15)}
+                </p>
+                <p className="text-[11px] leading-relaxed text-zinc-500">
+                  Includes aluminium, glass, hardware and labour. Your final price is confirmed after our team
+                  reviews your request.
+                </p>
               </div>
             </div>
 

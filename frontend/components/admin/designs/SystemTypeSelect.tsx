@@ -72,3 +72,51 @@ export function systemTypeForSubmit(category: string, value: string) {
   if (!options) return "none";
   return options.some((option) => option.value === value) ? value : options[0].value;
 }
+
+const PANEL_OPTIONS = [1, 2, 3, 4, 5, 6];
+const PANEL_DEFAULT = "default";
+
+interface PanelCountSelectProps {
+  id: string;
+  category: string;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+/**
+ * Fixed number of panels/leaves for a window/door catalogue design. Customers
+ * can't change a catalogue design, so the price uses this number. Left unset,
+ * pricing falls back to the opening system's default.
+ */
+export function PanelCountSelect({ id, category, value, onChange }: PanelCountSelectProps) {
+  if (!OPTIONS[category]) return null;
+  const noun = category === "doors" ? "leaves / panels" : "panels / sashes";
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>Number of {noun}</Label>
+      <Select value={value || PANEL_DEFAULT} onValueChange={(v) => onChange(v === PANEL_DEFAULT ? "" : v)}>
+        <SelectTrigger id={id} className="bg-zinc-900 border-zinc-800">
+          <SelectValue placeholder="Select number of panels" />
+        </SelectTrigger>
+        <SelectContent className="bg-zinc-900 border-zinc-800">
+          <SelectItem value={PANEL_DEFAULT}>Not set (use system default)</SelectItem>
+          {PANEL_OPTIONS.map((count) => (
+            <SelectItem key={count} value={String(count)}>
+              {count}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="text-[10px] text-zinc-500">
+        Must match the design&apos;s 3D model — customers can&apos;t change it, and it is used for the price.
+      </p>
+    </div>
+  );
+}
+
+/** Value to send: a number for windows/doors, "none" to clear it. */
+export function panelCountForSubmit(category: string, value: string) {
+  if (!OPTIONS[category] || !value) return "none";
+  return value;
+}

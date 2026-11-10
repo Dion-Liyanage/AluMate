@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsArray, IsUrl, IsBoolean, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsArray, IsUrl, IsBoolean, IsIn, IsInt, Min, Max } from 'class-validator';
 
 export class CreateDesignDto {
   @IsString()
@@ -22,6 +22,13 @@ export class CreateDesignDto {
   @Transform(({ value }) => (value === '' || value === 'none' ? null : value))
   @IsIn(['sliding', 'swing', 'fixed'])
   systemType?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' || value === 'none' || value === null ? null : Number(value)))
+  @IsInt()
+  @Min(1)
+  @Max(6)
+  panelCount?: number | null;
 
   @IsOptional()
   imageUrls?: string[];
@@ -62,6 +69,13 @@ export class UpdateDesignDto {
   @Transform(({ value }) => (value === '' || value === 'none' ? null : value))
   @IsIn(['sliding', 'swing', 'fixed'])
   systemType?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === '' || value === 'none' || value === null ? null : Number(value)))
+  @IsInt()
+  @Min(1)
+  @Max(6)
+  panelCount?: number | null;
 
   @IsOptional()
   imageUrls?: string[];

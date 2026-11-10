@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { AlertTriangle, ChevronDown, ChevronUp, Layers, Ruler, Scale, Scissors } from "lucide-react";
+import { AlertTriangle, Layers, Ruler, Scale, Scissors } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,7 +14,7 @@ import { formatFeetInches, formatKg, formatLKR } from "@/lib/units";
 
 interface BomPreviewProps {
   bom: BomResult;
-  /** Customer view: summary first, cut list behind a toggle, no per-line prices. */
+  /** Customer view: no workshop figures or cut list — just the design summary. */
   compact?: boolean;
   /** Show per-line costs, the per-profile bar summary and the cost breakdown. */
   showCosts?: boolean;
@@ -34,7 +33,7 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
 }
 
 export function BomPreview({ bom, compact = false, showCosts = false }: BomPreviewProps) {
-  const [showCutList, setShowCutList] = useState(!compact);
+  const showCutList = !compact;
   const pieces = bom.lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
@@ -46,12 +45,15 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat icon={<Scale className="h-3 w-3" />} label="Aluminium" value={formatKg(bom.totals.aluminiumWeightKg)} />
-        <Stat icon={<Ruler className="h-3 w-3" />} label="Profile length" value={`${bom.totals.totalLengthFt.toFixed(1)} ft`} />
-        <Stat icon={<Scissors className="h-3 w-3" />} label="Pieces" value={String(pieces)} />
-        <Stat icon={<Layers className="h-3 w-3" />} label="Profiles" value={String(bom.profiles.length)} />
-      </div>
+      {/* Workshop figures — not shown to customers (compact view). */}
+      {!compact && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Stat icon={<Scale className="h-3 w-3" />} label="Aluminium" value={formatKg(bom.totals.aluminiumWeightKg)} />
+          <Stat icon={<Ruler className="h-3 w-3" />} label="Profile length" value={`${bom.totals.totalLengthFt.toFixed(1)} ft`} />
+          <Stat icon={<Scissors className="h-3 w-3" />} label="Pieces" value={String(pieces)} />
+          <Stat icon={<Layers className="h-3 w-3" />} label="Profiles" value={String(bom.profiles.length)} />
+        </div>
+      )}
 
       {bom.warnings.length > 0 && (
         <div className="space-y-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
@@ -62,17 +64,6 @@ export function BomPreview({ bom, compact = false, showCosts = false }: BomPrevi
             </p>
           ))}
         </div>
-      )}
-
-      {compact && (
-        <button
-          type="button"
-          onClick={() => setShowCutList((open) => !open)}
-          className="flex w-full items-center justify-between rounded-lg border border-zinc-800 px-3 py-2 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
-        >
-          {showCutList ? "Hide cut list" : `View cut list (${pieces} pieces)`}
-          {showCutList ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-        </button>
       )}
 
       {showCutList && (

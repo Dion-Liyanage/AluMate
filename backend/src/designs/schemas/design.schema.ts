@@ -21,6 +21,10 @@ export class Design {
   @Prop({ enum: ['sliding', 'swing', 'fixed'] })
   systemType?: string;
 
+  /** Fixed number of panels/leaves for window/door designs — used for pricing. */
+  @Prop({ type: Number, min: 1, max: 6 })
+  panelCount?: number;
+
   @Prop({ type: [String], default: [] })
   imageUrls: string[];
 
