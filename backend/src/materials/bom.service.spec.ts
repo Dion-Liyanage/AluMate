@@ -57,15 +57,16 @@ describe('BomService', () => {
     expect(rails.cutLengthIn).toBe(24); // (48 - 2) / 2 + 1
     expect(bom.lines.some((l) => l.component.includes('transom'))).toBe(false); // TR = 0 → skipped
     expect(bom.totals.aluminiumWeightKg).toBeGreaterThan(0);
-    expect(bom.totals.total).toBe(
-      bom.totals.profileCost + bom.totals.glassCost + bom.totals.hardwareCost + bom.totals.laborCost,
-    );
+    // 4ft × 4ft = 16 sq.ft × LKR 3,000 all-inclusive
+    expect(bom.pricing).toEqual({ method: 'per-sq-ft', ratePerSqFt: 3000 });
+    expect(bom.totals.total).toBe(48_000);
+    expect(bom.totals.materialCost + bom.totals.laborCost).toBe(48_000);
   });
 
   it('moves to a stronger profile series when the opening is larger', () => {
     const bom = service.generate(
       template('window', 'sliding'),
-      { measurements: { width: `9'`, height: `5'` }, panels: 3 },
+      { measurements: { width: `7'`, height: `5'` }, panels: 3 },
       profiles,
     );
     expect(bom.sizeBand).toContain('80mm');
@@ -186,5 +187,85 @@ describe('stock bar lengths', () => {
       expect(profile.stockLengthsFt).toEqual([20]);
       expect(profile.stockToBuy.every((s) => s.lengthFt === 20)).toBe(true);
     }
+  });
+});
+
+describe('window pricing per sq.ft', () => {
+  const service = new BomService();
+  const quote = (systemType: string, w: string, h: string, extra: Record<string, unknown> = {}) =>
+    service.generate(
+      template('window', systemType),
+      { measurements: { width: w, height: h }, panels: systemType === 'sliding' ? 2 : 1, ...extra } as any,
+      profiles,
+    );
+
+  it.each([
+    // [width, height, series, rate]
+    [`6'`, `4'`, '70mm', 3000], // exactly at the 70mm limit
+    [`5'`, `3'`, '70mm', 3000],
+    [`4'`, `6'`, '80mm', 4500], // too tall for 70mm (width ≤ 6 AND height ≤ 4)
+    [`6'6"`, `4'`, '80mm', 4500], // too wide for 70mm
+    [`8'`, `10'`, '80mm', 4500], // exactly at the 80mm limit
+    [`9'`, `5'`, '100mm', 7000], // too wide for 80mm
+    [`8'`, `11'`, '100mm', 7000], // too tall for 80mm
+    [`14'`, `12'`, '100mm', 7000], // no upper limit
+  ])('sliding %s × %s → %s at LKR %d/sq.ft', (w, h, series, rate) => {
+    const bom = quote('sliding', w, h);
+    expect(bom.sizeBand).toContain(series);
+    expect(bom.pricing.ratePerSqFt).toBe(rate);
+    expect(bom.totals.total).toBe(bom.inputs.billableAreaSqFt * rate);
+  });
+
+  it('extra-large sliding windows are cut from the 100mm SW100 profiles', () => {
+    const bom = quote('sliding', `10'`, `6'`);
+    expect(bom.lines.every((l) => l.profileCode.startsWith('SW100'))).toBe(true);
+    for (const p of bom.profiles) expect(p.stockLengthsFt).toEqual([7, 14, 21]);
+  });
+
+  it.each([
+    [`4'`, `3'`, '41mm', 3000],
+    [`4'`, `12'`, '41mm', 3000], // any height while ≤ 4 ft wide
+    [`4'1"`, `3'`, '60mm', 4500],
+    [`8'`, `5'`, '60mm', 4500],
+  ])('swing %s × %s → %s at LKR %d/sq.ft', (w, h, series, rate) => {
+    const bom = quote('swing', w, h);
+    expect(bom.sizeBand).toContain(series);
+    expect(bom.totals.total).toBe(bom.inputs.billableAreaSqFt * rate);
+  });
+
+  it('bills part feet as a whole foot, as before', () => {
+    const bom = quote('sliding', `5'6"`, `3'2"`); // billed 6 × 4
+    expect(bom.inputs.billableAreaSqFt).toBe(24);
+    expect(bom.totals.total).toBe(72_000);
+  });
+
+  it('adds 30% on top for wood finish', () => {
+    const bom = quote('sliding', `4'`, `4'`, { color: 'wood-finish' });
+    expect(bom.totals.finishSurcharge).toBe(14_400);
+    expect(bom.totals.total).toBe(62_400);
+  });
+
+  it('splits the price into labour (area × labour rate) and material (the rest)', () => {
+    const bom = quote('sliding', `4'`, `4'`);
+    expect(bom.totals.laborCost).toBe(16 * 250);
+    expect(bom.totals.materialCost).toBe(48_000 - 4_000);
+  });
+
+  it('the panel count does not change a per-sq.ft price', () => {
+    const two = quote('sliding', `6'`, `4'`, { panels: 2 });
+    const three = quote('sliding', `6'`, `4'`, { panels: 3 });
+    expect(three.totals.total).toBe(two.totals.total);
+  });
+
+  it('bands without a per-sq.ft rate are still itemised (doors unchanged)', () => {
+    const bom = service.generate(
+      template('door', 'swing'),
+      { measurements: { width: `3'`, height: `7'` }, panels: 1 },
+      profiles,
+    );
+    expect(bom.pricing.method).toBe('itemised');
+    expect(bom.totals.total).toBe(
+      bom.totals.profileCost + bom.totals.glassCost + bom.totals.hardwareCost + bom.totals.laborCost,
+    );
   });
 });

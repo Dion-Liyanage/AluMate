@@ -71,6 +71,13 @@ export class SizeBandDto {
   @Min(0)
   maxPanelWidthFt?: number;
 
+  /** All-inclusive price per sq.ft; empty means itemised pricing. */
+  @IsOptional()
+  @Transform(optionalNumber)
+  @IsNumber()
+  @Min(0)
+  pricePerSqFt?: number;
+
   @Type(() => Number)
   @IsNumber()
   @Min(0)

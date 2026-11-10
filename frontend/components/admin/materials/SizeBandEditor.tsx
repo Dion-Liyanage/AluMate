@@ -119,6 +119,28 @@ export function SizeBandEditor({
         </div>
       </div>
 
+      <div className="space-y-1">
+        <Label className="text-[11px] text-zinc-400">
+          All-in price / sq.ft <span className="text-zinc-600">(LKR, optional)</span>
+        </Label>
+        <Input
+          type="number"
+          min="0"
+          step="1"
+          placeholder="Leave blank to price item by item"
+          value={band.pricePerSqFt ?? ""}
+          onChange={(event) =>
+            update("pricePerSqFt", event.target.value === "" ? null : Number(event.target.value))
+          }
+          className={fieldClass}
+        />
+        <p className="text-[10px] text-zinc-500">
+          {band.pricePerSqFt
+            ? "Customer price = area × this rate. Labour below is the labour share of it; material is the rest. Glass and hardware are workshop costs only."
+            : "Customer price = aluminium + glass + hardware + labour."}
+        </p>
+      </div>
+
       <div className="grid grid-cols-3 gap-3">
         {RATES.map(({ key, label }) => (
           <div key={key} className="space-y-1">

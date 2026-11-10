@@ -34,8 +34,10 @@ const input = { measurements: { width: `4'0"`, height: `4'0"` }, panels: 2, vert
 describe('materials request validation', () => {
   it('accepts the admin editor preview, create and update payloads', async () => {
     const preview = await validate(PreviewTemplateDto, { template: editorTemplate(), input });
-    expect(preview.template.sizeBands[0].maxPanelWidthFt).toBe(2.5);
-    expect(preview.template.sizeBands[1].maxWidthFt).toBeUndefined(); // null → no limit
+    expect(preview.template.sizeBands[0].maxWidthFt).toBe(4);
+    expect(preview.template.sizeBands[0].maxPanelWidthFt).toBeUndefined(); // null → no limit
+    expect(preview.template.sizeBands[0].pricePerSqFt).toBe(3000);
+    expect(preview.template.sizeBands[1].maxWidthFt).toBeUndefined();
 
     await expect(validate(CreateProductTemplateDto, editorTemplate())).resolves.toBeDefined();
 
