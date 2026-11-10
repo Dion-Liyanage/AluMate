@@ -1,0 +1,120 @@
+# AluMate CI — checks every change before it can reach production.
+#
+# CD is handled by the hosts themselves:
+#   - Vercel deploys the frontend when `main` changes
+#   - Render deploys the backend when `main` changes
+# This workflow is the gate in front of `main`: protect the branch on GitHub
+# (Settings → Branches) and require the "Backend" and "Frontend" checks.
+
+name: CI
+
+on:
+  push:
+    branches: [main, 'dev-*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel an older run on the same branch when a new commit is pushed
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+
+    # Throwaway MongoDB for e2e tests — created and destroyed with each run,
+    # so tests never touch the real Atlas database.
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MONGODB_URI: mongodb://localhost:27017/alumate_ci
+      JWT_SECRET: ci-only-not-a-real-secret
+      JWT_EXPIRATION: 1h
+      FRONTEND_URL: http://localhost:3000
+      # Dummy values: external services are never called by the tests,
+      # but some clients refuse to construct without a key.
+      RESEND_API_KEY: re_ci_dummy_key
+      MAIL_FROM: ci@example.com
+      CLOUDINARY_CLOUD_NAME: ci
+      CLOUDINARY_API_KEY: ci
+      CLOUDINARY_API_SECRET: ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test -- --ci
+
+      - name: E2E tests
+        run: npm run test:e2e -- --ci --forceExit
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+
+    env:
+      NEXT_PUBLIC_API_URL: https://alumate.onrender.com/api/v1
+      NEXT_PUBLIC_SOCKET_URL: https://alumate.onrender.com
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      # Non-blocking for now: existing lint errors are reported but don't fail
+      # the build. Remove `continue-on-error` once they're fixed.
+      - name: Lint (warning only)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
