@@ -114,6 +114,15 @@ export interface MaterialUsageInput {
   totalCost: number;
 }
 
+export interface MaterialUsageRecord extends MaterialUsageInput {
+  _id: string;
+  orderId?: string;
+  orderNumber?: string;
+  costPerKg: number;
+  recordedAt: string;
+  hasPlan: boolean;
+}
+
 export interface PlanComparison {
   orderNumber: string;
   projectName: string;
@@ -805,6 +814,20 @@ export const sustainabilityApi = {
       "/admin/sustainability/material-usage",
       data
     );
+    return response.data;
+  },
+  getRecords: async () => {
+    const response = await apiClient.get<ApiResponse<MaterialUsageRecord[]>>(
+      "/admin/sustainability/records"
+    );
+    return response.data;
+  },
+  updateRecord: async (id: string, data: Partial<MaterialUsageInput>) => {
+    const response = await apiClient.patch<ApiResponse>(`/admin/sustainability/records/${id}`, data);
+    return response.data;
+  },
+  deleteRecord: async (id: string) => {
+    const response = await apiClient.delete<ApiResponse>(`/admin/sustainability/records/${id}`);
     return response.data;
   },
 };

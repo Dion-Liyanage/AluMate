@@ -1,8 +1,9 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateMaterialUsageDto } from './dto/create-material-usage.dto';
 import { CompleteFabricationDto } from './dto/complete-fabrication.dto';
+import { UpdateMaterialUsageDto } from './dto/update-material-usage.dto';
 import {
   MaterialUsage,
   MaterialUsageDocument,
@@ -59,6 +60,54 @@ export class SustainabilityService {
       recordedAt: new Date(),
       recordedBy: new Types.ObjectId(adminId),
     });
+  }
+
+  /** All records, newest first, for the admin's edit/delete table. */
+  async listRecords() {
+    const records = await this.materialUsageModel.find().sort({ recordedAt: -1 }).lean().exec();
+    return records.map((r) => ({
+      _id: r._id.toString(),
+      orderId: r.orderId?.toString(),
+      orderNumber: r.orderNumber,
+      projectName: r.projectName,
+      purchasedKg: r.purchasedKg,
+      usedKg: r.usedKg,
+      reusableOffcutsKg: r.reusableOffcutsKg,
+      scrapWasteKg: r.scrapWasteKg,
+      totalCost: r.totalCost,
+      costPerKg: r.costPerKg,
+      recordedAt: r.recordedAt,
+      hasPlan: !!r.planned,
+    }));
+  }
+
+  async updateRecord(id: string, data: UpdateMaterialUsageDto) {
+    if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Material record not found');
+    const record = await this.materialUsageModel.findById(id).exec();
+    if (!record) throw new NotFoundException('Material record not found');
+
+    const merged = {
+      purchasedKg: data.purchasedKg ?? record.purchasedKg,
+      usedKg: data.usedKg ?? record.usedKg,
+      reusableOffcutsKg: data.reusableOffcutsKg ?? record.reusableOffcutsKg,
+      scrapWasteKg: data.scrapWasteKg ?? record.scrapWasteKg,
+      totalCost: data.totalCost ?? record.totalCost,
+    };
+    this.validateMaterialAllocation(merged as CreateMaterialUsageDto);
+
+    Object.assign(record, merged, {
+      costPerKg: this.calculateCostPerKg(merged.purchasedKg, merged.totalCost),
+    });
+    if (data.projectName) record.projectName = data.projectName;
+    if (data.recordedAt) record.recordedAt = new Date(data.recordedAt);
+    await record.save();
+    return record.toObject();
+  }
+
+  async deleteRecord(id: string) {
+    if (!Types.ObjectId.isValid(id)) throw new NotFoundException('Material record not found');
+    const res = await this.materialUsageModel.deleteOne({ _id: id }).exec();
+    if (res.deletedCount === 0) throw new NotFoundException('Material record not found');
   }
 
   async getDashboard() {
