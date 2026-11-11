@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PackageCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -15,10 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { sustainabilityApi } from "@/lib/api";
+import { sustainabilityApi, type MaterialUsageRecord } from "@/lib/api";
 
 interface RecordMaterialUsageDialogProps {
   onSaved: () => void;
+  /** Edit mode: the record to change. The dialog is then opened by the parent (no trigger button). */
+  record?: MaterialUsageRecord | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const initialForm = {
@@ -30,10 +34,26 @@ const initialForm = {
   totalCost: "",
 };
 
-export function RecordMaterialUsageDialog({ onSaved }: RecordMaterialUsageDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function RecordMaterialUsageDialog({ onSaved, record, open, onOpenChange }: RecordMaterialUsageDialogProps) {
+  const isEdit = record !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isEdit ? !!open : internalOpen;
+  const setIsOpen = (value: boolean) => (isEdit ? onOpenChange?.(value) : setInternalOpen(value));
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState(initialForm);
+
+  // Fill the form with the record being edited.
+  useEffect(() => {
+    if (!isEdit || !record || !open) return;
+    setForm({
+      projectName: record.projectName,
+      purchasedKg: String(record.purchasedKg),
+      usedKg: String(record.usedKg),
+      reusableOffcutsKg: String(record.reusableOffcutsKg),
+      scrapWasteKg: String(record.scrapWasteKg),
+      totalCost: String(record.totalCost),
+    });
+  }, [isEdit, record, open]);
 
   const updateField = (field: keyof typeof initialForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -65,15 +85,21 @@ export function RecordMaterialUsageDialog({ onSaved }: RecordMaterialUsageDialog
 
     setIsSaving(true);
     try {
-      await sustainabilityApi.recordMaterialUsage({
+      const payload = {
         projectName: form.projectName.trim(),
         purchasedKg,
         usedKg,
         reusableOffcutsKg,
         scrapWasteKg,
         totalCost,
-      });
-      toast.success("Material usage recorded");
+      };
+      if (isEdit && record) {
+        await sustainabilityApi.updateRecord(record._id, payload);
+        toast.success("Material record updated");
+      } else {
+        await sustainabilityApi.recordMaterialUsage(payload);
+        toast.success("Material usage recorded");
+      }
       setForm(initialForm);
       setIsOpen(false);
       onSaved();
@@ -87,17 +113,21 @@ export function RecordMaterialUsageDialog({ onSaved }: RecordMaterialUsageDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="border border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25">
-          <PackageCheck className="mr-2 h-4 w-4" />
-          Add Historical Record
-        </Button>
-      </DialogTrigger>
+      {!isEdit && (
+        <DialogTrigger asChild>
+          <Button className="border border-emerald-500/40 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/25">
+            <PackageCheck className="mr-2 h-4 w-4" />
+            Add Historical Record
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto border-zinc-800 bg-zinc-950 text-zinc-100">
         <DialogHeader>
-          <DialogTitle>Add Historical Material Record</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Material Record" : "Add Historical Material Record"}</DialogTitle>
           <DialogDescription className="text-zinc-400">
-            Use this only to add a past job that was not recorded through the order workflow.
+            {isEdit
+              ? `Correct the figures for ${record?.orderNumber ? `order ${record.orderNumber}` : "this record"}. Cost per kg and the dashboard update automatically.`
+              : "Use this only to add a past job that was not recorded through the order workflow."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
@@ -128,7 +158,7 @@ export function RecordMaterialUsageDialog({ onSaved }: RecordMaterialUsageDialog
               Cancel
             </Button>
             <Button type="submit" disabled={isSaving} className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400">
-              {isSaving ? "Saving..." : "Save Record"}
+              {isSaving ? "Saving..." : isEdit ? "Save Changes" : "Save Record"}
             </Button>
           </DialogFooter>
         </form>

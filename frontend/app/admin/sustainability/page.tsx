@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecordMaterialUsageDialog } from "@/components/admin/sustainability/RecordMaterialUsageDialog";
 import { PlannedVsActualChart } from "@/components/admin/sustainability/PlannedVsActualChart";
 import { HighWasteOrders } from "@/components/admin/sustainability/HighWasteOrders";
+import { MaterialRecordsTable } from "@/components/admin/sustainability/MaterialRecordsTable";
 import { sustainabilityApi, type SustainabilityDashboardData } from "@/lib/api";
 
 const tooltipStyle = {
@@ -39,6 +40,7 @@ export default function SustainabilityPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [recordsRefreshKey, setRecordsRefreshKey] = useState(0);
 
   const handleDownloadReport = async () => {
     if (!dashboard) return;
@@ -110,7 +112,12 @@ export default function SustainabilityPage() {
               {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
               Download PDF Report
             </Button>
-            <RecordMaterialUsageDialog onSaved={loadDashboard} />
+            <RecordMaterialUsageDialog
+              onSaved={() => {
+                loadDashboard();
+                setRecordsRefreshKey((key) => key + 1);
+              }}
+            />
           </div>
         </div>
 
@@ -308,6 +315,7 @@ export default function SustainabilityPage() {
             </Card>
           </>
         )}
+        <MaterialRecordsTable refreshKey={recordsRefreshKey} onChanged={loadDashboard} />
       </div>
     </DashboardLayout>
   );
